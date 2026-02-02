@@ -134,6 +134,33 @@
             margin-top: 20px;
             font-weight: bold;
         }
+
+        .try-again {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(233, 30, 99, 0.95);
+            color: white;
+            padding: 40px 60px;
+            border-radius: 20px;
+            font-size: 2.5em;
+            font-weight: bold;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            animation: bounceIn 0.5s;
+        }
+
+        .try-again.show {
+            display: block;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
     </style>
 </head>
 <body>
@@ -155,12 +182,15 @@
         </div>
     </div>
 
+    <div class="try-again" id="tryAgain">Try again! 😊</div>
+
     <script>
         const noBtn = document.getElementById('noBtn');
         const yesBtn = document.getElementById('yesBtn');
         const questionSection = document.getElementById('questionSection');
         const celebration = document.getElementById('celebration');
         const buttonsContainer = document.getElementById('buttonsContainer');
+        const tryAgain = document.getElementById('tryAgain');
 
         // Make the No button run away from the mouse
         buttonsContainer.addEventListener('mousemove', (e) => {
@@ -203,7 +233,10 @@
 
         // Handle No button click
         noBtn.addEventListener('click', () => {
-            alert('Try again! 😊');
+            tryAgain.classList.add('show');
+            setTimeout(() => {
+                tryAgain.classList.remove('show');
+            }, 1500);
         });
 
         // Initial position for No button
