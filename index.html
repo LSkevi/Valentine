@@ -40,15 +40,11 @@
         }
 
         .heart {
-            font-size: 4em;
-            animation: heartbeat 1.5s infinite;
-            margin-bottom: 30px;
-        }
-
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            25% { transform: scale(1.1); }
-            50% { transform: scale(1); }
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 30px;
+            display: block;
+            border-radius: 20px;
         }
 
         .buttons-container {
@@ -166,7 +162,7 @@
 <body>
     <div class="container">
         <div class="question-section" id="questionSection">
-            <div class="heart">💖</div>
+            <img class="heart" src="cat.png" alt="Cute cat">
             <h1>Yurie will you be my valentine?</h1>
             <p style="color: #999; font-style: italic; margin-top: 10px;">*the no is shy 😊</p>
             <div class="buttons-container" id="buttonsContainer">
@@ -178,7 +174,7 @@
         <div class="celebration" id="celebration">
             <h2>I love you babe thank you for being my girlfriend 🎉</h2>
             <img class="fireworks" src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZGpmY3luOWJ0YjRqdzEweDJ5MmQ0Ymw4Y3pzdjhmMnplN2lwa3owNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/IzXiddo2twMmdmU8Lv/giphy.gif" alt="Love hearts">
-            <div class="message">Wowww! 💕✨</div>
+            <div class="message"></div>
         </div>
     </div>
 
