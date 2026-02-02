@@ -173,13 +173,13 @@
             const distanceY = mouseY - noBtnCenterY;
             const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
 
-            // If mouse is within 100px of the No button
-            if (distance < 100) {
+            // If mouse is within 150px of the No button
+            if (distance < 150) {
                 const containerRect = buttonsContainer.getBoundingClientRect();
                 
-                // Calculate new position (move away from mouse)
-                let newX = noBtnCenterX - distanceX * 0.5;
-                let newY = noBtnCenterY - distanceY * 0.5;
+                // Calculate new position (move away from mouse faster)
+                let newX = noBtnCenterX - distanceX * 1.5;
+                let newY = noBtnCenterY - distanceY * 1.5;
 
                 // Keep button within container bounds
                 const maxX = containerRect.width - noBtnRect.width / 2;
