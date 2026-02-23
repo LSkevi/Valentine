@@ -1,7 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-<<<<<<< HEAD
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>🌸 Yurie's Flower Garden</title>
@@ -311,165 +310,6 @@
       100%{opacity:0;transform:scale(.8) translateY(-44px);}
     }
   </style>
-=======
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Will You Be My Valentine? 💕</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .container {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 80px 60px;
-            border-radius: 30px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 12000px;
-            width: 90%;
-            position: relative;
-        }
-
-        h1 {
-            color: #e91e63;
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .heart {
-            width: 150px;
-            height: 150px;
-            margin: 0 auto 30px;
-            display: block;
-            border-radius: 20px;
-        }
-
-        .buttons-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-        }
-
-        button {
-            padding: 20px 50px;
-            font-size: 1.5em;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-transform: uppercase;
-        }
-
-        button:hover {
-            transform: scale(1.05);
-        }
-
-        .yes-btn {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
-        }
-
-        .yes-btn:hover {
-            box-shadow: 0 8px 25px rgba(245, 87, 108, 0.6);
-        }
-
-        .no-btn {
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-            color: #333;
-            position: absolute;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .celebration {
-            display: none;
-            text-align: center;
-        }
-
-        .celebration.active {
-            display: block;
-            animation: fadeIn 0.5s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .celebration h2 {
-            font-size: 3em;
-            color: #e91e63;
-            margin-bottom: 20px;
-            animation: bounce 0.5s;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-
-        .fireworks {
-            width: 100%;
-            max-width: 400px;
-            border-radius: 20px;
-            margin-top: 20px;
-        }
-
-        .message {
-            font-size: 1.8em;
-            color: #667eea;
-            margin-top: 20px;
-            font-weight: bold;
-        }
-
-        .try-again {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(233, 30, 99, 0.95);
-            color: white;
-            padding: 40px 60px;
-            border-radius: 20px;
-            font-size: 2.5em;
-            font-weight: bold;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-            animation: bounceIn 0.5s;
-        }
-
-        .try-again.show {
-            display: block;
-        }
-
-        @keyframes bounceIn {
-            0% { transform: translate(-50%, -50%) scale(0); }
-            50% { transform: translate(-50%, -50%) scale(1.1); }
-            100% { transform: translate(-50%, -50%) scale(1); }
-        }
-    </style>
->>>>>>> parent of ff1c46e (Enhance responsive design with clamp() for fluid layouts and add touch support for No button interaction)
 </head>
 <body>
 <div class="bg-canvas"></div>
@@ -515,7 +355,6 @@
 
 <div class="toast" id="toast"></div>
 
-<<<<<<< HEAD
 <!-- PACKET MODAL -->
 <div class="overlay" id="pktOverlay">
   <div class="sheet">
@@ -727,46 +566,6 @@ function initPetals(){
     document.body.appendChild(el);
   }
 }
-=======
-        // Make the No button run away from the mouse
-        buttonsContainer.addEventListener('mousemove', (e) => {
-            const noBtnRect = noBtn.getBoundingClientRect();
-            const noBtnCenterX = noBtnRect.left + noBtnRect.width / 2;
-            const noBtnCenterY = noBtnRect.top + noBtnRect.height / 2;
-
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
-
-            const distanceX = mouseX - noBtnCenterX;
-            const distanceY = mouseY - noBtnCenterY;
-            const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
-
-            // If mouse is within 150px of the No button
-            if (distance < 150) {
-                const containerRect = buttonsContainer.getBoundingClientRect();
-                
-                // Calculate new position (move away from mouse faster)
-                let newX = noBtnCenterX - distanceX * 1.5;
-                let newY = noBtnCenterY - distanceY * 1.5;
-
-                // Keep button within container bounds
-                const maxX = containerRect.width - noBtnRect.width / 2;
-                const maxY = containerRect.height - noBtnRect.height / 2;
-                
-                newX = Math.max(noBtnRect.width / 2, Math.min(newX - containerRect.left, maxX));
-                newY = Math.max(noBtnRect.height / 2, Math.min(newY - containerRect.top, maxY));
-
-                noBtn.style.left = newX + 'px';
-                noBtn.style.top = newY + 'px';
-            }
-        });
-
-        // Handle Yes button click
-        yesBtn.addEventListener('click', () => {
-            questionSection.style.display = 'none';
-            celebration.classList.add('active');
-        });
->>>>>>> parent of ff1c46e (Enhance responsive design with clamp() for fluid layouts and add touch support for No button interaction)
 
 const nBtn=document.getElementById('noBtn');
 const vBtns=document.getElementById('vBtns');
