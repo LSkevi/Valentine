@@ -81,7 +81,23 @@
     .wdrop{width:14px;height:14px;border-radius:50% 50% 50% 50% / 62% 62% 38% 38%;transition:background .4s;}
     .wdrop.full{background:linear-gradient(155deg,#90caf9,#1e88e5);}
     .wdrop.empty{background:#e0e0e0;}
-    .refill-eta{font-size:.75em;color:#1e88e5;min-width:52px;font-weight:bold;}
+    /* pump */
+    .pump-section{display:flex;align-items:center;justify-content:center;gap:16px;padding:4px 16px 10px;}
+    .pump-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;flex-shrink:0;}
+    .pump-svg{width:68px;height:84px;filter:drop-shadow(0 3px 7px rgba(0,0,0,.2));transition:transform .1s;}
+    .pump-wrap:active .pump-svg{transform:scale(.93);}
+    .pump-handle{transition:transform .14s ease;transform-origin:45px 43px;}
+    .pump-handle.pumping{animation:pumpAnim .25s ease;}
+    @keyframes pumpAnim{0%{transform:rotate(0)}45%{transform:rotate(22deg)}100%{transform:rotate(0)}}
+    .pump-label{font-size:.6em;color:#78909c;font-weight:bold;margin-top:2px;white-space:nowrap;}
+    .water-info{display:flex;flex-direction:column;gap:6px;}
+    .pump-prog-row{display:flex;align-items:center;gap:6px;}
+    .pump-prog-bg{width:86px;height:7px;background:#e0e0e0;border-radius:4px;overflow:hidden;}
+    .pump-prog-fill{height:100%;background:linear-gradient(90deg,#90caf9,#1e88e5);border-radius:4px;transition:width .18s ease;}
+    .pump-prog-lbl{font-size:.68em;color:#1e88e5;font-weight:bold;white-space:nowrap;min-width:36px;}
+    /* coin badge (replaces broken 🪙 emoji) */
+    .ic{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:linear-gradient(135deg,#ffe082,#ffa000);border-radius:50%;font-size:.68em;font-weight:bold;color:#5d4037;vertical-align:middle;margin-right:2px;flex-shrink:0;line-height:1;}
+    .coin-val{font-weight:bold;}
     .garden-grid{
       display:grid;grid-template-columns:repeat(3,1fr);
       gap:10px;padding:8px 11px;max-width:480px;margin:0 auto;width:100%;
@@ -274,7 +290,7 @@
       border-radius:16px;padding:13px 15px;margin-bottom:10px;
     }
     .shop-item.pkt-item{background:linear-gradient(135deg,#f3e5f5,#ce93d8);}
-    .shop-item.wat-item{background:linear-gradient(135deg,#e3f2fd,#90caf9);}
+    .shop-item.pkt-item{background:linear-gradient(135deg,#fce4ec,#f8bbd9);}
     .shop-left{display:flex;align-items:center;gap:10px;}
     .shop-icon{font-size:2em;}
     .shop-name{font-weight:bold;color:#333;font-size:.9em;}
@@ -330,7 +346,7 @@
 <!-- GAME SCREEN -->
 <div id="gameScreen">
   <div class="top-bar">
-    <div class="stat-pill">🪙 <span id="coinDisp">10</span></div>
+    <div class="stat-pill"><span class="ic">C</span><span id="coinDisp">10</span></div>
     <div class="stat-pill">📦 <span id="pktDisp">3</span></div>
     <button class="tbtn tbtn-open"  onclick="openPktModal()">🎁 Open Packet</button>
     <button class="tbtn tbtn-house" onclick="openGhModal()">🌿 Greenhouse</button>
@@ -340,10 +356,33 @@
     <h2>🌸 Yurie's Flower Garden</h2>
     <p>Tap a plot to plant · Tap a plant to water it!</p>
   </div>
-  <div class="water-row">
-    <span style="font-size:1.1em">💧</span>
-    <div class="wdrops" id="dropRow"></div>
-    <span class="refill-eta" id="refillEta"></span>
+  <div class="pump-section">
+    <div class="pump-wrap" id="pumpBtn" onclick="pumpClick()">
+      <svg class="pump-svg" viewBox="0 0 90 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="22" y="110" width="46" height="8" rx="3" fill="#4e342e"/>
+        <rect x="37" y="48" width="16" height="64" rx="5" fill="#607d8b"/>
+        <rect x="38" y="50" width="6" height="60" rx="3" fill="#78909c" opacity=".4"/>
+        <rect x="33" y="42" width="24" height="11" rx="5" fill="#546e7a"/>
+        <path d="M39 68 Q22 68 18 80 Q16 89 22 95" stroke="#546e7a" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <ellipse cx="22" cy="96" rx="4.5" ry="3.5" fill="#455a64"/>
+        <rect x="40" y="34" width="10" height="13" rx="3" fill="#455a64"/>
+        <g class="pump-handle" id="pumpHandle">
+          <rect x="15" y="39" width="60" height="9" rx="4.5" fill="#78909c"/>
+          <rect x="11" y="37" width="8" height="13" rx="4" fill="#90a4ae"/>
+          <rect x="71" y="37" width="8" height="13" rx="4" fill="#90a4ae"/>
+        </g>
+        <circle cx="45" cy="43" r="4.5" fill="#37474f"/>
+        <circle cx="45" cy="43" r="2.5" fill="#263238"/>
+      </svg>
+      <div class="pump-label" id="pumpLabel">Tap to pump!</div>
+    </div>
+    <div class="water-info">
+      <div class="wdrops" id="dropRow"></div>
+      <div class="pump-prog-row">
+        <div class="pump-prog-bg"><div class="pump-prog-fill" id="pumpProgFill" style="width:0%"></div></div>
+        <span class="pump-prog-lbl" id="pumpProgLbl">0/10</span>
+      </div>
+    </div>
   </div>
   <div class="garden-grid" id="gardenGrid"></div>
   <div class="seed-tray">
@@ -432,17 +471,7 @@
           <div class="shop-detail">Random flower seed · might be legendary! ✨</div>
         </div>
       </div>
-      <button class="btn-buy" onclick="buyPacket()">🪙 10</button>
-    </div>
-    <div class="shop-item wat-item">
-      <div class="shop-left">
-        <span class="shop-icon">💧</span>
-        <div>
-          <div class="shop-name">Watering Can Refill</div>
-          <div class="shop-detail">Instantly refill all 10 water drops</div>
-        </div>
-      </div>
-      <button class="btn-buy" onclick="buyWater()">🪙 5</button>
+      <button class="btn-buy" onclick="buyPacket()"><span class="ic">C</span> 10</button>
     </div>
   </div>
 </div>
@@ -463,7 +492,7 @@ const STAGE_WATERS=3,MAX_STAGE=3;
 let G={
   coins:10,packets:3,seeds:[],seedId:0,
   plots:Array(6).fill(0).map((_,i)=>({id:i,state:'empty',key:null,stage:0,waters:0,rewarded:false})),
-  greenhouse:[],water:10,maxWater:10,lastRefill:Date.now(),
+  greenhouse:[],water:10,maxWater:10,pumpClicks:0,
   bloomPlot:null,openedKey:null,plantPlot:null,
 };
 
@@ -594,7 +623,7 @@ document.getElementById('yesBtn').addEventListener('click',()=>{
 
 function initGame(){
   initPetals();
-  renderGarden();renderTray();renderDrops();updateHUD();startRefill();
+  renderGarden();renderTray();renderDrops();updateHUD();renderPump();
 }
 function updateHUD(){
   document.getElementById('coinDisp').textContent=G.coins;
@@ -610,16 +639,34 @@ function renderDrops(){
     row.appendChild(d);
   }
 }
-let refillTimer;
-function startRefill(){
-  clearInterval(refillTimer);
-  refillTimer=setInterval(()=>{
-    const lbl=document.getElementById('refillEta');
-    if(G.water>=G.maxWater){lbl.textContent='';return;}
-    const ms=30000-(Date.now()-G.lastRefill);
-    if(ms<=0){G.water=Math.min(G.maxWater,G.water+1);G.lastRefill=Date.now();renderDrops();}
-    else lbl.textContent=`+💧${Math.ceil(ms/1000)}s`;
-  },500);
+function renderPump(){
+  const pct=(G.pumpClicks/10)*100;
+  const fill=document.getElementById('pumpProgFill');
+  const lbl=document.getElementById('pumpProgLbl');
+  const plbl=document.getElementById('pumpLabel');
+  if(fill) fill.style.width=pct+'%';
+  if(lbl)  lbl.textContent=G.pumpClicks+'/10';
+  if(plbl) plbl.textContent=G.water>=G.maxWater?'Tank full! 💧':`Pump! (${10-G.pumpClicks} more)`;
+}
+function pumpClick(){
+  if(G.water>=G.maxWater){toast('Watering can is full! 💧',1400);return;}
+  G.pumpClicks++;
+  // animate handle
+  const h=document.getElementById('pumpHandle');
+  if(h){h.classList.remove('pumping');void h.offsetWidth;h.classList.add('pumping');}
+  // water drip from spout every 2 clicks
+  if(G.pumpClicks%2===0){
+    const btn=document.getElementById('pumpBtn');
+    if(btn){const r=btn.getBoundingClientRect();spawnSplash(r.left+26,r.top+84);}
+  }
+  if(G.pumpClicks>=10){
+    G.pumpClicks=0;
+    G.water=Math.min(G.maxWater,G.water+1);
+    renderDrops();
+    spawnSparkle(window.innerWidth/2,window.innerHeight*.38,'💧');
+    toast('+1 water! Keep pumping 💧',1200);
+  }
+  renderPump();
 }
 
 function renderGarden(){
@@ -666,7 +713,7 @@ function clickPlot(i){
   }
 }
 function waterPlot(i){
-  if(G.water<=0){toast('No water left! Wait for refill 💧',2000);return;}
+  if(G.water<=0){toast('No water! Pump more at the well 🚰',2000);return;}
   G.water--;G.plots[i].waters++;renderDrops();
   const tiles=document.querySelectorAll('.plot');
   if(tiles[i]){tiles[i].classList.add('watered');setTimeout(()=>tiles[i].classList.remove('watered'),380);}
@@ -765,7 +812,7 @@ function openPlantModal(plotIdx){
       <div class="pr-svg">${flowerSVG(key,2)}</div>
       <div class="pr-info">
         <div class="pr-name">${f.name}</div>
-        <div class="pr-sub">${RARITY_LABEL[f.rarity]} · sells for 🪙${f.sell}</div>
+        <div class="pr-sub">${RARITY_LABEL[f.rarity]} · sells for <span class="ic">C</span>${f.sell}</div>
         <div class="pr-cnt">x${cnt} in your tray</div>
       </div>
       <span class="pr-badge ${f.rarity}">${RARITY_LABEL[f.rarity]}</span>
@@ -795,7 +842,7 @@ function openBloomModal(i){
       :f.rarity==='uncommon'
         ?`Your ${f.name.toLowerCase()} is absolutely stunning! 💕`
         :`Beautiful! Your ${f.name.toLowerCase()} is glowing! 🌸`;
-  document.getElementById('btnSell').textContent=`💰 Sell for 🪙${f.sell}`;
+  document.getElementById('btnSell').innerHTML=`💰 Sell for <span class="ic">C</span><span class="coin-val">${f.sell}</span>`;
   document.getElementById('btnSell').onclick=sellFlower;
   openModal('bloomOverlay');
 }
@@ -803,7 +850,7 @@ function sellFlower(){
   if(G.bloomPlot===null) return;
   const f=FLOWERS[G.plots[G.bloomPlot].key];
   G.coins+=f.sell;clearPlot(G.bloomPlot);closeModal('bloomOverlay');updateHUD();
-  toast(`Sold for 🪙${f.sell}! 💰`,2000);
+  toast(`Sold for ${f.sell} coins! 💰`,2000);
 }
 function saveFlower(){
   if(G.bloomPlot===null) return;
@@ -849,10 +896,6 @@ function openShopModal(){openModal('shopOverlay');}
 function buyPacket(){
   if(G.coins<10){toast('Not enough coins! Sell some flowers 💰',2000);return;}
   G.coins-=10;G.packets++;updateHUD();closeModal('shopOverlay');toast('Seed packet bought! 📦',1500);
-}
-function buyWater(){
-  if(G.coins<5){toast('Not enough coins!',2000);return;}
-  G.coins-=5;G.water=G.maxWater;updateHUD();renderDrops();closeModal('shopOverlay');toast('Watering can refilled! 💧',1500);
 }
 
 function openModal(id){document.getElementById(id).classList.add('on');}
