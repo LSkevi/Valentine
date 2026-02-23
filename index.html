@@ -1018,6 +1018,7 @@ function openJournalModal(){
   });
   openModal('journalOverlay');
 }
+function openShopModal(){openModal('shopOverlay');}
 function buyPacket(type){
   const cost=PKT_COST[type];
   if(G.coins<cost){toast(`Need ${cost} coins for a ${PKT_LABEL[type]} Packet! 💰`,2000);return;}
