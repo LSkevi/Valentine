@@ -70,9 +70,26 @@
       transition:transform .12s;white-space:nowrap;
     }
     .tbtn:active{transform:scale(.92);}
-    .tbtn-open {background:linear-gradient(135deg,#ce93d8,#ab47bc);color:#fff;}
-    .tbtn-house{background:linear-gradient(135deg,#a5d6a7,#43a047);color:#fff;margin-left:auto;}
-    .tbtn-shop {background:linear-gradient(135deg,#ffe082,#ffa000);color:#fff;}
+    .tbtn-open   {background:linear-gradient(135deg,#ce93d8,#ab47bc);color:#fff;}
+    .tbtn-house  {background:linear-gradient(135deg,#a5d6a7,#43a047);color:#fff;margin-left:auto;}
+    .tbtn-shop   {background:linear-gradient(135deg,#ffe082,#ffa000);color:#fff;}
+    .tbtn-journal{background:linear-gradient(135deg,#80deea,#00838f);color:#fff;}
+    /* journal */
+    .journal-prog{text-align:center;font-size:.78em;color:#888;margin-bottom:12px;}
+    .journal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:4px 0;}
+    .jnl-card{border-radius:18px;padding:12px 8px 10px;display:flex;flex-direction:column;align-items:center;gap:5px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.08);position:relative;}
+    .jnl-card.jlocked{background:#f0f0f0;}
+    .jnl-svg{width:56px;height:72px;flex-shrink:0;}
+    .jnl-fl{width:100%;height:100%;}
+    .jnl-svg.jsilhouette{filter:brightness(0);}
+    .jnl-name{font-size:.63em;font-weight:bold;color:#333;text-align:center;line-height:1.3;}
+    .jnl-name.jlocked{color:#bbb;letter-spacing:.04em;}
+    .jnl-sell{font-size:.58em;color:#888;display:flex;align-items:center;gap:2px;}
+    .jnl-sell.jhide{visibility:hidden;}
+    .jnl-badge{font-size:.52em;border-radius:8px;padding:2px 7px;font-weight:bold;margin-top:1px;}
+    .jnl-badge.common  {background:#fce4ec;color:#c2185b;}
+    .jnl-badge.uncommon{background:#e8f5e9;color:#2e7d32;}
+    .jnl-badge.rare    {background:#ede7f6;color:#6a1b9a;}
     .garden-header{text-align:center;padding:12px 16px 4px;}
     .garden-header h2{font-size:clamp(1em,4vw,1.45em);color:#c2185b;}
     .garden-header p{font-size:.78em;color:#aaa;margin-top:3px;}
@@ -350,9 +367,10 @@
   <div class="top-bar">
     <div class="stat-pill"><span class="ic">C</span><span id="coinDisp">10</span></div>
     <div class="stat-pill">📦 <span id="pktDisp">3</span></div>
-    <button class="tbtn tbtn-open"  onclick="openPktModal()">🎁 Open Packet</button>
-    <button class="tbtn tbtn-house" onclick="openGhModal()">🌿 Greenhouse</button>
-    <button class="tbtn tbtn-shop"  onclick="openShopModal()">🛒 Shop</button>
+    <button class="tbtn tbtn-open"    onclick="openPktModal()">🎁 Open Packet</button>
+    <button class="tbtn tbtn-journal" onclick="openJournalModal()">📖 Journal</button>
+    <button class="tbtn tbtn-house"   onclick="openGhModal()">🌿 Greenhouse</button>
+    <button class="tbtn tbtn-shop"    onclick="openShopModal()">🛒 Shop</button>
   </div>
   <div class="garden-header">
     <h2>🌸 Yurie's Flower Garden</h2>
@@ -459,6 +477,17 @@
   </div>
 </div>
 
+<!-- JOURNAL MODAL -->
+<div class="overlay" id="journalOverlay">
+  <div class="sheet">
+    <button class="sh-close" onclick="closeModal('journalOverlay')">✕</button>
+    <div class="sh-handle"></div>
+    <div class="sh-title">📖 Flower Journal</div>
+    <div class="journal-prog" id="jnlProg"></div>
+    <div class="journal-grid" id="jnlGrid"></div>
+  </div>
+</div>
+
 <!-- SHOP MODAL -->
 <div class="overlay" id="shopOverlay">
   <div class="sheet">
@@ -530,6 +559,7 @@ let G={
   plots:Array(6).fill(0).map((_,i)=>({id:i,state:'empty',key:null,stage:0,waters:0,rewarded:false})),
   greenhouse:[],water:10,maxWater:10,pumpClicks:0,
   bloomPlot:null,openedKey:null,plantPlot:null,pendingPktType:'common',
+  discovered:[],
 };
 
 function lighter(hex,a=52){
@@ -837,6 +867,7 @@ function doOpenPacket(){
 }
 function collectSeed(){
   if(!G.openedKey) return;
+  if(!G.discovered.includes(G.openedKey)) G.discovered.push(G.openedKey);
   G.seeds.push({id:G.seedId++,key:G.openedKey});G.openedKey=null;
   closeModal('pktOverlay');renderTray();
   toast('Seed added to your tray! 🌱',1600);
@@ -869,6 +900,7 @@ function openPlantModal(plotIdx){
 function plantSeed(key,plotIdx){
   const idx=G.seeds.findIndex(s=>s.key===key);
   if(idx===-1) return;
+  if(!G.discovered.includes(key)) G.discovered.push(key);
   G.seeds.splice(idx,1);
   G.plots[plotIdx]={id:plotIdx,state:'growing',key,stage:0,waters:0,rewarded:false};
   closeModal('plantOverlay');renderGarden();renderTray();
@@ -892,13 +924,16 @@ function openBloomModal(i){
 }
 function sellFlower(){
   if(G.bloomPlot===null) return;
-  const f=FLOWERS[G.plots[G.bloomPlot].key];
+  const key=G.plots[G.bloomPlot].key;
+  const f=FLOWERS[key];
+  if(!G.discovered.includes(key)) G.discovered.push(key);
   G.coins+=f.sell;clearPlot(G.bloomPlot);closeModal('bloomOverlay');updateHUD();
   toast(`Sold for ${f.sell} coins! 💰`,2000);
 }
 function saveFlower(){
   if(G.bloomPlot===null) return;
   const key=G.plots[G.bloomPlot].key;
+  if(!G.discovered.includes(key)) G.discovered.push(key);
   G.greenhouse.push({key});clearPlot(G.bloomPlot);closeModal('bloomOverlay');
   toast(`${FLOWERS[key].name} saved to your greenhouse! 🌿`,2000);
 }
@@ -936,7 +971,28 @@ function openGhModal(){
   openModal('ghOverlay');
 }
 
-function openShopModal(){openModal('shopOverlay');}
+function openJournalModal(){
+  const order=['pinkTulip','redTulip','yellowTulip','redRose','pinkRose','blueRose'];
+  const grid=document.getElementById('jnlGrid');
+  grid.innerHTML='';
+  const unlocked=order.filter(k=>G.discovered.includes(k)).length;
+  document.getElementById('jnlProg').textContent=`${unlocked} / ${order.length} flowers discovered`;
+  order.forEach(key=>{
+    const f=FLOWERS[key];
+    const known=G.discovered.includes(key);
+    const card=document.createElement('div');
+    card.className='jnl-card'+(known?'':' jlocked');
+    const svgHtml=flowerSVG(key,3);
+    card.innerHTML=`
+      <div class="jnl-svg${known?'':' jsilhouette'}">${svgHtml}</div>
+      <div class="jnl-name${known?'':' jlocked'}">${known?f.name:'??????'}</div>
+      <span class="jnl-badge ${f.rarity}">${RARITY_LABEL[f.rarity]}</span>
+      <div class="jnl-sell${known?'':' jhide'}"><span class="ic" style="width:13px;height:13px;font-size:.6em">C</span>${f.sell}</div>
+    `;
+    grid.appendChild(card);
+  });
+  openModal('journalOverlay');
+}
 function buyPacket(type){
   const cost=PKT_COST[type];
   if(G.coins<cost){toast(`Need ${cost} coins for a ${PKT_LABEL[type]} Packet! 💰`,2000);return;}
