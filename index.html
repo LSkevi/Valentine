@@ -1,6 +1,317 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
+<<<<<<< HEAD
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🌸 Yurie's Flower Garden</title>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    html{scroll-behavior:smooth;}
+    body{
+      font-family:'Arial Rounded MT Bold',Arial,sans-serif;
+      background:#fce4ec;min-height:100vh;min-height:100dvh;overflow-x:hidden;
+    }
+    .bg-canvas{
+      position:fixed;inset:0;z-index:-2;
+      background:linear-gradient(155deg,#fce4ec 0%,#f3e5f5 40%,#e8eaf6 100%);
+    }
+    .petal{position:fixed;pointer-events:none;z-index:-1;opacity:0;animation:petalDrift linear infinite;}
+    @keyframes petalDrift{
+      0%{opacity:0;transform:translateY(-30px) rotate(0deg);}
+      6%{opacity:.55;}92%{opacity:.35;}
+      100%{opacity:0;transform:translateY(105vh) rotate(740deg);}
+    }
+    #valentineScreen{
+      display:flex;flex-direction:column;justify-content:center;align-items:center;
+      min-height:100vh;min-height:100dvh;padding:20px;
+    }
+    .v-card{
+      background:rgba(255,255,255,.96);border-radius:28px;text-align:center;
+      padding:clamp(24px,6vw,56px) clamp(20px,5vw,48px);
+      max-width:460px;width:100%;box-shadow:0 20px 60px rgba(233,30,99,.18);
+      animation:cardPop .6s cubic-bezier(.175,.885,.32,1.275);
+    }
+    @keyframes cardPop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+    .v-card img{
+      width:clamp(80px,25vw,140px);border-radius:50%;margin-bottom:14px;
+      box-shadow:0 8px 24px rgba(233,30,99,.22);border:3px solid #f8bbd0;
+    }
+    .v-card h1{color:#e91e63;font-size:clamp(1.1em,4.8vw,2em);line-height:1.3;margin-bottom:6px;}
+    .v-hint{color:#bbb;font-style:italic;font-size:.88em;margin-bottom:18px;}
+    .v-btns{position:relative;height:clamp(130px,32vw,200px);display:flex;justify-content:center;align-items:center;}
+    .btn-yes{
+      background:linear-gradient(135deg,#f48fb1,#e91e63);color:#fff;border:none;
+      border-radius:50px;cursor:pointer;font-weight:bold;touch-action:manipulation;
+      padding:clamp(12px,3vw,18px) clamp(28px,7vw,52px);font-size:clamp(1em,3.5vw,1.4em);
+      box-shadow:0 6px 20px rgba(233,30,99,.4);position:relative;z-index:1;
+      transition:transform .15s,box-shadow .15s;
+    }
+    .btn-yes:active{transform:scale(.96);}
+    .btn-no{
+      background:linear-gradient(135deg,#f8bbd0,#ce93d8);color:#555;border:none;
+      border-radius:50px;cursor:pointer;font-weight:bold;touch-action:manipulation;
+      padding:clamp(9px,2.5vw,14px) clamp(20px,5vw,38px);font-size:clamp(.88em,2.8vw,1.15em);
+      position:absolute;box-shadow:0 4px 12px rgba(0,0,0,.14);
+    }
+    #gameScreen{display:none;flex-direction:column;min-height:100vh;min-height:100dvh;padding-bottom:120px;}
+    .top-bar{
+      background:rgba(255,255,255,.93);backdrop-filter:blur(14px);
+      padding:9px 11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+      box-shadow:0 2px 18px rgba(0,0,0,.09);position:sticky;top:0;z-index:20;
+    }
+    .stat-pill{
+      background:linear-gradient(135deg,#fce4ec,#f8bbd0);border-radius:20px;
+      padding:6px 11px;font-size:.85em;font-weight:bold;color:#c2185b;
+      display:flex;align-items:center;gap:4px;white-space:nowrap;
+    }
+    .tbtn{
+      border:none;border-radius:20px;padding:8px 12px;font-size:.78em;
+      font-weight:bold;cursor:pointer;touch-action:manipulation;
+      transition:transform .12s;white-space:nowrap;
+    }
+    .tbtn:active{transform:scale(.92);}
+    .tbtn-open {background:linear-gradient(135deg,#ce93d8,#ab47bc);color:#fff;}
+    .tbtn-house{background:linear-gradient(135deg,#a5d6a7,#43a047);color:#fff;margin-left:auto;}
+    .tbtn-shop {background:linear-gradient(135deg,#ffe082,#ffa000);color:#fff;}
+    .garden-header{text-align:center;padding:12px 16px 4px;}
+    .garden-header h2{font-size:clamp(1em,4vw,1.45em);color:#c2185b;}
+    .garden-header p{font-size:.78em;color:#aaa;margin-top:3px;}
+    .water-row{display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 16px 8px;}
+    .wdrops{display:flex;gap:3px;}
+    .wdrop{width:14px;height:14px;border-radius:50% 50% 50% 50% / 62% 62% 38% 38%;transition:background .4s;}
+    .wdrop.full{background:linear-gradient(155deg,#90caf9,#1e88e5);}
+    .wdrop.empty{background:#e0e0e0;}
+    .refill-eta{font-size:.75em;color:#1e88e5;min-width:52px;font-weight:bold;}
+    .garden-grid{
+      display:grid;grid-template-columns:repeat(3,1fr);
+      gap:10px;padding:8px 11px;max-width:480px;margin:0 auto;width:100%;
+    }
+    .plot{
+      aspect-ratio:.88;border-radius:18px;cursor:pointer;position:relative;
+      overflow:hidden;touch-action:manipulation;transition:transform .13s;
+      box-shadow:0 4px 18px rgba(0,0,0,.16);
+      display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+      background:linear-gradient(to bottom,#a1887f 0%,#795548 50%,#5d4037 100%);
+    }
+    .plot:active{transform:scale(.93);}
+    .plot.has-plant{background:linear-gradient(to bottom,#c5e1a5 0%,#a5d6a7 28%,#8d6e63 62%,#5d4037 100%);}
+    .plot.bloomed{
+      background:linear-gradient(to bottom,#e8f5e9 0%,#c8e6c9 22%,#a5d6a7 44%,#8d6e63 68%,#5d4037 100%);
+      animation:bloomGlow 2.4s ease-in-out infinite;
+    }
+    @keyframes bloomGlow{
+      0%,100%{box-shadow:0 4px 18px rgba(0,0,0,.16);}
+      50%{box-shadow:0 4px 38px rgba(233,30,99,.6);}
+    }
+    .plot-plus{font-size:2em;color:rgba(255,255,255,.38);margin-bottom:14px;}
+    .empty-hint{font-size:.48em;color:rgba(255,255,255,.45);margin-bottom:8px;text-align:center;}
+    .plot-fl{width:78%;max-height:74%;display:flex;align-items:flex-end;justify-content:center;flex:1;padding-top:4px;}
+    .plot-fl svg{width:100%;height:100%;}
+    .prog-wrap{position:absolute;bottom:20px;left:8px;right:8px;}
+    .prog-bg{height:4px;background:rgba(0,0,0,.18);border-radius:2px;overflow:hidden;}
+    .prog-fill{height:100%;background:linear-gradient(90deg,#a5d6a7,#66bb6a);border-radius:2px;transition:width .55s ease;}
+    .plot-stage{
+      position:absolute;bottom:4px;left:0;right:0;text-align:center;
+      font-size:.5em;color:rgba(255,255,255,.95);font-weight:bold;
+      text-shadow:0 1px 4px rgba(0,0,0,.7);padding:0 3px;
+    }
+    .plot-pips{position:absolute;top:7px;right:6px;display:flex;gap:2px;}
+    .pip{width:8px;height:8px;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:background .3s;}
+    .pip.on{background:#64b5f6;}
+    .pip.off{background:rgba(255,255,255,.25);}
+    .rare-crown{
+      position:absolute;top:6px;left:6px;font-size:.44em;
+      background:linear-gradient(135deg,rgba(57,73,171,.75),rgba(123,31,162,.75));
+      color:#fff;padding:2px 5px;border-radius:6px;font-weight:bold;
+      backdrop-filter:blur(4px);animation:crownPulse 2s alternate infinite;
+    }
+    @keyframes crownPulse{from{box-shadow:0 0 4px rgba(57,73,171,.4)}to{box-shadow:0 0 14px rgba(123,31,162,.9)}}
+    .plot.watered{animation:waterShake .36s ease;}
+    @keyframes waterShake{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+    .seed-tray{
+      position:fixed;bottom:0;left:0;right:0;
+      background:rgba(255,255,255,.96);backdrop-filter:blur(14px);
+      border-radius:22px 22px 0 0;padding:8px 12px 22px;
+      box-shadow:0 -4px 24px rgba(0,0,0,.12);z-index:15;
+    }
+    .tray-handle{width:36px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 7px;}
+    .tray-title{font-size:.68em;color:#bbb;text-align:center;margin-bottom:7px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;}
+    .tray-scroll{display:flex;gap:7px;overflow-x:auto;padding:0 2px 2px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+    .tray-scroll::-webkit-scrollbar{display:none;}
+    .seed-chip{
+      display:flex;flex-direction:column;align-items:center;
+      border-radius:14px;padding:7px 8px;min-width:58px;max-width:64px;
+      position:relative;border:2px solid transparent;flex-shrink:0;cursor:default;
+    }
+    .seed-chip.common  {background:linear-gradient(135deg,#fce4ec,#f8bbd0);}
+    .seed-chip.uncommon{background:linear-gradient(135deg,#f3e5f5,#ce93d8);}
+    .seed-chip.rare    {background:linear-gradient(135deg,#e3f2fd,#c5cae9);border-color:#7986cb;animation:rareChip 2s alternate infinite;}
+    @keyframes rareChip{from{box-shadow:0 2px 8px rgba(57,73,171,.3)}to{box-shadow:0 2px 22px rgba(123,31,162,.75)}}
+    .chip-svg{width:32px;height:38px;}
+    .chip-name{font-size:.5em;color:#555;text-align:center;margin-top:2px;line-height:1.2;}
+    .chip-cnt{
+      position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;
+      background:#e91e63;color:#fff;border-radius:9px;font-size:.5em;
+      font-weight:bold;display:flex;align-items:center;justify-content:center;padding:0 3px;
+    }
+    .tray-empty{text-align:center;color:#bbb;font-size:.82em;padding:8px;}
+    .overlay{
+      display:none;position:fixed;inset:0;
+      background:rgba(0,0,0,.5);z-index:100;
+      justify-content:center;align-items:flex-end;
+    }
+    .overlay.on{display:flex;}
+    .sheet{
+      background:#fff;border-radius:26px 26px 0 0;
+      padding:20px 18px 42px;width:100%;max-width:480px;
+      max-height:90vh;overflow-y:auto;
+      animation:slideUp .28s ease;position:relative;
+    }
+    @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    .sh-handle{width:36px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 14px;}
+    .sh-title{font-size:1.2em;font-weight:bold;color:#c2185b;text-align:center;margin-bottom:14px;}
+    .sh-close{
+      position:absolute;top:16px;right:16px;width:32px;height:32px;
+      border-radius:50%;background:#f5f5f5;border:none;font-size:.95em;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;
+      touch-action:manipulation;
+    }
+    .pkt-count{color:#bbb;font-size:.84em;text-align:center;margin-bottom:12px;}
+    .pkt-body{display:flex;flex-direction:column;align-items:center;gap:12px;}
+    .pkt-card{
+      width:110px;height:148px;border-radius:16px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      cursor:pointer;touch-action:manipulation;
+      background:linear-gradient(155deg,#ce93d8,#7b1fa2);
+      box-shadow:0 8px 28px rgba(123,31,162,.38);
+      border:3px solid rgba(255,255,255,.35);gap:8px;transition:transform .18s;
+    }
+    .pkt-card:active{transform:scale(.94);}
+    .pkt-card.shaking{animation:pktShake .52s ease;}
+    @keyframes pktShake{
+      0%,100%{transform:rotate(0)}18%{transform:rotate(-9deg) scale(1.05)}
+      36%{transform:rotate(9deg) scale(1.05)}54%{transform:rotate(-6deg)}72%{transform:rotate(6deg)}
+    }
+    .pkt-icon{font-size:3.2em;}
+    .pkt-label{font-size:.62em;color:rgba(255,255,255,.85);font-weight:bold;letter-spacing:1px;}
+    .pkt-hint{color:#bbb;font-size:.8em;text-align:center;}
+    .pkt-result{display:none;flex-direction:column;align-items:center;gap:11px;}
+    .pkt-result.show{display:flex;animation:popIn .48s cubic-bezier(.175,.885,.32,1.275);}
+    @keyframes popIn{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
+    .res-flower{width:100px;height:120px;}
+    .res-name{font-size:1.3em;font-weight:bold;color:#333;}
+    .res-rarity{font-size:.88em;font-weight:bold;padding:5px 16px;border-radius:20px;color:#fff;}
+    .res-rarity.common  {background:#9e9e9e;}
+    .res-rarity.uncommon{background:linear-gradient(135deg,#ab47bc,#7b1fa2);}
+    .res-rarity.rare    {background:linear-gradient(135deg,#3949ab,#7b1fa2);animation:rarePulse 1s alternate infinite;}
+    @keyframes rarePulse{from{box-shadow:0 0 8px rgba(57,73,171,.5)}to{box-shadow:0 0 28px rgba(123,31,162,1)}}
+    .res-msg{color:#aaa;font-size:.82em;text-align:center;max-width:260px;}
+    .btn-collect{
+      background:linear-gradient(135deg,#f48fb1,#e91e63);color:#fff;border:none;
+      border-radius:50px;padding:13px 36px;font-size:1em;font-weight:bold;
+      cursor:pointer;touch-action:manipulation;margin-top:4px;
+    }
+    .plant-list{display:flex;flex-direction:column;gap:9px;}
+    .plant-row{
+      display:flex;align-items:center;gap:12px;border-radius:16px;
+      padding:11px 14px;cursor:pointer;touch-action:manipulation;
+      transition:transform .12s;border:none;width:100%;text-align:left;
+    }
+    .plant-row:active{transform:scale(.97);}
+    .plant-row.common  {background:linear-gradient(135deg,#fce4ec,#f8bbd0);}
+    .plant-row.uncommon{background:linear-gradient(135deg,#f3e5f5,#ce93d8);}
+    .plant-row.rare    {background:linear-gradient(135deg,#e3f2fd,#c5cae9);animation:rarePulse 2s alternate infinite;}
+    .pr-svg{width:44px;height:52px;flex-shrink:0;}
+    .pr-info{flex:1;min-width:0;}
+    .pr-name{font-weight:bold;color:#333;font-size:.9em;}
+    .pr-sub{font-size:.72em;color:#888;margin-top:2px;}
+    .pr-cnt{font-size:.7em;color:#bbb;}
+    .pr-badge{font-size:.68em;font-weight:bold;padding:4px 10px;border-radius:12px;color:#fff;white-space:nowrap;flex-shrink:0;}
+    .pr-badge.common  {background:#9e9e9e;}
+    .pr-badge.uncommon{background:linear-gradient(135deg,#ab47bc,#7b1fa2);}
+    .pr-badge.rare    {background:linear-gradient(135deg,#3949ab,#7b1fa2);}
+    .bloom-wrap{display:flex;flex-direction:column;align-items:center;gap:11px;text-align:center;padding:6px 0;}
+    .bloom-fl{width:120px;height:144px;animation:floatBloom 2.5s ease-in-out infinite;}
+    @keyframes floatBloom{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-13px) rotate(3deg)}}
+    .bloom-title{font-size:1.4em;font-weight:bold;color:#c2185b;}
+    .bloom-sub{color:#888;font-size:.84em;max-width:260px;}
+    .bloom-reward{
+      background:linear-gradient(135deg,#fff9c4,#ffe082);
+      border-radius:14px;padding:10px 18px;font-size:.8em;color:#795548;width:100%;font-weight:bold;
+    }
+    .bloom-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+    .btn-sell{
+      background:linear-gradient(135deg,#ffe082,#ffa000);color:#fff;border:none;
+      border-radius:50px;padding:13px 26px;font-size:.95em;font-weight:bold;
+      cursor:pointer;touch-action:manipulation;
+    }
+    .btn-save{
+      background:linear-gradient(135deg,#a5d6a7,#43a047);color:#fff;border:none;
+      border-radius:50px;padding:13px 26px;font-size:.95em;font-weight:bold;
+      cursor:pointer;touch-action:manipulation;
+    }
+    .gh-stats{display:flex;justify-content:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+    .gh-stat{font-size:.78em;color:#888;background:#f5f5f5;padding:6px 12px;border-radius:20px;}
+    .gh-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+    .gh-card{
+      aspect-ratio:.88;border-radius:16px;display:flex;flex-direction:column;
+      align-items:center;justify-content:flex-end;padding-bottom:8px;
+      position:relative;overflow:hidden;
+    }
+    .gh-card.common  {background:linear-gradient(to bottom,#c8e6c9,#a5d6a7 38%,#8d6e63 68%,#5d4037);}
+    .gh-card.uncommon{background:linear-gradient(to bottom,#f8bbd0,#f48fb1 38%,#8d6e63 68%,#5d4037);}
+    .gh-card.rare    {background:linear-gradient(to bottom,#c5cae9,#9fa8da 38%,#8d6e63 68%,#5d4037);animation:rarePulse 2s alternate infinite;}
+    .gh-fl{width:80%;flex:1;display:flex;align-items:flex-end;justify-content:center;padding-top:4px;}
+    .gh-fl svg{width:100%;height:100%;}
+    .gh-name{font-size:.48em;color:rgba(255,255,255,.98);font-weight:bold;text-shadow:0 1px 4px rgba(0,0,0,.65);text-align:center;padding:0 4px;}
+    .gh-slot-empty{
+      border:2px dashed #e0e0e0;border-radius:16px;aspect-ratio:.88;
+      display:flex;align-items:center;justify-content:center;color:#ddd;font-size:1.5em;
+    }
+    .gh-empty{grid-column:1/-1;text-align:center;color:#ccc;padding:28px;font-size:.88em;}
+    .shop-item{
+      display:flex;align-items:center;justify-content:space-between;
+      border-radius:16px;padding:13px 15px;margin-bottom:10px;
+    }
+    .shop-item.pkt-item{background:linear-gradient(135deg,#f3e5f5,#ce93d8);}
+    .shop-item.wat-item{background:linear-gradient(135deg,#e3f2fd,#90caf9);}
+    .shop-left{display:flex;align-items:center;gap:10px;}
+    .shop-icon{font-size:2em;}
+    .shop-name{font-weight:bold;color:#333;font-size:.9em;}
+    .shop-detail{font-size:.72em;color:#666;margin-top:2px;}
+    .btn-buy{
+      background:linear-gradient(135deg,#ffa000,#e65100);color:#fff;border:none;
+      border-radius:20px;padding:9px 15px;font-weight:bold;font-size:.8em;
+      cursor:pointer;touch-action:manipulation;white-space:nowrap;
+    }
+    .toast{
+      position:fixed;top:68px;left:50%;transform:translateX(-50%) translateY(-14px);
+      background:rgba(28,28,28,.88);color:#fff;padding:9px 20px;
+      border-radius:22px;font-size:.86em;z-index:400;opacity:0;
+      transition:opacity .25s,transform .25s;pointer-events:none;
+      white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+    .sparkle{position:fixed;pointer-events:none;z-index:450;font-size:1.4em;animation:spkAnim .9s ease-out forwards;}
+    @keyframes spkAnim{
+      0%{opacity:1;transform:scale(0) translateY(0);}
+      50%{opacity:1;transform:scale(1.5) translateY(-30px);}
+      100%{opacity:0;transform:scale(1) translateY(-62px);}
+    }
+    .confetti-bit{position:fixed;pointer-events:none;z-index:450;border-radius:3px;animation:cfAnim linear forwards;}
+    @keyframes cfAnim{
+      0%{opacity:1;transform:translateY(0) rotate(0deg);}
+      100%{opacity:0;transform:translateY(85vh) rotate(740deg);}
+    }
+    .splash{position:fixed;pointer-events:none;z-index:420;font-size:1.6em;animation:splashAnim .62s ease-out forwards;}
+    @keyframes splashAnim{
+      0%{opacity:1;transform:scale(.5) translateY(0);}
+      40%{opacity:1;transform:scale(1.4) translateY(-22px);}
+      100%{opacity:0;transform:scale(.8) translateY(-44px);}
+    }
+  </style>
+=======
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Will You Be My Valentine? 💕</title>
@@ -158,36 +469,265 @@
             100% { transform: translate(-50%, -50%) scale(1); }
         }
     </style>
+>>>>>>> parent of ff1c46e (Enhance responsive design with clamp() for fluid layouts and add touch support for No button interaction)
 </head>
 <body>
-    <div class="container">
-        <div class="question-section" id="questionSection">
-            <img class="heart" src="unnamed.jpg" alt="Cute cat">
-            <h1>Yurie will you be my valentine?</h1>
-            <p style="color: #999; font-style: italic; margin-top: 10px;">*the no is shy 😊</p>
-            <div class="buttons-container" id="buttonsContainer">
-                <button class="yes-btn" id="yesBtn">Yes!</button>
-                <button class="no-btn" id="noBtn">No</button>
-            </div>
-        </div>
+<div class="bg-canvas"></div>
 
-        <div class="celebration" id="celebration">
-            <h2>I love you babe thank you for being my girlfriend 🎉</h2>
-            <img class="fireworks" src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZGpmY3luOWJ0YjRqdzEweDJ5MmQ0Ymw4Y3pzdjhmMnplN2lwa3owNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/IzXiddo2twMmdmU8Lv/giphy.gif" alt="Love hearts">
-            <div class="message"></div>
-        </div>
+<!-- VALENTINE SCREEN -->
+<div id="valentineScreen">
+  <div class="v-card">
+    <img src="unnamed.jpg" alt="" onerror="this.style.display='none'">
+    <h1>Yurie, will you be my valentine? 💕</h1>
+    <p class="v-hint">*the no button is feeling a little shy 😊</p>
+    <div class="v-btns" id="vBtns">
+      <button class="btn-yes" id="yesBtn">Yes! 💖</button>
+      <button class="btn-no"  id="noBtn">No</button>
     </div>
+  </div>
+</div>
 
-    <div class="try-again" id="tryAgain">Try again! 😊</div>
+<!-- GAME SCREEN -->
+<div id="gameScreen">
+  <div class="top-bar">
+    <div class="stat-pill">🪙 <span id="coinDisp">10</span></div>
+    <div class="stat-pill">📦 <span id="pktDisp">3</span></div>
+    <button class="tbtn tbtn-open"  onclick="openPktModal()">🎁 Open Packet</button>
+    <button class="tbtn tbtn-house" onclick="openGhModal()">🌿 Greenhouse</button>
+    <button class="tbtn tbtn-shop"  onclick="openShopModal()">🛒 Shop</button>
+  </div>
+  <div class="garden-header">
+    <h2>🌸 Yurie's Flower Garden</h2>
+    <p>Tap a plot to plant · Tap a plant to water it!</p>
+  </div>
+  <div class="water-row">
+    <span style="font-size:1.1em">💧</span>
+    <div class="wdrops" id="dropRow"></div>
+    <span class="refill-eta" id="refillEta"></span>
+  </div>
+  <div class="garden-grid" id="gardenGrid"></div>
+  <div class="seed-tray">
+    <div class="tray-handle"></div>
+    <div class="tray-title">🌱 Your Seeds — tap a plot to plant</div>
+    <div class="tray-scroll" id="trayItems"></div>
+  </div>
+</div>
 
-    <script>
-        const noBtn = document.getElementById('noBtn');
-        const yesBtn = document.getElementById('yesBtn');
-        const questionSection = document.getElementById('questionSection');
-        const celebration = document.getElementById('celebration');
-        const buttonsContainer = document.getElementById('buttonsContainer');
-        const tryAgain = document.getElementById('tryAgain');
+<div class="toast" id="toast"></div>
 
+<<<<<<< HEAD
+<!-- PACKET MODAL -->
+<div class="overlay" id="pktOverlay">
+  <div class="sheet">
+    <button class="sh-close" onclick="closeModal('pktOverlay')">✕</button>
+    <div class="sh-handle"></div>
+    <div class="sh-title">🎁 Open a Seed Packet</div>
+    <div class="pkt-count" id="pktCountLbl"></div>
+    <div class="pkt-body">
+      <div id="pktCardEl" class="pkt-card" onclick="doOpenPacket()">
+        <span class="pkt-icon">🌸</span>
+        <span class="pkt-label">TAP TO OPEN</span>
+      </div>
+      <p class="pkt-hint" id="pktHint">Something beautiful might be inside… ✨</p>
+    </div>
+    <div class="pkt-result" id="pktResult">
+      <div class="res-flower" id="resFlower"></div>
+      <div class="res-name"   id="resName"></div>
+      <div class="res-rarity" id="resRarity"></div>
+      <div class="res-msg"    id="resMsg"></div>
+      <button class="btn-collect" onclick="collectSeed()">Add to Seeds 🌱</button>
+    </div>
+  </div>
+</div>
+
+<!-- PLANT MODAL -->
+<div class="overlay" id="plantOverlay">
+  <div class="sheet">
+    <button class="sh-close" onclick="closeModal('plantOverlay')">✕</button>
+    <div class="sh-handle"></div>
+    <div class="sh-title">🌱 Plant a Seed</div>
+    <p style="color:#bbb;font-size:.8em;text-align:center;margin-bottom:12px;">Choose which seed to plant here</p>
+    <div class="plant-list" id="plantList"></div>
+  </div>
+</div>
+
+<!-- BLOOM MODAL -->
+<div class="overlay" id="bloomOverlay">
+  <div class="sheet">
+    <div class="sh-handle"></div>
+    <div class="bloom-wrap">
+      <div class="bloom-fl"    id="bloomFlEl"></div>
+      <div class="bloom-title" id="bloomTitle"></div>
+      <div class="bloom-sub"   id="bloomSub"></div>
+      <div class="bloom-reward">🎁 +1 Seed Packet earned for growing this flower!</div>
+      <div class="bloom-btns">
+        <button class="btn-sell" id="btnSell">💰 Sell</button>
+        <button class="btn-save" onclick="saveFlower()">🏡 Save to Greenhouse</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GREENHOUSE MODAL -->
+<div class="overlay" id="ghOverlay">
+  <div class="sheet">
+    <button class="sh-close" onclick="closeModal('ghOverlay')">✕</button>
+    <div class="sh-handle"></div>
+    <div class="sh-title">🌿 Yurie's Greenhouse</div>
+    <div class="gh-stats" id="ghStats"></div>
+    <div class="gh-grid"  id="ghGrid"></div>
+  </div>
+</div>
+
+<!-- SHOP MODAL -->
+<div class="overlay" id="shopOverlay">
+  <div class="sheet">
+    <button class="sh-close" onclick="closeModal('shopOverlay')">✕</button>
+    <div class="sh-handle"></div>
+    <div class="sh-title">🛒 Shop</div>
+    <div class="shop-item pkt-item">
+      <div class="shop-left">
+        <span class="shop-icon">📦</span>
+        <div>
+          <div class="shop-name">Seed Packet</div>
+          <div class="shop-detail">Random flower seed · might be legendary! ✨</div>
+        </div>
+      </div>
+      <button class="btn-buy" onclick="buyPacket()">🪙 10</button>
+    </div>
+    <div class="shop-item wat-item">
+      <div class="shop-left">
+        <span class="shop-icon">💧</span>
+        <div>
+          <div class="shop-name">Watering Can Refill</div>
+          <div class="shop-detail">Instantly refill all 10 water drops</div>
+        </div>
+      </div>
+      <button class="btn-buy" onclick="buyWater()">🪙 5</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const FLOWERS = {
+  pinkTulip:  {name:'Pink Tulip',  kind:'tulip',rarity:'common',  w:26,petal:'#f06292',stem:'#66bb6a',sell:5 },
+  redTulip:   {name:'Red Tulip',   kind:'tulip',rarity:'common',  w:22,petal:'#e53935',stem:'#66bb6a',sell:6 },
+  yellowTulip:{name:'Yellow Tulip',kind:'tulip',rarity:'common',  w:18,petal:'#fdd835',stem:'#66bb6a',sell:6 },
+  redRose:    {name:'Red Rose',    kind:'rose', rarity:'uncommon',w:14,petal:'#c62828',stem:'#43a047',sell:15},
+  pinkRose:   {name:'Pink Rose',   kind:'rose', rarity:'uncommon',w:9, petal:'#e91e63',stem:'#43a047',sell:20},
+  blueRose:   {name:'Blue Rose',   kind:'rose', rarity:'rare',    w:3, petal:'#3f51b5',stem:'#388e3c',sell:60},
+};
+const RARITY_LABEL={common:'Common',uncommon:'Uncommon',rare:'★ Legendary'};
+const STAGE_NAMES=['🌰 Seed','🌱 Sprout','🌿 Growing','🌸 Bloomed!'];
+const STAGE_WATERS=3,MAX_STAGE=3;
+
+let G={
+  coins:10,packets:3,seeds:[],seedId:0,
+  plots:Array(6).fill(0).map((_,i)=>({id:i,state:'empty',key:null,stage:0,waters:0,rewarded:false})),
+  greenhouse:[],water:10,maxWater:10,lastRefill:Date.now(),
+  bloomPlot:null,openedKey:null,plantPlot:null,
+};
+
+function lighter(hex,a=52){
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return `rgb(${Math.min(255,r+a)},${Math.min(255,g+a)},${Math.min(255,b+a)})`;
+}
+function darker(hex,a=44){
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return `rgb(${Math.max(0,r-a)},${Math.max(0,g-a)},${Math.max(0,b-a)})`;
+}
+
+function flowerSVG(key,stage){
+  const f=FLOWERS[key],p=f.petal,S=f.stem;
+  const pl=lighter(p),pll=lighter(p,85),pd=darker(p),SD=darker(S,25);
+  const rare=f.rarity==='rare';
+  if(stage===0) return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="30" cy="95" rx="14" ry="4" fill="#6d4c41" opacity=".3"/>
+    <path d="M30 93 Q26 78 28 64 Q30 70 32 64 Q34 78 30 93" fill="${S}"/>
+    <ellipse cx="30" cy="62" rx="5" ry="4" fill="${SD}" opacity=".9"/>
+  </svg>`;
+  if(stage===1){
+    if(f.kind==='tulip') return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/>
+      <line x1="30" y1="96" x2="30" y2="62" stroke="${S}" stroke-width="3" stroke-linecap="round"/>
+      <path d="M30 80 Q18 72 16 62 Q24 67 30 77" fill="${S}"/>
+      <path d="M25 65 Q24 56 30 51 Q36 56 35 65 Q32 68 30 69 Q28 68 25 65Z" fill="${p}" opacity=".82"/>
+    </svg>`;
+    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/>
+      <line x1="30" y1="96" x2="30" y2="62" stroke="${S}" stroke-width="3" stroke-linecap="round"/>
+      <path d="M30 82 Q17 73 15 62 Q23 67 30 78" fill="${S}"/>
+      <circle cx="30" cy="53" r="9.5" fill="${pll}" opacity=".8"/>
+      <circle cx="30" cy="53" r="7" fill="${p}" opacity=".85"/>
+    </svg>`;
+  }
+  if(stage===2){
+    if(f.kind==='tulip') return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/>
+      <line x1="30" y1="98" x2="30" y2="52" stroke="${S}" stroke-width="3" stroke-linecap="round"/>
+      <path d="M30 78 Q14 67 12 54 Q23 61 30 73" fill="${S}"/>
+      <path d="M30 78 Q46 67 48 54 Q37 61 30 73" fill="${S}"/>
+      <path d="M22 55 Q21 40 30 35 Q39 40 38 55 Q35 60 30 61 Q25 60 22 55Z" fill="${p}"/>
+      <path d="M26 55 Q25 41 30 36 Q35 41 34 55" fill="${pl}" opacity=".3"/>
+    </svg>`;
+    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/>
+      <line x1="30" y1="98" x2="30" y2="52" stroke="${S}" stroke-width="3" stroke-linecap="round"/>
+      <path d="M30 78 Q14 67 12 53 Q23 60 30 72" fill="${S}"/>
+      <path d="M30 78 Q46 67 48 53 Q37 60 30 72" fill="${S}"/>
+      <circle cx="30" cy="43" r="14" fill="${pll}" opacity=".7"/>
+      <circle cx="22" cy="39" r="10" fill="${pl}"/>
+      <circle cx="38" cy="39" r="10" fill="${pl}"/>
+      <circle cx="30" cy="36" r="10" fill="${p}"/>
+      <circle cx="30" cy="44" r="10" fill="${pd}"/>
+    </svg>`;
+  }
+  if(f.kind==='tulip') return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/>
+    <line x1="30" y1="98" x2="30" y2="48" stroke="${S}" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M30 75 Q12 62 10 47 Q22 55 30 68" fill="${S}"/>
+    <path d="M30 75 Q48 62 50 47 Q38 55 30 68" fill="${S}"/>
+    <path d="M18 49 Q17 30 30 23 Q43 30 42 49 Q38 55 30 57 Q22 55 18 49Z" fill="${p}"/>
+    <path d="M23 49 Q22 32 30 25 Q38 32 37 49" fill="${pl}" opacity=".28"/>
+    <path d="M24 31 Q27 24 30 23" stroke="rgba(255,255,255,.5)" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M30 23 Q34 24 36 30" stroke="rgba(255,255,255,.38)" stroke-width="1" stroke-linecap="round"/>
+    <ellipse cx="30" cy="50" rx="5" ry="4" fill="${pd}" opacity=".35"/>
+  </svg>`;
+  return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/>
+    <line x1="30" y1="98" x2="30" y2="50" stroke="${S}" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M30 76 Q12 64 10 50 Q23 57 30 70" fill="${S}"/>
+    <path d="M30 76 Q48 64 50 50 Q37 57 30 70" fill="${S}"/>
+    <path d="M25 65 L18 55" stroke="${S}" stroke-width="2"/>
+    ${rare
+      ?`<circle cx="30" cy="32" r="17" fill="${pll}" opacity=".55"/>
+         <circle cx="30" cy="32" r="17" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".7"/>
+         <text x="30" y="12" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>`
+      :`<circle cx="30" cy="32" r="15" fill="${pll}"/>`
+    }
+    <circle cx="21" cy="27" r="10" fill="${pl}"/>
+    <circle cx="39" cy="27" r="10" fill="${pl}"/>
+    <circle cx="30" cy="22" r="10" fill="${p}"/>
+    <circle cx="22" cy="36" r="9"  fill="${p}"/>
+    <circle cx="38" cy="36" r="9"  fill="${p}"/>
+    <circle cx="30" cy="35" r="10" fill="${pd}"/>
+    <circle cx="30" cy="31" r="6"  fill="${pd}"/>
+    <circle cx="30" cy="29" r="3.5" fill="${darker(p,75)}"/>
+  </svg>`;
+}
+
+function initPetals(){
+  const pool=['🌸','🌷','✿','❀','💮','🌺'];
+  for(let i=0;i<14;i++){
+    const el=document.createElement('div');
+    el.className='petal';
+    el.textContent=pool[Math.floor(Math.random()*pool.length)];
+    const left=5+Math.random()*90,dur=13+Math.random()*18,delay=Math.random()*20;
+    el.style.cssText=`left:${left}%;font-size:${.7+Math.random()*.8}em;animation-duration:${dur}s;animation-delay:-${delay}s;`;
+    document.body.appendChild(el);
+  }
+}
+=======
         // Make the No button run away from the mouse
         buttonsContainer.addEventListener('mousemove', (e) => {
             const noBtnRect = noBtn.getBoundingClientRect();
@@ -226,19 +766,339 @@
             questionSection.style.display = 'none';
             celebration.classList.add('active');
         });
+>>>>>>> parent of ff1c46e (Enhance responsive design with clamp() for fluid layouts and add touch support for No button interaction)
 
-        // Handle No button click
-        noBtn.addEventListener('click', () => {
-            tryAgain.classList.add('show');
-            setTimeout(() => {
-                tryAgain.classList.remove('show');
-            }, 1500);
-        });
+const nBtn=document.getElementById('noBtn');
+const vBtns=document.getElementById('vBtns');
+nBtn.style.cssText='left:65%;top:50%;transform:translate(-50%,-50%)';
+function escNo(cx,cy){
+  const r=nBtn.getBoundingClientRect();
+  const ox=r.left+r.width/2,oy=r.top+r.height/2;
+  if(Math.hypot(cx-ox,cy-oy)<170){
+    const cr=vBtns.getBoundingClientRect();
+    let nx=ox-(cx-ox)*2.1-cr.left,ny=oy-(cy-oy)*2.1-cr.top;
+    nx=Math.max(r.width/2,Math.min(nx,cr.width-r.width/2));
+    ny=Math.max(r.height/2,Math.min(ny,cr.height-r.height/2));
+    nBtn.style.left=nx+'px';nBtn.style.top=ny+'px';nBtn.style.transform='translate(-50%,-50%)';
+  }
+}
+vBtns.addEventListener('mousemove',e=>escNo(e.clientX,e.clientY));
+vBtns.addEventListener('touchmove',e=>escNo(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
+nBtn.addEventListener('click',()=>toast('Try again! 😊',1400));
+document.getElementById('yesBtn').addEventListener('click',()=>{
+  document.getElementById('valentineScreen').style.display='none';
+  const gs=document.getElementById('gameScreen');
+  gs.style.display='flex';gs.style.flexDirection='column';
+  initGame();
+  toast('💖 Yay! Welcome to your garden, Yurie! 🌸',3200);
+});
 
-        // Initial position for No button
-        noBtn.style.left = '60%';
-        noBtn.style.top = '50%';
-        noBtn.style.transform = 'translate(-50%, -50%)';
-    </script>
+function initGame(){
+  initPetals();
+  renderGarden();renderTray();renderDrops();updateHUD();startRefill();
+}
+function updateHUD(){
+  document.getElementById('coinDisp').textContent=G.coins;
+  document.getElementById('pktDisp').textContent=G.packets;
+}
+
+function renderDrops(){
+  const row=document.getElementById('dropRow');
+  row.innerHTML='';
+  for(let i=0;i<G.maxWater;i++){
+    const d=document.createElement('div');
+    d.className='wdrop '+(i<G.water?'full':'empty');
+    row.appendChild(d);
+  }
+}
+let refillTimer;
+function startRefill(){
+  clearInterval(refillTimer);
+  refillTimer=setInterval(()=>{
+    const lbl=document.getElementById('refillEta');
+    if(G.water>=G.maxWater){lbl.textContent='';return;}
+    const ms=30000-(Date.now()-G.lastRefill);
+    if(ms<=0){G.water=Math.min(G.maxWater,G.water+1);G.lastRefill=Date.now();renderDrops();}
+    else lbl.textContent=`+💧${Math.ceil(ms/1000)}s`;
+  },500);
+}
+
+function renderGarden(){
+  const grid=document.getElementById('gardenGrid');
+  grid.innerHTML='';
+  G.plots.forEach((p,i)=>grid.appendChild(buildPlotCard(p,i)));
+}
+function buildPlotCard(p,i){
+  const div=document.createElement('div');
+  div.className='plot'+(p.state==='empty'?'':(p.state==='bloomed'?' bloomed':' has-plant'));
+  div.onclick=()=>clickPlot(i);
+  if(p.state==='empty'){
+    div.innerHTML='<div class="plot-plus">＋</div><div class="empty-hint">tap to plant</div>';
+    return div;
+  }
+  const f=FLOWERS[p.key];
+  let pips='<div class="plot-pips">';
+  for(let w=0;w<STAGE_WATERS;w++) pips+=`<div class="pip ${w<p.waters?'on':'off'}"></div>`;
+  pips+='</div>';
+  const crown=f.rarity==='rare'?'<div class="rare-crown">★ L</div>':'';
+  const stageLabel=p.state==='bloomed'?`✨ ${f.name}`:STAGE_NAMES[p.stage];
+  const totalSteps=MAX_STAGE*STAGE_WATERS;
+  const doneSteps=p.stage*STAGE_WATERS+p.waters;
+  const barPct=p.state==='bloomed'?100:Math.round(doneSteps/totalSteps*100);
+  div.innerHTML=`
+    ${pips}${crown}
+    <div class="plot-fl">${flowerSVG(p.key,p.stage)}</div>
+    <div class="prog-wrap">
+      <div class="prog-bg"><div class="prog-fill" style="width:${barPct}%"></div></div>
+    </div>
+    <div class="plot-stage">${stageLabel}</div>
+  `;
+  return div;
+}
+function clickPlot(i){
+  const p=G.plots[i];
+  if(p.state==='empty'){
+    if(!G.seeds.length){toast('No seeds! Open a packet first 📦',2000);return;}
+    openPlantModal(i);
+  }else if(p.state==='bloomed'){
+    openBloomModal(i);
+  }else{
+    waterPlot(i);
+  }
+}
+function waterPlot(i){
+  if(G.water<=0){toast('No water left! Wait for refill 💧',2000);return;}
+  G.water--;G.plots[i].waters++;renderDrops();
+  const tiles=document.querySelectorAll('.plot');
+  if(tiles[i]){tiles[i].classList.add('watered');setTimeout(()=>tiles[i].classList.remove('watered'),380);}
+  if(tiles[i]){
+    const r=tiles[i].getBoundingClientRect();
+    spawnSplash(r.left+r.width/2,r.top+r.height/3);
+  }
+  if(G.plots[i].waters>=STAGE_WATERS){
+    G.plots[i].waters=0;G.plots[i].stage++;
+    if(G.plots[i].stage>=MAX_STAGE){
+      G.plots[i].stage=MAX_STAGE;G.plots[i].state='bloomed';
+      if(!G.plots[i].rewarded){G.packets++;G.plots[i].rewarded=true;updateHUD();}
+      setTimeout(()=>{renderGarden();confettiBurst();openBloomModal(i);},350);
+    }else{
+      renderGarden();
+      toast(`${STAGE_NAMES[G.plots[i].stage]} — keep watering! 🌿`,1500);
+    }
+  }else{renderGarden();}
+}
+
+function renderTray(){
+  const tray=document.getElementById('trayItems');
+  if(!G.seeds.length){tray.innerHTML='<div class="tray-empty">Open a seed packet to start growing! 📦</div>';return;}
+  tray.innerHTML='';
+  const groups={};
+  G.seeds.forEach(s=>{groups[s.key]=(groups[s.key]||0)+1;});
+  Object.entries(groups).forEach(([key,cnt])=>{
+    const f=FLOWERS[key];
+    const chip=document.createElement('div');
+    chip.className=`seed-chip ${f.rarity}`;
+    chip.innerHTML=`
+      <div class="chip-svg">${flowerSVG(key,1)}</div>
+      <span class="chip-name">${f.name}</span>
+      ${cnt>1?`<span class="chip-cnt">x${cnt}</span>`:''}
+    `;
+    tray.appendChild(chip);
+  });
+}
+
+function openPktModal(){
+  if(!G.packets){toast('No packets! Buy some in the shop 🛒',2000);return;}
+  G.openedKey=null;
+  const card=document.getElementById('pktCardEl');
+  card.style.display='flex';
+  const res=document.getElementById('pktResult');
+  res.classList.remove('show');res.style.display='';
+  document.getElementById('pktHint').style.display='';
+  document.getElementById('pktCountLbl').textContent=`You have ${G.packets} seed packet${G.packets!==1?'s':''}`;
+  openModal('pktOverlay');
+}
+function doOpenPacket(){
+  if(!G.packets) return;
+  const card=document.getElementById('pktCardEl');
+  card.classList.add('shaking');
+  setTimeout(()=>{
+    G.packets--;updateHUD();
+    G.openedKey=weightedRandom();
+    const f=FLOWERS[G.openedKey];
+    card.style.display='none';
+    document.getElementById('pktHint').style.display='none';
+    document.getElementById('resFlower').innerHTML=`<div style="width:100%;height:100%">${flowerSVG(G.openedKey,MAX_STAGE)}</div>`;
+    document.getElementById('resName').textContent=f.name;
+    const rl=document.getElementById('resRarity');
+    rl.textContent=RARITY_LABEL[f.rarity]+(f.rarity==='rare'?' ✦✦✦':'');
+    rl.className=`res-rarity ${f.rarity}`;
+    const msgs={
+      common:'A lovely flower for your garden! 🌸',
+      uncommon:'A beautiful find — how wonderful! 💕',
+      rare:'✨ OH WOW! A legendary Blue Rose — just like you, one of a kind! 💙✨',
+    };
+    document.getElementById('resMsg').textContent=msgs[f.rarity];
+    const res=document.getElementById('pktResult');
+    res.classList.add('show');
+    if(f.rarity==='rare') multiSparkle();
+    else spawnSparkle(window.innerWidth/2,window.innerHeight*.4,'✨');
+  },540);
+}
+function collectSeed(){
+  if(!G.openedKey) return;
+  G.seeds.push({id:G.seedId++,key:G.openedKey});G.openedKey=null;
+  closeModal('pktOverlay');renderTray();
+  toast('Seed added to your tray! 🌱',1600);
+}
+
+function openPlantModal(plotIdx){
+  G.plantPlot=plotIdx;
+  const list=document.getElementById('plantList');
+  list.innerHTML='';
+  const groups={};
+  G.seeds.forEach(s=>{groups[s.key]=(groups[s.key]||0)+1;});
+  Object.entries(groups).forEach(([key,cnt])=>{
+    const f=FLOWERS[key];
+    const btn=document.createElement('button');
+    btn.className=`plant-row ${f.rarity}`;
+    btn.innerHTML=`
+      <div class="pr-svg">${flowerSVG(key,2)}</div>
+      <div class="pr-info">
+        <div class="pr-name">${f.name}</div>
+        <div class="pr-sub">${RARITY_LABEL[f.rarity]} · sells for 🪙${f.sell}</div>
+        <div class="pr-cnt">x${cnt} in your tray</div>
+      </div>
+      <span class="pr-badge ${f.rarity}">${RARITY_LABEL[f.rarity]}</span>
+    `;
+    btn.onclick=()=>plantSeed(key,plotIdx);
+    list.appendChild(btn);
+  });
+  openModal('plantOverlay');
+}
+function plantSeed(key,plotIdx){
+  const idx=G.seeds.findIndex(s=>s.key===key);
+  if(idx===-1) return;
+  G.seeds.splice(idx,1);
+  G.plots[plotIdx]={id:plotIdx,state:'growing',key,stage:0,waters:0,rewarded:false};
+  closeModal('plantOverlay');renderGarden();renderTray();
+  toast(`${FLOWERS[key].name} planted! 💧 Water it to grow!`,2000);
+}
+
+function openBloomModal(i){
+  G.bloomPlot=i;
+  const f=FLOWERS[G.plots[i].key];
+  document.getElementById('bloomFlEl').innerHTML=flowerSVG(G.plots[i].key,MAX_STAGE);
+  document.getElementById('bloomTitle').textContent=`${f.name} is fully bloomed! 🎉`;
+  document.getElementById('bloomSub').textContent=
+    f.rarity==='rare'
+      ?'💙 A legendary Blue Rose — incredibly rare and gorgeous! ✨'
+      :f.rarity==='uncommon'
+        ?`Your ${f.name.toLowerCase()} is absolutely stunning! 💕`
+        :`Beautiful! Your ${f.name.toLowerCase()} is glowing! 🌸`;
+  document.getElementById('btnSell').textContent=`💰 Sell for 🪙${f.sell}`;
+  document.getElementById('btnSell').onclick=sellFlower;
+  openModal('bloomOverlay');
+}
+function sellFlower(){
+  if(G.bloomPlot===null) return;
+  const f=FLOWERS[G.plots[G.bloomPlot].key];
+  G.coins+=f.sell;clearPlot(G.bloomPlot);closeModal('bloomOverlay');updateHUD();
+  toast(`Sold for 🪙${f.sell}! 💰`,2000);
+}
+function saveFlower(){
+  if(G.bloomPlot===null) return;
+  const key=G.plots[G.bloomPlot].key;
+  G.greenhouse.push({key});clearPlot(G.bloomPlot);closeModal('bloomOverlay');
+  toast(`${FLOWERS[key].name} saved to your greenhouse! 🌿`,2000);
+}
+function clearPlot(i){
+  G.plots[i]={id:i,state:'empty',key:null,stage:0,waters:0,rewarded:false};renderGarden();
+}
+
+function openGhModal(){
+  const grid=document.getElementById('ghGrid');
+  const stats=document.getElementById('ghStats');
+  grid.innerHTML='';stats.innerHTML='';
+  if(!G.greenhouse.length){
+    grid.innerHTML='<div class="gh-empty">No flowers saved yet!<br>Grow some and save them here 🌱</div>';
+  }else{
+    const total=G.greenhouse.length;
+    const rares=G.greenhouse.filter(({key})=>FLOWERS[key].rarity==='rare').length;
+    const uniq=new Set(G.greenhouse.map(({key})=>key)).size;
+    stats.innerHTML=`
+      <span class="gh-stat">🌸 ${total} saved</span>
+      <span class="gh-stat">🌈 ${uniq}/6 types</span>
+      ${rares?`<span class="gh-stat">💙 ${rares} legendary</span>`:''}
+    `;
+    G.greenhouse.forEach(({key})=>{
+      const f=FLOWERS[key];
+      const card=document.createElement('div');
+      card.className=`gh-card ${f.rarity}`;
+      card.innerHTML=`<div class="gh-fl">${flowerSVG(key,MAX_STAGE)}</div><div class="gh-name">${f.name}</div>`;
+      grid.appendChild(card);
+    });
+    const slots=Math.max(9,Math.ceil(G.greenhouse.length/3)*3);
+    for(let i=G.greenhouse.length;i<slots;i++){
+      const s=document.createElement('div');s.className='gh-slot-empty';s.textContent='＋';grid.appendChild(s);
+    }
+  }
+  openModal('ghOverlay');
+}
+
+function openShopModal(){openModal('shopOverlay');}
+function buyPacket(){
+  if(G.coins<10){toast('Not enough coins! Sell some flowers 💰',2000);return;}
+  G.coins-=10;G.packets++;updateHUD();closeModal('shopOverlay');toast('Seed packet bought! 📦',1500);
+}
+function buyWater(){
+  if(G.coins<5){toast('Not enough coins!',2000);return;}
+  G.coins-=5;G.water=G.maxWater;updateHUD();renderDrops();closeModal('shopOverlay');toast('Watering can refilled! 💧',1500);
+}
+
+function openModal(id){document.getElementById(id).classList.add('on');}
+function closeModal(id){document.getElementById(id).classList.remove('on');}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on');}));
+
+function weightedRandom(){
+  const keys=Object.keys(FLOWERS);
+  const total=keys.reduce((s,k)=>s+FLOWERS[k].w,0);
+  let r=Math.random()*total;
+  for(const k of keys){r-=FLOWERS[k].w;if(r<=0)return k;}
+  return keys.at(-1);
+}
+
+let toastTimer;
+function toast(msg,ms=2000){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),ms);
+}
+function spawnSparkle(x,y,e='✨'){
+  const el=document.createElement('div');el.className='sparkle';el.textContent=e;
+  el.style.cssText=`left:${x}px;top:${y}px`;document.body.appendChild(el);setTimeout(()=>el.remove(),950);
+}
+function spawnSplash(x,y){
+  const el=document.createElement('div');el.className='splash';el.textContent='💧';
+  el.style.cssText=`left:${x}px;top:${y}px`;document.body.appendChild(el);setTimeout(()=>el.remove(),680);
+}
+function multiSparkle(){
+  const pool=['✨','💙','⭐','💫','🌟','💎','🔮','🫧'];
+  for(let i=0;i<16;i++) setTimeout(()=>{
+    spawnSparkle(window.innerWidth*(.08+Math.random()*.84),window.innerHeight*(.1+Math.random()*.7),pool[Math.floor(Math.random()*pool.length)]);
+  },i*90);
+}
+function confettiBurst(){
+  const colors=['#f48fb1','#ce93d8','#90caf9','#a5d6a7','#ffe082','#e91e63','#f9a825'];
+  for(let i=0;i<30;i++){
+    const el=document.createElement('div');el.className='confetti-bit';
+    const x=window.innerWidth*(.1+Math.random()*.8);
+    const y=window.innerHeight*(.15+Math.random()*.35);
+    const sz=6+Math.random()*9,dur=1.2+Math.random()*1.5;
+    el.style.cssText=`left:${x}px;top:${y}px;width:${sz}px;height:${sz+2}px;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${dur}s;`;
+    document.body.appendChild(el);setTimeout(()=>el.remove(),dur*1000+100);
+  }
+}
+</script>
 </body>
 </html>
