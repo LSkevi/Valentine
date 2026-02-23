@@ -289,8 +289,10 @@
       display:flex;align-items:center;justify-content:space-between;
       border-radius:16px;padding:13px 15px;margin-bottom:10px;
     }
-    .shop-item.pkt-item{background:linear-gradient(135deg,#f3e5f5,#ce93d8);}
-    .shop-item.pkt-item{background:linear-gradient(135deg,#fce4ec,#f8bbd9);}
+    .shop-item.pkt-common  {background:linear-gradient(135deg,#fce4ec,#f8bbd0);}
+    .shop-item.pkt-uncommon{background:linear-gradient(135deg,#e8f5e9,#a5d6a7);}
+    .shop-item.pkt-rare    {background:linear-gradient(135deg,#e3f2fd,#90caf9);}
+    .shop-item.pkt-legendary{background:linear-gradient(135deg,#ede7f6,#ce93d8);border:2px solid #ab47bc;}
     .shop-left{display:flex;align-items:center;gap:10px;}
     .shop-icon{font-size:2em;}
     .shop-name{font-weight:bold;color:#333;font-size:.9em;}
@@ -463,15 +465,45 @@
     <button class="sh-close" onclick="closeModal('shopOverlay')">✕</button>
     <div class="sh-handle"></div>
     <div class="sh-title">🛒 Shop</div>
-    <div class="shop-item pkt-item">
+    <div class="shop-item pkt-common">
       <div class="shop-left">
         <span class="shop-icon">📦</span>
         <div>
-          <div class="shop-name">Seed Packet</div>
-          <div class="shop-detail">Random flower seed · might be legendary! ✨</div>
+          <div class="shop-name">Common Packet</div>
+          <div class="shop-detail">Random seed — tulips &amp; roses, tiny legendary chance</div>
         </div>
       </div>
-      <button class="btn-buy" onclick="buyPacket()"><span class="ic">C</span> 10</button>
+      <button class="btn-buy" onclick="buyPacket('common')"><span class="ic">C</span> 10</button>
+    </div>
+    <div class="shop-item pkt-uncommon">
+      <div class="shop-left">
+        <span class="shop-icon">🌹</span>
+        <div>
+          <div class="shop-name">Uncommon Packet</div>
+          <div class="shop-detail">Only roses inside — Red &amp; Pink Rose guaranteed pool</div>
+        </div>
+      </div>
+      <button class="btn-buy" onclick="buyPacket('uncommon')"><span class="ic">C</span> 30</button>
+    </div>
+    <div class="shop-item pkt-rare">
+      <div class="shop-left">
+        <span class="shop-icon">💎</span>
+        <div>
+          <div class="shop-name">Rare Packet</div>
+          <div class="shop-detail">Roses only · ~35% chance of Blue Rose 💙</div>
+        </div>
+      </div>
+      <button class="btn-buy" onclick="buyPacket('rare')"><span class="ic">C</span> 55</button>
+    </div>
+    <div class="shop-item pkt-legendary">
+      <div class="shop-left">
+        <span class="shop-icon">✨</span>
+        <div>
+          <div class="shop-name">Legendary Packet</div>
+          <div class="shop-detail">Guaranteed ★ Legendary Blue Rose 💙✦✦✦</div>
+        </div>
+      </div>
+      <button class="btn-buy" onclick="buyPacket('legendary')"><span class="ic">C</span> 85</button>
     </div>
   </div>
 </div>
@@ -489,11 +521,15 @@ const RARITY_LABEL={common:'Common',uncommon:'Uncommon',rare:'★ Legendary'};
 const STAGE_NAMES=['🌰 Seed','🌱 Sprout','🌿 Growing','🌸 Bloomed!'];
 const STAGE_WATERS=3,MAX_STAGE=3;
 
+const PKT_COST={common:10,uncommon:30,rare:55,legendary:85};
+const PKT_LABEL={common:'Common',uncommon:'Uncommon',rare:'Rare',legendary:'✦ Legendary'};
+const PKT_ICON={common:'📦',uncommon:'🌹',rare:'💎',legendary:'✨'};
+
 let G={
-  coins:10,packets:3,seeds:[],seedId:0,
+  coins:10,pkt:{common:3,uncommon:0,rare:0,legendary:0},seeds:[],seedId:0,
   plots:Array(6).fill(0).map((_,i)=>({id:i,state:'empty',key:null,stage:0,waters:0,rewarded:false})),
   greenhouse:[],water:10,maxWater:10,pumpClicks:0,
-  bloomPlot:null,openedKey:null,plantPlot:null,
+  bloomPlot:null,openedKey:null,plantPlot:null,pendingPktType:'common',
 };
 
 function lighter(hex,a=52){
@@ -627,7 +663,8 @@ function initGame(){
 }
 function updateHUD(){
   document.getElementById('coinDisp').textContent=G.coins;
-  document.getElementById('pktDisp').textContent=G.packets;
+  const total=Object.values(G.pkt).reduce((a,b)=>a+b,0);
+  document.getElementById('pktDisp').textContent=total;
 }
 
 function renderDrops(){
@@ -725,7 +762,7 @@ function waterPlot(i){
     G.plots[i].waters=0;G.plots[i].stage++;
     if(G.plots[i].stage>=MAX_STAGE){
       G.plots[i].stage=MAX_STAGE;G.plots[i].state='bloomed';
-      if(!G.plots[i].rewarded){G.packets++;G.plots[i].rewarded=true;updateHUD();}
+      if(!G.plots[i].rewarded){G.pkt.common++;G.plots[i].rewarded=true;updateHUD();}
       setTimeout(()=>{renderGarden();confettiBurst();openBloomModal(i);},350);
     }else{
       renderGarden();
@@ -753,24 +790,31 @@ function renderTray(){
   });
 }
 
-function openPktModal(){
-  if(!G.packets){toast('No packets! Buy some in the shop 🛒',2000);return;}
+function openPktModal(type){
+  const total=Object.values(G.pkt).reduce((a,b)=>a+b,0);
+  if(!total){toast('No packets! Buy some in the shop 🛒',2000);return;}
+  // pick the type to open — prefer passed type, fallback to first available
+  const fallback=Object.keys(G.pkt).find(k=>G.pkt[k]>0)||'common';
+  G.pendingPktType=(type&&G.pkt[type]>0)?type:fallback;
   G.openedKey=null;
   const card=document.getElementById('pktCardEl');
   card.style.display='flex';
   const res=document.getElementById('pktResult');
   res.classList.remove('show');res.style.display='';
   document.getElementById('pktHint').style.display='';
-  document.getElementById('pktCountLbl').textContent=`You have ${G.packets} seed packet${G.packets!==1?'s':''}`;
+  document.getElementById('pktCardEl').querySelector('.pkt-icon').textContent=PKT_ICON[G.pendingPktType];
+  const cnt=G.pkt[G.pendingPktType];
+  document.getElementById('pktCountLbl').textContent=`${PKT_ICON[G.pendingPktType]} ${PKT_LABEL[G.pendingPktType]} Packet · You have ${cnt}`;
+  document.querySelector('#pktOverlay .sh-title').textContent=`${PKT_ICON[G.pendingPktType]} Open a ${PKT_LABEL[G.pendingPktType]} Packet`;
   openModal('pktOverlay');
 }
 function doOpenPacket(){
-  if(!G.packets) return;
+  if(!G.pkt[G.pendingPktType]) return;
   const card=document.getElementById('pktCardEl');
   card.classList.add('shaking');
   setTimeout(()=>{
-    G.packets--;updateHUD();
-    G.openedKey=weightedRandom();
+    G.pkt[G.pendingPktType]--;updateHUD();
+    G.openedKey=weightedRandom(G.pendingPktType);
     const f=FLOWERS[G.openedKey];
     card.style.display='none';
     document.getElementById('pktHint').style.display='none';
@@ -893,20 +937,29 @@ function openGhModal(){
 }
 
 function openShopModal(){openModal('shopOverlay');}
-function buyPacket(){
-  if(G.coins<10){toast('Not enough coins! Sell some flowers 💰',2000);return;}
-  G.coins-=10;G.packets++;updateHUD();closeModal('shopOverlay');toast('Seed packet bought! 📦',1500);
+function buyPacket(type){
+  const cost=PKT_COST[type];
+  if(G.coins<cost){toast(`Need ${cost} coins for a ${PKT_LABEL[type]} Packet! 💰`,2000);return;}
+  G.coins-=cost;G.pkt[type]++;updateHUD();closeModal('shopOverlay');
+  toast(`${PKT_ICON[type]} ${PKT_LABEL[type]} Packet bought!`,1600);
 }
 
 function openModal(id){document.getElementById(id).classList.add('on');}
 function closeModal(id){document.getElementById(id).classList.remove('on');}
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on');}));
 
-function weightedRandom(){
-  const keys=Object.keys(FLOWERS);
-  const total=keys.reduce((s,k)=>s+FLOWERS[k].w,0);
+const PKT_POOLS={
+  common: {pinkTulip:26,redTulip:22,yellowTulip:18,redRose:14,pinkRose:9,blueRose:3},
+  uncommon:{redRose:48,pinkRose:40,blueRose:6},
+  rare:   {redRose:32,pinkRose:28,blueRose:35},
+  legendary:{blueRose:1},
+};
+function weightedRandom(type='common'){
+  const pool=PKT_POOLS[type]||PKT_POOLS.common;
+  const keys=Object.keys(pool);
+  const total=keys.reduce((s,k)=>s+pool[k],0);
   let r=Math.random()*total;
-  for(const k of keys){r-=FLOWERS[k].w;if(r<=0)return k;}
+  for(const k of keys){r-=pool[k];if(r<=0)return k;}
   return keys.at(-1);
 }
 
