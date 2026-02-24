@@ -975,7 +975,7 @@ function openBloomModal(i){
   document.getElementById('bloomTitle').textContent=`${f.name} is fully bloomed! 🎉`;
   document.getElementById('bloomSub').textContent=
     f.rarity==='rare'
-      ?'💙 A legendary Blue Rose — incredibly rare and gorgeous! ✨'
+      ?`💙 A legendary ${f.name} — incredibly rare and gorgeous! ✨`
       :f.rarity==='uncommon'
         ?`Your ${f.name.toLowerCase()} is absolutely stunning! 💕`
         :`Beautiful! Your ${f.name.toLowerCase()} is glowing! 🌸`;
@@ -1014,7 +1014,7 @@ function openGhModal(){
     const uniq=new Set(G.greenhouse.map(({key})=>key)).size;
     stats.innerHTML=`
       <span class="gh-stat">🌸 ${total} saved</span>
-      <span class="gh-stat">🌈 ${uniq}/6 types</span>
+      <span class="gh-stat">🌈 ${uniq} unique</span>
       ${rares?`<span class="gh-stat">💙 ${rares} legendary</span>`:''}
     `;
     G.greenhouse.forEach(({key})=>{
