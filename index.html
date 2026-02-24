@@ -115,38 +115,18 @@
       gap:10px;padding:8px 11px;max-width:480px;margin:0 auto;width:100%;
     }
     .plot{
-      aspect-ratio:.88;border-radius:12px 12px 22px 22px;cursor:pointer;position:relative;
+      aspect-ratio:.88;border-radius:18px;cursor:pointer;position:relative;
       overflow:hidden;touch-action:manipulation;transition:transform .13s;
-      box-shadow:0 6px 22px rgba(0,0,0,.22);
-      display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
-      /* Terra cotta pot: dark soil top → rim → clay body */
-      background:linear-gradient(to bottom,
-        #3e2723 0%,#4e342e 26%,
-        #e8704a 28%,#bf5635 31%,
-        #c45228 55%,#a8400f 100%);
+      box-shadow:0 4px 18px rgba(0,0,0,.16);
+      background:linear-gradient(160deg,#fef2f2 0%,#fde8ef 100%);
     }
+    .pot-svg{position:absolute;inset:0;width:100%;height:100%;display:block;}
     .plot:active{transform:scale(.93);}
-    .plot.has-plant{
-      background:linear-gradient(to bottom,
-        #1b0f0a 0%,#2e1a10 24%,
-        #e8704a 26%,#bf5635 29%,
-        #c45228 54%,#a8400f 100%);
-    }
-    .plot.bloomed{
-      background:linear-gradient(to bottom,
-        #0d2b0d 0%,#1a4a1a 20%,
-        #e8704a 22%,#bf5635 25%,
-        #c45228 52%,#a8400f 100%);
-      animation:bloomGlow 2.4s ease-in-out infinite;
-    }
+    .plot.bloomed{animation:bloomGlow 2.4s ease-in-out infinite;}
     @keyframes bloomGlow{
-      0%,100%{box-shadow:0 6px 22px rgba(0,0,0,.22);}
-      50%{box-shadow:0 6px 40px rgba(233,30,99,.62),0 0 0 3px rgba(232,112,74,.35);}
+      0%,100%{box-shadow:0 4px 18px rgba(0,0,0,.16);}
+      50%{box-shadow:0 4px 38px rgba(233,30,99,.65);}
     }
-    .plot-plus{font-size:2em;color:rgba(255,255,255,.38);margin-bottom:14px;}
-    .empty-hint{font-size:.48em;color:rgba(255,255,255,.45);margin-bottom:8px;text-align:center;}
-    .plot-fl{width:78%;max-height:74%;display:flex;align-items:flex-end;justify-content:center;flex:1;padding-top:4px;}
-    .plot-fl svg{width:100%;height:100%;}
     .prog-wrap{position:absolute;bottom:20px;left:8px;right:8px;}
     .prog-bg{height:4px;background:rgba(0,0,0,.18);border-radius:2px;overflow:hidden;}
     .prog-fill{height:100%;background:linear-gradient(90deg,#a5d6a7,#66bb6a);border-radius:2px;transition:width .55s ease;}
@@ -802,31 +782,100 @@ function renderGarden(){
   grid.innerHTML='';
   G.plots.forEach((p,i)=>grid.appendChild(buildPlotCard(p,i)));
 }
+function potCardSVG(p){
+  // Terra cotta colours
+  const rH='#e8724e',rM='#c9522a',rD='#a83e18';
+  const bM='#c24e26',bS='#7a3010';
+  const sl='#4e342e',sm='#3e2723',sd='#2a1810';
+
+  // Flower nested into upper 64px of the 103-tall viewBox
+  let flPart='';
+  if(p.state!=='empty'){
+    const stage=p.state==='bloomed'?MAX_STAGE:p.stage;
+    const fsvg=flowerSVG(p.key,stage);
+    flPart=fsvg.replace(/^<svg /,'<svg x="7" y="0" width="66" height="64" ');
+  } else {
+    flPart=`<text x="40" y="42" text-anchor="middle" font-size="19"
+      fill="rgba(175,100,55,.42)" font-weight="bold">+</text>
+      <text x="40" y="54" text-anchor="middle" font-size="6.5"
+      fill="rgba(175,100,55,.38)" font-weight="bold">tap to plant</text>`;
+  }
+
+  // Progress bar (growing/bloomed states)
+  let barEl='';
+  if(p.state!=='empty'){
+    const totalSteps=MAX_STAGE*STAGE_WATERS;
+    const doneSteps=p.stage*STAGE_WATERS+p.waters;
+    const barPct=p.state==='bloomed'?100:Math.round(doneSteps/totalSteps*100);
+    const barW=Math.round(barPct*50/100);
+    barEl=`<rect x="15" y="93.5" width="50" height="3" rx="1.5" fill="rgba(0,0,0,.2)"/>
+      <rect x="15" y="93.5" width="${barW}" height="3" rx="1.5" fill="#81c784"/>`;
+  }
+
+  // Stage / name label
+  const labelTxt=p.state==='empty'?''
+    :p.state==='bloomed'?'\u2728 '+FLOWERS[p.key].name
+    :STAGE_NAMES[p.stage];
+  const labelEl=labelTxt
+    ?`<text x="40" y="99.5" text-anchor="middle" font-size="5.5"
+        fill="rgba(255,255,255,.95)" font-weight="bold">${labelTxt}</text>`
+    :'';
+
+  // Pips (watering progress dots)
+  let pipEls='';
+  if(p.state==='growing'){
+    for(let w=0;w<STAGE_WATERS;w++){
+      const cx=52+w*8,on=w<p.waters;
+      pipEls+=`<circle cx="${cx}" cy="9" r="4"
+        fill="${on?'#64b5f6':'rgba(255,255,255,.3)'}"
+        filter="drop-shadow(0 1px 2px rgba(0,0,0,.4))"/>`;
+    }
+  }
+
+  // Rare/legendary crown badge
+  const crownEl=p.state!=='empty'&&FLOWERS[p.key].rarity==='rare'
+    ?`<rect x="4" y="3" width="22" height="13" rx="3" fill="rgba(25,118,210,.86)"/>
+      <text x="15" y="12.5" text-anchor="middle" font-size="6.5"
+        fill="#fff" font-weight="bold">\u2605 L</text>`
+    :'';
+
+  return `<svg class="pot-svg" viewBox="0 0 80 103"
+    fill="none" xmlns="http://www.w3.org/2000/svg">
+    ${flPart}
+    ${pipEls}
+    ${crownEl}
+    <!-- Rim top highlight -->
+    <rect x="8" y="59" width="64" height="4" rx="2.5" fill="${rH}"/>
+    <!-- Rim main body -->
+    <rect x="8" y="61" width="64" height="9" rx="3.5" fill="${rM}"/>
+    <!-- Rim underside shadow -->
+    <rect x="9" y="67" width="62" height="3" rx="2" fill="${rD}" opacity=".5"/>
+    <!-- Pot body (trapezoid) -->
+    <path d="M13 70 L11 90 Q11 96 19 96 L61 96 Q69 96 69 90 L67 70 Z" fill="${bM}"/>
+    <!-- Left shine stripe -->
+    <path d="M17 70 L15 87 Q15 91 17.5 92.5"
+      stroke="rgba(255,210,170,.26)" stroke-width="3"
+      fill="none" stroke-linecap="round"/>
+    <!-- Right shade stripe -->
+    <path d="M63 70 L65 87 Q65 91 62.5 92.5"
+      stroke="rgba(0,0,0,.13)" stroke-width="2.5"
+      fill="none" stroke-linecap="round"/>
+    <!-- Dark base band -->
+    <path d="M11 89 L11 90 Q11 96 19 96 L61 96 Q69 96 69 90 L69 89 Z" fill="${bS}"/>
+    <!-- Soil surface layers -->
+    <ellipse cx="40" cy="66" rx="28" ry="7.5" fill="${sl}"/>
+    <ellipse cx="40" cy="64" rx="25" ry="6"   fill="${sm}"/>
+    <ellipse cx="40" cy="63" rx="20" ry="4.5" fill="${sd}"/>
+    ${barEl}
+    ${labelEl}
+  </svg>`;
+}
+
 function buildPlotCard(p,i){
   const div=document.createElement('div');
-  div.className='plot'+(p.state==='empty'?'':(p.state==='bloomed'?' bloomed':' has-plant'));
+  div.className='plot'+(p.state==='bloomed'?' bloomed':p.state==='growing'?' has-plant':'');
   div.onclick=()=>clickPlot(i);
-  if(p.state==='empty'){
-    div.innerHTML='<div class="plot-plus">＋</div><div class="empty-hint">tap to plant</div>';
-    return div;
-  }
-  const f=FLOWERS[p.key];
-  let pips='<div class="plot-pips">';
-  for(let w=0;w<STAGE_WATERS;w++) pips+=`<div class="pip ${w<p.waters?'on':'off'}"></div>`;
-  pips+='</div>';
-  const crown=f.rarity==='rare'?'<div class="rare-crown">★ L</div>':'';
-  const stageLabel=p.state==='bloomed'?`✨ ${f.name}`:STAGE_NAMES[p.stage];
-  const totalSteps=MAX_STAGE*STAGE_WATERS;
-  const doneSteps=p.stage*STAGE_WATERS+p.waters;
-  const barPct=p.state==='bloomed'?100:Math.round(doneSteps/totalSteps*100);
-  div.innerHTML=`
-    ${pips}${crown}
-    <div class="plot-fl">${flowerSVG(p.key,p.stage)}</div>
-    <div class="prog-wrap">
-      <div class="prog-bg"><div class="prog-fill" style="width:${barPct}%"></div></div>
-    </div>
-    <div class="plot-stage">${stageLabel}</div>
-  `;
+  div.innerHTML=potCardSVG(p);
   return div;
 }
 function clickPlot(i){
