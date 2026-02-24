@@ -280,15 +280,33 @@
     .gh-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
     .gh-card{
       aspect-ratio:.88;border-radius:16px;display:flex;flex-direction:column;
-      align-items:center;justify-content:flex-end;padding-bottom:8px;
-      position:relative;overflow:hidden;
+      align-items:center;justify-content:flex-end;padding-bottom:0;
+      position:relative;overflow:hidden;cursor:pointer;touch-action:manipulation;
+      transition:transform .13s;
     }
+    .gh-card:active{transform:scale(.93);}
     .gh-card.common  {background:linear-gradient(to bottom,#c8e6c9,#a5d6a7 38%,#8d6e63 68%,#5d4037);}
     .gh-card.uncommon{background:linear-gradient(to bottom,#f8bbd0,#f48fb1 38%,#8d6e63 68%,#5d4037);}
     .gh-card.rare    {background:linear-gradient(to bottom,#c5cae9,#9fa8da 38%,#8d6e63 68%,#5d4037);animation:rarePulse 2s alternate infinite;}
-    .gh-fl{width:80%;flex:1;display:flex;align-items:flex-end;justify-content:center;padding-top:4px;}
+    .gh-fl{width:100%;flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;}
     .gh-fl svg{width:100%;height:100%;}
-    .gh-name{font-size:.48em;color:rgba(255,255,255,.98);font-weight:bold;text-shadow:0 1px 4px rgba(0,0,0,.65);text-align:center;padding:0 4px;}
+    .gh-name{font-size:.48em;color:rgba(255,255,255,.98);font-weight:bold;text-shadow:0 1px 4px rgba(0,0,0,.65);text-align:center;padding:0 4px 2px;}
+    .gh-sell-bar{
+      width:100%;background:rgba(0,0,0,.38);backdrop-filter:blur(4px);
+      display:flex;align-items:center;justify-content:center;gap:4px;
+      padding:5px 4px;font-size:.52em;font-weight:bold;color:#ffe082;
+      border-top:1px solid rgba(255,255,255,.12);
+    }
+    /* gh sell confirm sheet */
+    .ghsc-flower{width:80px;height:96px;flex-shrink:0;}
+    .ghsc-info{flex:1;min-width:0;}
+    .ghsc-name{font-weight:bold;color:#333;font-size:1em;}
+    .ghsc-rarity{font-size:.78em;margin-top:3px;}
+    .ghsc-row{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+    .ghsc-btns{display:flex;gap:10px;}
+    .ghsc-btns .btn-sell{flex:1;padding:13px 10px;}
+    .btn-keep{flex:1;background:#f5f5f5;color:#555;border:none;border-radius:50px;
+      padding:13px 10px;font-size:.95em;font-weight:bold;cursor:pointer;touch-action:manipulation;}
     .gh-slot-empty{
       border:2px dashed #e0e0e0;border-radius:16px;aspect-ratio:.88;
       display:flex;align-items:center;justify-content:center;color:#ddd;font-size:1.5em;
@@ -463,6 +481,27 @@
     <div class="sh-title">🌿 Yurie's Greenhouse</div>
     <div class="gh-stats" id="ghStats"></div>
     <div class="gh-grid"  id="ghGrid"></div>
+  </div>
+</div>
+
+<!-- GREENHOUSE SELL CONFIRM -->
+<div class="overlay" id="ghSellOverlay">
+  <div class="sheet">
+    <button class="sh-close" onclick="closeModal('ghSellOverlay')">✕</button>
+    <div class="sh-handle"></div>
+    <div class="sh-title">🌸 Sell Flower?</div>
+    <div class="ghsc-row">
+      <div class="ghsc-flower" id="ghscFlower"></div>
+      <div class="ghsc-info">
+        <div class="ghsc-name" id="ghscName"></div>
+        <div class="ghsc-rarity" id="ghscRarity"></div>
+        <div style="margin-top:6px;font-size:.82em;color:#888" id="ghscPrice"></div>
+      </div>
+    </div>
+    <div class="ghsc-btns">
+      <button class="btn-keep" onclick="closeModal('ghSellOverlay')">Keep 🌿</button>
+      <button class="btn-sell" id="ghscSellBtn">💰 Sell</button>
+    </div>
   </div>
 </div>
 
@@ -1102,11 +1141,16 @@ function openGhModal(){
       <span class="gh-stat">🌈 ${uniq} unique</span>
       ${rares?`<span class="gh-stat">💙 ${rares} legendary</span>`:''}
     `;
-    G.greenhouse.forEach(({key})=>{
+    G.greenhouse.forEach(({key},idx)=>{
       const f=FLOWERS[key];
       const card=document.createElement('div');
       card.className=`gh-card ${f.rarity}`;
-      card.innerHTML=`<div class="gh-fl">${flowerSVG(key,MAX_STAGE)}</div><div class="gh-name">${f.name}</div>`;
+      card.innerHTML=`
+        <div class="gh-fl">${flowerSVG(key,MAX_STAGE)}</div>
+        <div class="gh-name">${f.name}</div>
+        <div class="gh-sell-bar"><span class="ic" style="width:13px;height:13px;font-size:.7em">C</span>${f.sell} &nbsp;·&nbsp; tap to sell</div>
+      `;
+      card.onclick=()=>openGhSell(idx);
       grid.appendChild(card);
     });
     const slots=Math.max(9,Math.ceil(G.greenhouse.length/3)*3);
@@ -1115,6 +1159,31 @@ function openGhModal(){
     }
   }
   openModal('ghOverlay');
+}
+
+function openGhSell(idx){
+  const {key}=G.greenhouse[idx];
+  const f=FLOWERS[key];
+  document.getElementById('ghscFlower').innerHTML=flowerSVG(key,MAX_STAGE);
+  document.getElementById('ghscName').textContent=f.name;
+  const rl=document.getElementById('ghscRarity');
+  rl.textContent=RARITY_LABEL[f.rarity]+(f.rarity==='rare'?' ❆❆❆':'');
+  rl.style.color=f.rarity==='rare'?'#3949ab':f.rarity==='uncommon'?'#7b1fa2':'#888';
+  document.getElementById('ghscPrice').innerHTML=`Sell for &nbsp;<span class="ic" style="width:14px;height:14px">C</span><strong>${f.sell}</strong>`;
+  const btn=document.getElementById('ghscSellBtn');
+  btn.innerHTML=`💰 Sell for <span class="ic" style="width:13px;height:13px">C</span>${f.sell}`;
+  btn.onclick=()=>sellFromGreenhouse(idx);
+  openModal('ghSellOverlay');
+}
+
+function sellFromGreenhouse(idx){
+  const {key}=G.greenhouse[idx];
+  const f=FLOWERS[key];
+  G.greenhouse.splice(idx,1);
+  G.coins+=f.sell;updateHUD();saveG();
+  closeModal('ghSellOverlay');
+  openGhModal();
+  toast(`Sold ${f.name} for ${f.sell} coins! 💰`,2000);
 }
 
 function openJournalModal(){
