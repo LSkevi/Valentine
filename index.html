@@ -28,20 +28,19 @@
       box-shadow:0 2px 18px rgba(0,0,0,.09);position:sticky;top:0;z-index:20;
     }
     .top-row-stats{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
-    .top-row-btns{display:flex;align-items:center;gap:5px;overflow-x:auto;scrollbar-width:none;
-      -webkit-overflow-scrolling:touch;padding-bottom:2px;}
-    .top-row-btns::-webkit-scrollbar{display:none;}
+    .top-row-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding-bottom:2px;}
     .stat-pill{
       background:linear-gradient(135deg,#fce4ec,#f8bbd0);border-radius:20px;
       padding:6px 11px;font-size:.85em;font-weight:bold;color:#c2185b;
       display:flex;align-items:center;gap:4px;white-space:nowrap;
     }
     .tbtn{
-      border:none;border-radius:20px;padding:8px 12px;font-size:.78em;
+      border:none;border-radius:20px;padding:8px 4px;font-size:.72em;
       font-weight:bold;cursor:pointer;touch-action:manipulation;
       transition:transform .12s;white-space:nowrap;
+      text-align:center;overflow:hidden;text-overflow:ellipsis;width:100%;
     }
-    .tbtn:active{transform:scale(.92);}
+    .tbtn:active,.tbtn.tapped{transform:scale(.92);}
     .tbtn-open   {background:linear-gradient(135deg,#ce93d8,#ab47bc);color:#fff;}
     .tbtn-house  {background:linear-gradient(135deg,#a5d6a7,#43a047);color:#fff;}
     .tbtn-shop   {background:linear-gradient(135deg,#ffe082,#ffa000);color:#fff;}
@@ -1336,20 +1335,24 @@ function openModal(id){
   if(id!=='pktOverlay') G.opening=false;
 }
 function closeModal(id){document.getElementById(id).classList.remove('on');}
-// Backdrop tap closes modal — click only (no touchend), guarded so a tap that opens
-// the modal can't immediately close it in the same gesture
+// Backdrop dismiss — handles both click (desktop) and touchstart (mobile)
+function _backdropDismiss(o, e){
+  if(e.target!==o) return;
+  if(Date.now()-_modalOpenTime<900) return; // guard: ignore touches right after open
+  e.preventDefault();
+  o.classList.remove('on');
+  if(o.id==='pktOverlay') G.opening=false;
+}
 document.querySelectorAll('.overlay').forEach(o=>{
-  o.addEventListener('click',e=>{
-    if(e.target!==o) return;
-    if(Date.now()-_modalOpenTime<700) return;
-    o.classList.remove('on');
-    if(o.id==='pktOverlay') G.opening=false;
-  });
+  o.addEventListener('click',     e=>_backdropDismiss(o,e));
+  o.addEventListener('touchstart',e=>_backdropDismiss(o,e),{passive:false});
 });
 // gh-confirm backdrop dismiss
-document.getElementById('ghConfirm').addEventListener('click',e=>{
-  if(e.target===document.getElementById('ghConfirm')) closeGhConfirm();
-});
+function _dismissGhConfirm(e){
+  if(e.target===document.getElementById('ghConfirm')){e.preventDefault();closeGhConfirm();}
+}
+document.getElementById('ghConfirm').addEventListener('click',     _dismissGhConfirm);
+document.getElementById('ghConfirm').addEventListener('touchstart',_dismissGhConfirm,{passive:false});
 
 const PKT_POOLS={
   common:   {pinkTulip:30,redTulip:26,yellowTulip:22,purpleViolet:20,blueViolet:18,purpleIris:14,yellowDaffodil:18,whiteDaisy:20,yellowDaisy:16,pinkDaisy:12,sunflower:5,lavender:4,whiteTulip:4,redRose:6,pinkRose:3,redPoppy:3,cherryBlossom:2,blueRose:1,blueTulip:1},
@@ -1430,27 +1433,32 @@ function weightedRandom(type='common'){
   svg.addEventListener('pointercancel',()=>{tracking=false;});
 })();
 
-// ── Wire top-bar buttons: touchend+click for max iOS reliability ─────────────
+// ── Wire top-bar buttons via touchstart (most reliable on iOS) ─────────────
+// touchstart+preventDefault fires IMMEDIATELY, kills the 300ms delay,
+// kills ghost clicks, AND prevents scroll-detection interference.
+// onclick stays on the element as the PC/desktop fallback.
 (function wireBtns(){
-  function wire(id, fn){
+  const MAP={
+    btnOpenPkt: openPktModal,
+    btnJournal: openJournalModal,
+    btnGarden:  openGhModal,
+    btnShop:    openShopModal,
+  };
+  Object.entries(MAP).forEach(([id,fn])=>{
     const el=document.getElementById(id);
     if(!el) return;
-    let _touched=false;
-    el.addEventListener('touchend',function(e){
-      e.preventDefault(); // kill ghost click
-      _touched=true;
+    // Restore onclick for PC
+    el.onclick=fn;
+    // touchstart for iOS — fires before any scroll detection, preventDefault
+    // kills both the ghost click and any scroll-gesture interpretation
+    el.addEventListener('touchstart',function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      this.classList.add('tapped');
+      setTimeout(()=>this.classList.remove('tapped'),150);
       fn();
-      setTimeout(()=>{_touched=false;},600);
     },{passive:false});
-    el.addEventListener('click',function(){
-      if(_touched) return;
-      fn();
-    });
-  }
-  wire('btnOpenPkt', openPktModal);
-  wire('btnJournal', openJournalModal);
-  wire('btnGarden',  openGhModal);
-  wire('btnShop',    openShopModal);
+  });
 })();
 function toast(msg,ms=2000){
   const el=document.getElementById('toast');
