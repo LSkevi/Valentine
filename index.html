@@ -63,6 +63,7 @@
     .jnl-badge.uncommon {background:#e8f5e9;color:#2e7d32;}
     .jnl-badge.rare     {background:#e3f2fd;color:#1565c0;}
     .jnl-badge.legendary{background:#fff8e1;color:#e65100;}
+    .jnl-badge.unique{background:linear-gradient(135deg,#e91e63,#9c27b0);color:#fff;}
     .garden-header{text-align:center;padding:12px 16px 4px;}
     .garden-header h2{font-size:clamp(1em,4vw,1.45em);color:#c2185b;}
     .garden-header p{font-size:.78em;color:#aaa;margin-top:3px;}
@@ -81,7 +82,7 @@
     .valve-svg:active{cursor:grabbing;filter:drop-shadow(0 2px 14px rgba(198,40,40,.8));}
     .valve-label{font-size:.58em;color:#c62828;font-weight:bold;margin-top:3px;white-space:nowrap;}
     .valve-prog-bg{width:66px;height:6px;background:#f5f5f5;border-radius:3px;overflow:hidden;margin-top:4px;border:1px solid #eee;}
-    .valve-prog-fill{height:100%;background:linear-gradient(90deg,#ef9a9a,#e53935);border-radius:3px;transition:width .15s;}
+    .valve-prog-fill{height:100%;background:linear-gradient(90deg,#90caf9,#1e88e5);border-radius:3px;transition:width .18s;}
     .pump-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;flex-shrink:0;}
     .pump-svg{width:68px;height:84px;filter:drop-shadow(0 3px 7px rgba(0,0,0,.2));transition:transform .1s;}
     .pump-wrap:active .pump-svg{transform:scale(.93);}
@@ -146,6 +147,8 @@
     .seed-chip.uncommon{background:linear-gradient(135deg,#f3e5f5,#ce93d8);}
     .seed-chip.rare    {background:linear-gradient(135deg,#e3f2fd,#c5cae9);border-color:#7986cb;animation:rareChip 2s alternate infinite;}
     .seed-chip.legendary{background:linear-gradient(135deg,#fff8e1,#ffe0b2);border-color:#ff8f00;animation:rareChip 2s alternate infinite;}
+    .seed-chip.unique{background:linear-gradient(135deg,#fce4ec,#f3e5f5,#e8f5e9,#e3f2fd);border-color:#e91e63;border-width:2.5px;animation:uniqueChip 2s alternate infinite;}
+    @keyframes uniqueChip{from{box-shadow:0 0 6px rgba(233,30,99,.5),0 0 0 rgba(255,255,255,0)}to{box-shadow:0 0 22px rgba(233,30,99,.9),0 0 36px rgba(255,255,255,.6)}}
     @keyframes rareChip{from{box-shadow:0 2px 8px rgba(57,73,171,.3)}to{box-shadow:0 2px 22px rgba(123,31,162,.75)}}
     .chip-svg{width:32px;height:38px;}
     .chip-name{font-size:.5em;color:#555;text-align:center;margin-top:2px;line-height:1.2;}
@@ -219,6 +222,7 @@
     .res-rarity.uncommon{background:linear-gradient(135deg,#ab47bc,#7b1fa2);}
     .res-rarity.rare    {background:linear-gradient(135deg,#3949ab,#7b1fa2);animation:rarePulse 1s alternate infinite;}
     .res-rarity.legendary{background:linear-gradient(135deg,#ff8f00,#e65100);animation:rarePulse 1s alternate infinite;}
+    .res-rarity.unique{background:linear-gradient(135deg,#e91e63,#9c27b0,#3f51b5);animation:uniquePulse 1s alternate infinite;}
     @keyframes rarePulse{from{box-shadow:0 0 8px rgba(57,73,171,.5)}to{box-shadow:0 0 28px rgba(123,31,162,1)}}
     .res-msg{color:#aaa;font-size:.82em;text-align:center;max-width:260px;}
     .btn-collect{
@@ -237,6 +241,8 @@
     .plant-row.uncommon{background:linear-gradient(135deg,#f3e5f5,#ce93d8);}
     .plant-row.rare    {background:linear-gradient(135deg,#e3f2fd,#c5cae9);animation:rarePulse 2s alternate infinite;}
     .plant-row.legendary{background:linear-gradient(135deg,#fff8e1,#ffe0b2);animation:rarePulse 2s alternate infinite;}
+    .plant-row.unique{background:linear-gradient(135deg,#fce4ec,#f3e5f5,#e8f5e9,#e3f2fd);animation:uniquePulse 1.5s alternate infinite;}
+    @keyframes uniquePulse{from{box-shadow:0 2px 8px rgba(233,30,99,.4)}to{box-shadow:0 2px 28px rgba(233,30,99,.9)}}
     .pr-svg{width:44px;height:52px;flex-shrink:0;}
     .pr-info{flex:1;min-width:0;}
     .pr-name{font-weight:bold;color:#333;font-size:.9em;}
@@ -247,6 +253,7 @@
     .pr-badge.uncommon{background:linear-gradient(135deg,#ab47bc,#7b1fa2);}
     .pr-badge.rare      {background:linear-gradient(135deg,#3949ab,#7b1fa2);}
     .pr-badge.legendary {background:linear-gradient(135deg,#ff8f00,#e65100);}
+    .pr-badge.unique    {background:linear-gradient(135deg,#e91e63,#9c27b0);color:#fff;}
     .bloom-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:4px 0 0;}
     .bloom-fl{width:clamp(80px,22vw,110px);height:clamp(96px,26vw,132px);animation:floatBloom 2.5s ease-in-out infinite;flex-shrink:0;}
     @keyframes floatBloom{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-13px) rotate(3deg)}}
@@ -282,6 +289,7 @@
     .gh-row.uncommon{background:linear-gradient(135deg,#f3e5f5,#ce93d8);}
     .gh-row.rare    {background:linear-gradient(135deg,#e3f2fd,#c5cae9);}
     .gh-row.legendary{background:linear-gradient(135deg,#fff8e1,#ffe0b2);}
+    .gh-row.unique{background:linear-gradient(135deg,#fce4ec,#f3e5f5,#e8f5e9,#e3f2fd);animation:uniquePulse 2s alternate infinite;}
     .gh-row-svg{width:48px;height:58px;flex-shrink:0;}
     .gh-row-info{flex:1;min-width:0;}
     .gh-row-name{font-weight:bold;color:#333;font-size:.9em;}
@@ -292,6 +300,7 @@
     .gh-row-badge.uncommon{background:linear-gradient(135deg,#ab47bc,#7b1fa2);}
     .gh-row-badge.rare    {background:linear-gradient(135deg,#3949ab,#7b1fa2);}
     .gh-row-badge.legendary{background:linear-gradient(135deg,#ff8f00,#e65100);}
+    .gh-row-badge.unique{background:linear-gradient(135deg,#e91e63,#9c27b0);}
     .gh-empty{text-align:center;color:#ccc;padding:32px 16px;font-size:.88em;line-height:1.7;}
     /* sell confirm panel (inline, inside same sheet) */
     .gh-confirm{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;
@@ -329,7 +338,7 @@
       cursor:pointer;touch-action:manipulation;white-space:nowrap;
     }
     .toast{
-      position:fixed;top:68px;left:50%;transform:translateX(-50%) translateY(-14px);
+      position:fixed;bottom:calc(160px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(14px);
       background:rgba(28,28,28,.88);color:#fff;padding:9px 20px;
       border-radius:22px;font-size:.86em;z-index:400;opacity:0;
       transition:opacity .25s,transform .25s;pointer-events:none;
@@ -409,7 +418,7 @@
         <!-- shine -->
         <ellipse cx="38" cy="20" rx="5" ry="3" fill="rgba(255,255,255,.18)" transform="rotate(-30,38,20)"/>
       </svg>
-      <div class="valve-label" id="valveLabel">Spin for seeds!</div>
+      <div class="valve-label" id="valveLabel">Spin for water! 💧</div>
       <div class="valve-prog-bg"><div class="valve-prog-fill" id="valveProgFill" style="width:0%"></div></div>
     </div>
     <div class="pump-wrap" id="pumpBtn" onclick="pumpClick()">
@@ -598,7 +607,7 @@ const FLOWERS = {
   yellowTulip:   {name:'Yellow Tulip',    kind:'tulip',    rarity:'common',   w:24,petal:'#fdd835',stem:'#66bb6a',sell:6 },
   purpleViolet:  {name:'Purple Violet',   kind:'violet',   rarity:'common',   w:20,petal:'#7e57c2',stem:'#66bb6a',sell:5 },
   blueViolet:    {name:'Blue Violet',     kind:'violet',   rarity:'common',   w:18,petal:'#5c6bc0',stem:'#66bb6a',sell:5 },
-  whiteLily:     {name:'White Lily',      kind:'lily',     rarity:'common',   w:16,petal:'#f5f5f5',stem:'#66bb6a',sell:6 },
+  whiteLily:     {name:'White Lily',      kind:'lily',     rarity:'unique',   w:1, petal:'#f5f5f5',stem:'#66bb6a',sell:200},
   purpleIris:    {name:'Purple Iris',     kind:'iris',     rarity:'common',   w:14,petal:'#9c27b0',stem:'#66bb6a',sell:6 },
   yellowDaffodil:{name:'Yellow Daffodil', kind:'daffodil', rarity:'common',   w:18,petal:'#fff176',stem:'#66bb6a',sell:6 },
   whiteDaisy:    {name:'White Daisy',     kind:'daisy',    rarity:'common',   w:22,petal:'#f5f5f5',stem:'#66bb6a',sell:5 },
@@ -643,7 +652,7 @@ const FLOWERS = {
   pinkOrchid:    {name:'Pink Orchid',     kind:'orchid',   rarity:'legendary',w:2, petal:'#f06292',stem:'#33691e',sell:85},
   blueOrchid:    {name:'Blue Orchid',     kind:'orchid',   rarity:'legendary',w:1, petal:'#42a5f5',stem:'#1b5e20',sell:90},
 };
-const RARITY_LABEL={common:'Common',uncommon:'Uncommon',rare:'★ Rare',legendary:'✦ Legendary'};
+const RARITY_LABEL={common:'Common',uncommon:'Uncommon',rare:'★ Rare',legendary:'✦ Legendary',unique:'◆ Unique'};
 const STAGE_NAMES=['🌰 Seed','🌱 Sprout','🌿 Growing','🌸 Bloomed!'];
 const STAGE_WATERS=3,MAX_STAGE=3;
 
@@ -701,7 +710,7 @@ function darker(hex,a=44){
 function flowerSVG(key,stage){
   const f=FLOWERS[key],p=f.petal,S=f.stem;
   const pl=lighter(p),pll=lighter(p,85),pd=darker(p),SD=darker(S,25);
-  const rare=f.rarity==='rare';
+  const rare=f.rarity==='rare'||f.rarity==='unique';
   if(stage===0) return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">
     <ellipse cx="30" cy="95" rx="14" ry="4" fill="#6d4c41" opacity=".3"/>
     <path d="M30 93 Q26 78 28 64 Q30 70 32 64 Q34 78 30 93" fill="${S}"/>
@@ -961,7 +970,11 @@ function potCardSVG(p){
 
   // Rare/legendary crown badge
   const _rar=p.state!=='empty'?FLOWERS[p.key].rarity:'';
-  const crownEl=_rar==='legendary'
+  const crownEl=_rar==='unique'
+    ?`<rect x="4" y="3" width="22" height="13" rx="3" fill="rgba(233,30,99,.92)"/>
+      <text x="15" y="12.5" text-anchor="middle" font-size="6.5"
+        fill="#fff" font-weight="bold">\u25c6 U</text>`
+    :_rar==='legendary'
     ?`<rect x="4" y="3" width="22" height="13" rx="3" fill="rgba(230,81,0,.88)"/>
       <text x="15" y="12.5" text-anchor="middle" font-size="6.5"
         fill="#fff" font-weight="bold">\u2726 L</text>`
@@ -1125,11 +1138,13 @@ function selectPktType(type){
         uncommon:'A beautiful find — how wonderful! 💕',
         rare:`✨ A rare ${f.name}! A stunning bloom, so hard to find! ✨`,
         legendary:`🌟 OH WOW! A legendary ${f.name}! One of the rarest flowers — just like you, one of a kind! 🌟`,
+        unique:`💎 UNBELIEVABLE! A WHITE LILY — the UNIQUE flower! Only one in the entire garden. You are truly one of a kind! 🌟💎`,
       };
       document.getElementById('resMsg').textContent=msgs[f.rarity]||'A beautiful flower! 🌸';
       document.getElementById('pktResult').classList.add('show');
       G.opening=false;
-      if(f.rarity==='legendary') multiSparkle();
+      if(f.rarity==='legendary'||f.rarity==='unique'){multiSparkle();}
+      if(f.rarity==='unique') confettiBurst();
       else spawnSparkle(window.innerWidth/2,window.innerHeight*.4,'✨');
     },540);
   },100);
@@ -1182,7 +1197,9 @@ function openBloomModal(i){
   document.getElementById('bloomFlEl').innerHTML=flowerSVG(G.plots[i].key,MAX_STAGE);
   document.getElementById('bloomTitle').textContent=`${f.name} is fully bloomed! 🎉`;
   document.getElementById('bloomSub').textContent=
-    f.rarity==='rare'
+    f.rarity==='unique'
+      ?`💎 The rarest flower in existence — your White Lily is in full bloom! ✨ Truly one of a kind!`
+      :f.rarity==='rare'
       ?`💙 A legendary ${f.name} — incredibly rare and gorgeous! ✨`
       :f.rarity==='uncommon'
         ?`Your ${f.name.toLowerCase()} is absolutely stunning! 💕`
@@ -1335,10 +1352,10 @@ document.getElementById('ghConfirm').addEventListener('click',e=>{
 });
 
 const PKT_POOLS={
-  common:   {pinkTulip:30,redTulip:26,yellowTulip:22,purpleViolet:20,blueViolet:18,whiteLily:16,purpleIris:14,yellowDaffodil:18,whiteDaisy:20,yellowDaisy:16,pinkDaisy:12,sunflower:5,lavender:4,whiteTulip:4,redRose:6,pinkRose:3,redPoppy:3,cherryBlossom:2,blueRose:1,blueTulip:1},
+  common:   {pinkTulip:30,redTulip:26,yellowTulip:22,purpleViolet:20,blueViolet:18,purpleIris:14,yellowDaffodil:18,whiteDaisy:20,yellowDaisy:16,pinkDaisy:12,sunflower:5,lavender:4,whiteTulip:4,redRose:6,pinkRose:3,redPoppy:3,cherryBlossom:2,blueRose:1,blueTulip:1},
   uncommon: {sunflower:22,lavender:18,whiteTulip:14,redRose:18,pinkRose:12,pinkLily:14,blueIris:12,whiteDaffodil:12,whiteViolet:10,pinkPeony:10,redPoppy:18,orangePoppy:14,cherryBlossom:16,deepCherry:10,yellowRose:10,peachRose:8,purpleRose:6,blueRose:3,blueTulip:3},
   rare:     {sunflower:8,lavender:6,redRose:12,pinkRose:10,tigerLily:12,goldenIris:10,pinkDaffodil:10,redPeony:10,purpleOrchid:10,blueRose:16,blueTulip:16,goldenRose:12,blackRose:6,blackTulip:12,silverRose:10,crystalDaisy:10,violetPoppy:10,goldenCherry:8,midnightRose:6},
-  legendary:{blueRose:25,blueTulip:25,goldenRose:20,blackRose:12,whitePeony:10,pinkOrchid:8,blueOrchid:6,blackTulip:15,silverRose:12,crystalDaisy:10,violetPoppy:10,goldenCherry:8,midnightRose:6},
+  legendary:{blueRose:25,blueTulip:25,goldenRose:20,blackRose:12,whitePeony:10,pinkOrchid:8,blueOrchid:6,blackTulip:15,silverRose:12,crystalDaisy:10,violetPoppy:10,goldenCherry:8,midnightRose:6,whiteLily:2},
 };
 function weightedRandom(type='common'){
   const pool=PKT_POOLS[type]||PKT_POOLS.common;
@@ -1354,8 +1371,14 @@ function weightedRandom(type='common'){
   const svg=document.getElementById('valveSvg');
   const lbl=document.getElementById('valveLabel');
   const bar=document.getElementById('valveProgFill');
-  const SPINS_NEEDED=5;
+  const SPINS_NEEDED=5; // kept for reference, no longer used
   let tracking=false,lastAngle=0,accumulated=0,completedSpins=0,visualRot=0;
+
+  // Init label with current water
+  (function initLabel(){
+    const l=document.getElementById('valveLabel');
+    if(l) l.textContent=G.water>=G.maxWater?'Tank full! 💧':`${G.water}/${G.maxWater} water 💧`;
+  })();
 
   function angleFrom(cx,cy,ex,ey){return Math.atan2(ey-cy,ex-cx)*180/Math.PI;}
   function center(){
@@ -1363,57 +1386,39 @@ function weightedRandom(type='common'){
     return{cx:r.left+r.width/2,cy:r.top+r.height/2};
   }
   function applyDelta(delta){
-    if(Math.abs(delta)>90) return; // ignore jumps (finger lift)
+    if(Math.abs(delta)>90) return;
     accumulated+=Math.abs(delta);
     visualRot+=delta;
     svg.style.transform=`rotate(${visualRot}deg)`;
     const newSpins=Math.floor(accumulated/360);
+    // Update progress bar: fraction of current rotation
+    const rotProgress=(accumulated%360)/360;
+    bar.style.width=(rotProgress*100).toFixed(1)+'%';
     if(newSpins>completedSpins){
       completedSpins=newSpins;
-      const progress=completedSpins%SPINS_NEEDED;
-      bar.style.width=(progress/SPINS_NEEDED*100)+'%';
-      lbl.textContent=progress>0?`${progress}/${SPINS_NEEDED} spins!`:'Spin for seeds!';
-      if(completedSpins%SPINS_NEEDED===0){
-        // Reward: 5 random common seeds
-        for(let i=0;i<5;i++) G.seeds.push({id:G.seedId++,key:weightedRandom('common')});
-        updateHUD();renderTray();saveG();
-        bar.style.width='0%';
-        lbl.textContent='Spin for seeds!';
-        toast('🌱 +5 seeds! Keep spinning!',2200);
-        multiSparkle();
+      if(G.water<G.maxWater){
+        G.water=Math.min(G.maxWater,G.water+1);
+        renderDrops();saveG();
+        spawnSparkle(window.innerWidth/2,window.innerHeight*.42,'💧');
+        toast(G.water>=G.maxWater?'Watering can is full! 💧':`+1 water from spinning! 💧 (${G.water}/${G.maxWater})`,1400);
+      } else {
+        toast('Watering can is full! 💧',1200);
       }
-    }else{
-      const progress=completedSpins%SPINS_NEEDED;
-      bar.style.width=(((accumulated%360)/360+progress)/SPINS_NEEDED*100).toFixed(1)+'%';
+      lbl.textContent=G.water>=G.maxWater?'Tank full! 💧':`${G.water}/${G.maxWater} water 💧`;
+    } else {
+      lbl.textContent=G.water>=G.maxWater?'Tank full! 💧':`${G.water}/${G.maxWater} water 💧`;
     }
   }
 
-  // Touch
-  svg.addEventListener('touchstart',e=>{
-    e.preventDefault();
-    const{cx,cy}=center();
-    lastAngle=angleFrom(cx,cy,e.touches[0].clientX,e.touches[0].clientY);
-    tracking=true;
-  },{passive:false});
-  document.addEventListener('touchmove',e=>{
-    if(!tracking) return;
-    e.preventDefault();
-    const{cx,cy}=center();
-    const a=angleFrom(cx,cy,e.touches[0].clientX,e.touches[0].clientY);
-    let d=a-lastAngle;
-    if(d>180)d-=360;if(d<-180)d+=360;
-    applyDelta(d);lastAngle=a;
-  },{passive:false});
-  document.addEventListener('touchend',  ()=>{tracking=false;});
-  document.addEventListener('touchcancel',()=>{tracking=false;});
-
-  // Mouse (desktop)
-  svg.addEventListener('mousedown',e=>{
+  // Pointer events — unified touch+mouse, SVG-scoped, no document-level non-passive listener
+  svg.addEventListener('pointerdown',e=>{
+    svg.setPointerCapture(e.pointerId);
     const{cx,cy}=center();
     lastAngle=angleFrom(cx,cy,e.clientX,e.clientY);
     tracking=true;
-  });
-  document.addEventListener('mousemove',e=>{
+    e.preventDefault();
+  },{passive:false});
+  svg.addEventListener('pointermove',e=>{
     if(!tracking) return;
     const{cx,cy}=center();
     const a=angleFrom(cx,cy,e.clientX,e.clientY);
@@ -1421,7 +1426,31 @@ function weightedRandom(type='common'){
     if(d>180)d-=360;if(d<-180)d+=360;
     applyDelta(d);lastAngle=a;
   });
-  document.addEventListener('mouseup',()=>{tracking=false;});
+  svg.addEventListener('pointerup',   ()=>{tracking=false;});
+  svg.addEventListener('pointercancel',()=>{tracking=false;});
+})();
+
+// ── Wire top-bar buttons: touchend+click for max iOS reliability ─────────────
+(function wireBtns(){
+  function wire(id, fn){
+    const el=document.getElementById(id);
+    if(!el) return;
+    let _touched=false;
+    el.addEventListener('touchend',function(e){
+      e.preventDefault(); // kill ghost click
+      _touched=true;
+      fn();
+      setTimeout(()=>{_touched=false;},600);
+    },{passive:false});
+    el.addEventListener('click',function(){
+      if(_touched) return;
+      fn();
+    });
+  }
+  wire('btnOpenPkt', openPktModal);
+  wire('btnJournal', openJournalModal);
+  wire('btnGarden',  openGhModal);
+  wire('btnShop',    openShopModal);
 })();
 function toast(msg,ms=2000){
   const el=document.getElementById('toast');
