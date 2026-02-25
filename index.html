@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>🌸 Yurie's Flower Garden</title>
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -47,10 +47,11 @@
     }
     .btn-enter:hover{transform:scale(1.04);box-shadow:0 10px 36px rgba(233,30,99,.56);}
     .btn-enter:active{transform:scale(.96);}
-    #gameScreen{display:none;flex-direction:column;min-height:100vh;min-height:100dvh;padding-bottom:120px;}
+    #gameScreen{display:none;flex-direction:column;min-height:100vh;min-height:100dvh;padding-bottom:calc(120px + env(safe-area-inset-bottom));}
     .top-bar{
-      background:rgba(255,255,255,.93);backdrop-filter:blur(14px);
-      padding:9px 11px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+      background:rgba(255,255,255,.93);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+      padding:9px 11px;padding-top:calc(9px + env(safe-area-inset-top));
+      display:flex;align-items:center;gap:6px;flex-wrap:wrap;
       box-shadow:0 2px 18px rgba(0,0,0,.09);position:sticky;top:0;z-index:20;
     }
     .stat-pill{
@@ -115,48 +116,27 @@
       gap:10px;padding:8px 11px;max-width:480px;margin:0 auto;width:100%;
     }
     .plot{
-      aspect-ratio:.88;border-radius:18px;cursor:pointer;position:relative;
-      overflow:hidden;touch-action:manipulation;transition:transform .13s;
-      box-shadow:0 4px 18px rgba(0,0,0,.16);
-      background:linear-gradient(160deg,#fef2f2 0%,#fde8ef 100%);
+      aspect-ratio:80/106;cursor:pointer;position:relative;
+      touch-action:manipulation;transition:transform .13s;
+      background:transparent;overflow:visible;
     }
-    .pot-svg{position:absolute;inset:0;width:100%;height:100%;display:block;}
+    .pot-svg{
+      position:absolute;inset:0;width:100%;height:100%;display:block;
+      filter:drop-shadow(0 6px 14px rgba(0,0,0,.22));
+      transition:filter .25s;
+    }
     .plot:active{transform:scale(.93);}
-    .plot.bloomed{animation:bloomGlow 2.4s ease-in-out infinite;}
+    .plot.bloomed .pot-svg{animation:bloomGlow 2.4s ease-in-out infinite;}
     @keyframes bloomGlow{
-      0%,100%{box-shadow:0 4px 18px rgba(0,0,0,.16);}
-      50%{box-shadow:0 4px 38px rgba(233,30,99,.65);}
+      0%,100%{filter:drop-shadow(0 6px 14px rgba(0,0,0,.22));}
+      50%{filter:drop-shadow(0 4px 32px rgba(233,30,99,.7)) drop-shadow(0 6px 14px rgba(0,0,0,.22));}
     }
-    .prog-wrap{position:absolute;bottom:20px;left:8px;right:8px;}
-    .prog-bg{height:4px;background:rgba(0,0,0,.18);border-radius:2px;overflow:hidden;}
-    .prog-fill{height:100%;background:linear-gradient(90deg,#a5d6a7,#66bb6a);border-radius:2px;transition:width .55s ease;}
-    .plot-stage{
-      position:absolute;bottom:4px;left:0;right:0;text-align:center;
-      font-size:.5em;color:rgba(255,255,255,.95);font-weight:bold;
-      text-shadow:0 1px 4px rgba(0,0,0,.7);padding:0 3px;
-    }
-    .plot-pips{position:absolute;top:7px;right:6px;display:flex;gap:2px;}
-    .pip{width:8px;height:8px;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:background .3s;}
-    .pip.on{background:#64b5f6;}
-    .pip.off{background:rgba(255,255,255,.25);}
-    .rare-crown{
-      position:absolute;top:6px;left:6px;font-size:.44em;
-      background:linear-gradient(135deg,rgba(30,136,229,.82),rgba(21,101,192,.82));
-      color:#fff;padding:2px 5px;border-radius:6px;font-weight:bold;
-      backdrop-filter:blur(4px);animation:crownPulseBlue 2s alternate infinite;
-    }
-    .rare-crown.legendary{
-      background:linear-gradient(135deg,rgba(255,160,0,.88),rgba(230,81,0,.88));
-      animation:crownPulseGold 2s alternate infinite;
-    }
-    @keyframes crownPulseBlue{from{box-shadow:0 0 4px rgba(30,136,229,.4)}to{box-shadow:0 0 14px rgba(21,101,192,.9)}}
-    @keyframes crownPulseGold{from{box-shadow:0 0 4px rgba(255,160,0,.4)}to{box-shadow:0 0 16px rgba(230,81,0,.95)}}
     .plot.watered{animation:waterShake .36s ease;}
     @keyframes waterShake{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
     .seed-tray{
       position:fixed;bottom:0;left:0;right:0;
-      background:rgba(255,255,255,.96);backdrop-filter:blur(14px);
-      border-radius:22px 22px 0 0;padding:8px 12px 22px;
+      background:rgba(255,255,255,.96);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+      border-radius:22px 22px 0 0;padding:8px 12px calc(22px + env(safe-area-inset-bottom));
       box-shadow:0 -4px 24px rgba(0,0,0,.12);z-index:15;
     }
     .tray-handle{width:36px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 7px;}
@@ -171,6 +151,7 @@
     .seed-chip.common  {background:linear-gradient(135deg,#fce4ec,#f8bbd0);}
     .seed-chip.uncommon{background:linear-gradient(135deg,#f3e5f5,#ce93d8);}
     .seed-chip.rare    {background:linear-gradient(135deg,#e3f2fd,#c5cae9);border-color:#7986cb;animation:rareChip 2s alternate infinite;}
+    .seed-chip.legendary{background:linear-gradient(135deg,#fff8e1,#ffe0b2);border-color:#ff8f00;animation:rareChip 2s alternate infinite;}
     @keyframes rareChip{from{box-shadow:0 2px 8px rgba(57,73,171,.3)}to{box-shadow:0 2px 22px rgba(123,31,162,.75)}}
     .chip-svg{width:32px;height:38px;}
     .chip-name{font-size:.5em;color:#555;text-align:center;margin-top:2px;line-height:1.2;}
@@ -188,8 +169,8 @@
     .overlay.on{display:flex;}
     .sheet{
       background:#fff;border-radius:26px 26px 0 0;
-      padding:16px 16px 36px;width:100%;max-width:480px;
-      max-height:92vh;overflow-y:auto;
+      padding:16px 16px calc(36px + env(safe-area-inset-bottom));width:100%;max-width:480px;
+      max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
       animation:slideUp .28s ease;position:relative;
     }
     @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
@@ -229,6 +210,7 @@
     .res-rarity.common  {background:#9e9e9e;}
     .res-rarity.uncommon{background:linear-gradient(135deg,#ab47bc,#7b1fa2);}
     .res-rarity.rare    {background:linear-gradient(135deg,#3949ab,#7b1fa2);animation:rarePulse 1s alternate infinite;}
+    .res-rarity.legendary{background:linear-gradient(135deg,#ff8f00,#e65100);animation:rarePulse 1s alternate infinite;}
     @keyframes rarePulse{from{box-shadow:0 0 8px rgba(57,73,171,.5)}to{box-shadow:0 0 28px rgba(123,31,162,1)}}
     .res-msg{color:#aaa;font-size:.82em;text-align:center;max-width:260px;}
     .btn-collect{
@@ -246,6 +228,7 @@
     .plant-row.common  {background:linear-gradient(135deg,#fce4ec,#f8bbd0);}
     .plant-row.uncommon{background:linear-gradient(135deg,#f3e5f5,#ce93d8);}
     .plant-row.rare    {background:linear-gradient(135deg,#e3f2fd,#c5cae9);animation:rarePulse 2s alternate infinite;}
+    .plant-row.legendary{background:linear-gradient(135deg,#fff8e1,#ffe0b2);animation:rarePulse 2s alternate infinite;}
     .pr-svg{width:44px;height:52px;flex-shrink:0;}
     .pr-info{flex:1;min-width:0;}
     .pr-name{font-weight:bold;color:#333;font-size:.9em;}
@@ -254,7 +237,8 @@
     .pr-badge{font-size:.68em;font-weight:bold;padding:4px 10px;border-radius:12px;color:#fff;white-space:nowrap;flex-shrink:0;}
     .pr-badge.common  {background:#9e9e9e;}
     .pr-badge.uncommon{background:linear-gradient(135deg,#ab47bc,#7b1fa2);}
-    .pr-badge.rare    {background:linear-gradient(135deg,#3949ab,#7b1fa2);}
+    .pr-badge.rare      {background:linear-gradient(135deg,#3949ab,#7b1fa2);}
+    .pr-badge.legendary {background:linear-gradient(135deg,#ff8f00,#e65100);}
     .bloom-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:4px 0 0;}
     .bloom-fl{width:clamp(80px,22vw,110px);height:clamp(96px,26vw,132px);animation:floatBloom 2.5s ease-in-out infinite;flex-shrink:0;}
     @keyframes floatBloom{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-13px) rotate(3deg)}}
@@ -527,7 +511,7 @@
         <span class="shop-icon">📦</span>
         <div>
           <div class="shop-name">Common Packet</div>
-          <div class="shop-detail">Random seed — tulips &amp; roses, tiny legendary chance</div>
+          <div class="shop-detail">Tulips, daisies, violets, lilies &amp; more — tiny legendary chance</div>
         </div>
       </div>
       <button class="btn-buy" onclick="buyPacket('common')"><span class="ic">C</span> 10</button>
@@ -537,7 +521,7 @@
         <span class="shop-icon">🌹</span>
         <div>
           <div class="shop-name">Uncommon Packet</div>
-          <div class="shop-detail">Only roses inside — Red &amp; Pink Rose guaranteed pool</div>
+          <div class="shop-detail">Roses, poppies, cherries, irises &amp; more — no rarities below uncommon</div>
         </div>
       </div>
       <button class="btn-buy" onclick="buyPacket('uncommon')"><span class="ic">C</span> 30</button>
@@ -547,7 +531,7 @@
         <span class="shop-icon">💎</span>
         <div>
           <div class="shop-name">Rare Packet</div>
-          <div class="shop-detail">Roses &amp; specials · ~40% legendary chance ✨</div>
+          <div class="shop-detail">Tiger lilies, orchids, golden iris &amp; more — chance at legendary ✦</div>
         </div>
       </div>
       <button class="btn-buy" onclick="buyPacket('rare')"><span class="ic">C</span> 55</button>
@@ -557,7 +541,7 @@
         <span class="shop-icon">✨</span>
         <div>
           <div class="shop-name">Legendary Packet</div>
-          <div class="shop-detail">Random Legendary: Blue Rose, Blue Tulip, Golden Rose or Black Rose ✦✦✦</div>
+          <div class="shop-detail">Blue Rose, Blue Tulip, White Peony, Pink Orchid, Black Rose &amp; more ✦</div>
         </div>
       </div>
       <button class="btn-buy" onclick="buyPacket('legendary')"><span class="ic">C</span> 85</button>
@@ -567,51 +551,58 @@
 
 <script>
 const FLOWERS = {
-  // Common tulips (appear often)
-  pinkTulip:   {name:'Pink Tulip',   kind:'tulip',    rarity:'common',  w:32,petal:'#f06292',stem:'#66bb6a',sell:5 },
-  redTulip:    {name:'Red Tulip',    kind:'tulip',    rarity:'common',  w:28,petal:'#e53935',stem:'#66bb6a',sell:6 },
-  yellowTulip: {name:'Yellow Tulip', kind:'tulip',    rarity:'common',  w:24,petal:'#fdd835',stem:'#66bb6a',sell:6 },
-  orangeTulip: {name:'Orange Tulip', kind:'tulip',    rarity:'common',  w:22,petal:'#ff7043',stem:'#66bb6a',sell:7 },
-  purpleTulip: {name:'Purple Tulip', kind:'tulip',    rarity:'common',  w:18,petal:'#9c27b0',stem:'#66bb6a',sell:8 },
-  // Uncommon
-  sunflower:   {name:'Sunflower',    kind:'sunflower',rarity:'uncommon',w:16,petal:'#fdd835',stem:'#558b2f',sell:18},
-  lavender:    {name:'Lavender',     kind:'lavender', rarity:'uncommon',w:14,petal:'#b39ddb',stem:'#7cb342',sell:16},
-  whiteTulip:  {name:'White Tulip',  kind:'tulip',    rarity:'uncommon',w:12,petal:'#eceff1',stem:'#66bb6a',sell:12},
-  redRose:     {name:'Red Rose',     kind:'rose',     rarity:'uncommon',w:12,petal:'#c62828',stem:'#43a047',sell:18},
-  pinkRose:    {name:'Pink Rose',    kind:'rose',     rarity:'uncommon',w:8, petal:'#e91e63',stem:'#43a047',sell:22},
-  // Legendary
-  blueRose:    {name:'Blue Rose',    kind:'rose',     rarity:'rare',    w:3, petal:'#3f51b5',stem:'#388e3c',sell:60},
-  blueTulip:   {name:'Blue Tulip',   kind:'tulip',    rarity:'rare',    w:3, petal:'#1565c0',stem:'#1b5e20',sell:65},
-  goldenRose:  {name:'Golden Rose',  kind:'rose',     rarity:'rare',    w:2, petal:'#f9a825',stem:'#33691e',sell:75},
-  blackRose:   {name:'Black Rose',   kind:'rose',     rarity:'rare',    w:1, petal:'#212121',stem:'#1b5e20',sell:85},
-  // Common tulip variants
-  lilacTulip:  {name:'Lilac Tulip',   kind:'tulip',    rarity:'common',  w:20,petal:'#ce93d8',stem:'#66bb6a',sell:6 },
-  tealTulip:   {name:'Teal Tulip',    kind:'tulip',    rarity:'common',  w:16,petal:'#26a69a',stem:'#66bb6a',sell:7 },
-  creamTulip:  {name:'Cream Tulip',   kind:'tulip',    rarity:'common',  w:14,petal:'#fff8e1',stem:'#81c784',sell:6 },
-  coralTulip:  {name:'Coral Tulip',   kind:'tulip',    rarity:'common',  w:12,petal:'#ff8a65',stem:'#66bb6a',sell:7 },
-  // Common daisies
-  whiteDaisy:  {name:'White Daisy',   kind:'daisy',    rarity:'common',  w:22,petal:'#f5f5f5',stem:'#66bb6a',sell:5 },
-  yellowDaisy: {name:'Yellow Daisy',  kind:'daisy',    rarity:'common',  w:18,petal:'#fff176',stem:'#66bb6a',sell:5 },
-  pinkDaisy:   {name:'Pink Daisy',    kind:'daisy',    rarity:'common',  w:14,petal:'#f48fb1',stem:'#66bb6a',sell:6 },
-  // Uncommon poppies
-  redPoppy:    {name:'Red Poppy',     kind:'poppy',    rarity:'uncommon',w:18,petal:'#f44336',stem:'#558b2f',sell:15},
-  orangePoppy: {name:'Orange Poppy',  kind:'poppy',    rarity:'uncommon',w:14,petal:'#ff6d00',stem:'#558b2f',sell:16},
-  // Uncommon cherry blossoms
-  cherryBlossom:{name:'Cherry Blossom',kind:'cherry',  rarity:'uncommon',w:16,petal:'#fce4ec',stem:'#795548',sell:20},
-  deepCherry:  {name:'Deep Cherry',   kind:'cherry',   rarity:'uncommon',w:10,petal:'#e91e63',stem:'#795548',sell:22},
-  // Uncommon roses
-  yellowRose:  {name:'Yellow Rose',   kind:'rose',     rarity:'uncommon',w:10,petal:'#f9a825',stem:'#43a047',sell:20},
-  peachRose:   {name:'Peach Rose',    kind:'rose',     rarity:'uncommon',w:8, petal:'#ffcc80',stem:'#43a047',sell:20},
-  purpleRose:  {name:'Purple Rose',   kind:'rose',     rarity:'uncommon',w:6, petal:'#7b1fa2',stem:'#388e3c',sell:25},
-  // Rare / Legendary
-  blackTulip:  {name:'Black Tulip',   kind:'tulip',    rarity:'rare',    w:2, petal:'#263238',stem:'#1b5e20',sell:70},
-  silverRose:  {name:'Silver Rose',   kind:'rose',     rarity:'rare',    w:2, petal:'#90a4ae',stem:'#546e7a',sell:75},
-  crystalDaisy:{name:'Crystal Daisy', kind:'daisy',    rarity:'rare',    w:2, petal:'#e3f2fd',stem:'#0288d1',sell:65},
-  violetPoppy: {name:'Violet Poppy',  kind:'poppy',    rarity:'rare',    w:2, petal:'#6a1b9a',stem:'#1a237e',sell:70},
-  goldenCherry:{name:'Golden Cherry', kind:'cherry',   rarity:'rare',    w:1, petal:'#f9a825',stem:'#5d4037',sell:80},
-  midnightRose:{name:'Midnight Rose', kind:'rose',     rarity:'rare',    w:1, petal:'#37474f',stem:'#212121',sell:90},
+  // ── Common ──────────────────────────────────────────────────
+  pinkTulip:     {name:'Pink Tulip',      kind:'tulip',    rarity:'common',   w:32,petal:'#f06292',stem:'#66bb6a',sell:5 },
+  redTulip:      {name:'Red Tulip',       kind:'tulip',    rarity:'common',   w:28,petal:'#e53935',stem:'#66bb6a',sell:6 },
+  yellowTulip:   {name:'Yellow Tulip',    kind:'tulip',    rarity:'common',   w:24,petal:'#fdd835',stem:'#66bb6a',sell:6 },
+  purpleViolet:  {name:'Purple Violet',   kind:'violet',   rarity:'common',   w:20,petal:'#7e57c2',stem:'#66bb6a',sell:5 },
+  blueViolet:    {name:'Blue Violet',     kind:'violet',   rarity:'common',   w:18,petal:'#5c6bc0',stem:'#66bb6a',sell:5 },
+  whiteLily:     {name:'White Lily',      kind:'lily',     rarity:'common',   w:16,petal:'#f5f5f5',stem:'#66bb6a',sell:6 },
+  purpleIris:    {name:'Purple Iris',     kind:'iris',     rarity:'common',   w:14,petal:'#9c27b0',stem:'#66bb6a',sell:6 },
+  yellowDaffodil:{name:'Yellow Daffodil', kind:'daffodil', rarity:'common',   w:18,petal:'#fff176',stem:'#66bb6a',sell:6 },
+  whiteDaisy:    {name:'White Daisy',     kind:'daisy',    rarity:'common',   w:22,petal:'#f5f5f5',stem:'#66bb6a',sell:5 },
+  yellowDaisy:   {name:'Yellow Daisy',    kind:'daisy',    rarity:'common',   w:18,petal:'#fff176',stem:'#66bb6a',sell:5 },
+  pinkDaisy:     {name:'Pink Daisy',      kind:'daisy',    rarity:'common',   w:14,petal:'#f48fb1',stem:'#66bb6a',sell:6 },
+  // ── Uncommon ────────────────────────────────────────────────
+  sunflower:     {name:'Sunflower',       kind:'sunflower',rarity:'uncommon', w:16,petal:'#fdd835',stem:'#558b2f',sell:18},
+  lavender:      {name:'Lavender',        kind:'lavender', rarity:'uncommon', w:14,petal:'#b39ddb',stem:'#7cb342',sell:16},
+  whiteTulip:    {name:'White Tulip',     kind:'tulip',    rarity:'uncommon', w:12,petal:'#eceff1',stem:'#66bb6a',sell:12},
+  redRose:       {name:'Red Rose',        kind:'rose',     rarity:'uncommon', w:12,petal:'#c62828',stem:'#43a047',sell:18},
+  pinkRose:      {name:'Pink Rose',       kind:'rose',     rarity:'uncommon', w:8, petal:'#e91e63',stem:'#43a047',sell:22},
+  pinkLily:      {name:'Pink Lily',       kind:'lily',     rarity:'uncommon', w:12,petal:'#f48fb1',stem:'#66bb6a',sell:14},
+  blueIris:      {name:'Blue Iris',       kind:'iris',     rarity:'uncommon', w:10,petal:'#1976d2',stem:'#66bb6a',sell:16},
+  whiteDaffodil: {name:'White Daffodil',  kind:'daffodil', rarity:'uncommon', w:10,petal:'#f5f5f5',stem:'#66bb6a',sell:15},
+  whiteViolet:   {name:'White Violet',    kind:'violet',   rarity:'uncommon', w:8, petal:'#ede7f6',stem:'#66bb6a',sell:14},
+  pinkPeony:     {name:'Pink Peony',      kind:'peony',    rarity:'uncommon', w:10,petal:'#f48fb1',stem:'#66bb6a',sell:18},
+  redPoppy:      {name:'Red Poppy',       kind:'poppy',    rarity:'uncommon', w:18,petal:'#f44336',stem:'#558b2f',sell:15},
+  orangePoppy:   {name:'Orange Poppy',    kind:'poppy',    rarity:'uncommon', w:14,petal:'#ff6d00',stem:'#558b2f',sell:16},
+  cherryBlossom: {name:'Cherry Blossom',  kind:'cherry',   rarity:'uncommon', w:16,petal:'#fce4ec',stem:'#795548',sell:20},
+  deepCherry:    {name:'Deep Cherry',     kind:'cherry',   rarity:'uncommon', w:10,petal:'#e91e63',stem:'#795548',sell:22},
+  yellowRose:    {name:'Yellow Rose',     kind:'rose',     rarity:'uncommon', w:10,petal:'#f9a825',stem:'#43a047',sell:20},
+  peachRose:     {name:'Peach Rose',      kind:'rose',     rarity:'uncommon', w:8, petal:'#ffcc80',stem:'#43a047',sell:20},
+  purpleRose:    {name:'Purple Rose',     kind:'rose',     rarity:'uncommon', w:6, petal:'#7b1fa2',stem:'#388e3c',sell:25},
+  // ── Rare ────────────────────────────────────────────────────
+  tigerLily:     {name:'Tiger Lily',      kind:'lily',     rarity:'rare',     w:4, petal:'#ff7043',stem:'#558b2f',sell:60},
+  goldenIris:    {name:'Golden Iris',     kind:'iris',     rarity:'rare',     w:4, petal:'#f9a825',stem:'#558b2f',sell:62},
+  pinkDaffodil:  {name:'Pink Daffodil',   kind:'daffodil', rarity:'rare',     w:3, petal:'#f8bbd0',stem:'#558b2f',sell:58},
+  redPeony:      {name:'Red Peony',       kind:'peony',    rarity:'rare',     w:3, petal:'#e53935',stem:'#558b2f',sell:65},
+  purpleOrchid:  {name:'Purple Orchid',   kind:'orchid',   rarity:'rare',     w:3, petal:'#ab47bc',stem:'#558b2f',sell:68},
+  blackTulip:    {name:'Black Tulip',     kind:'tulip',    rarity:'rare',     w:2, petal:'#263238',stem:'#1b5e20',sell:70},
+  silverRose:    {name:'Silver Rose',     kind:'rose',     rarity:'rare',     w:2, petal:'#90a4ae',stem:'#546e7a',sell:75},
+  crystalDaisy:  {name:'Crystal Daisy',   kind:'daisy',    rarity:'rare',     w:2, petal:'#e3f2fd',stem:'#0288d1',sell:65},
+  violetPoppy:   {name:'Violet Poppy',    kind:'poppy',    rarity:'rare',     w:2, petal:'#6a1b9a',stem:'#1a237e',sell:70},
+  goldenCherry:  {name:'Golden Cherry',   kind:'cherry',   rarity:'rare',     w:1, petal:'#f9a825',stem:'#5d4037',sell:80},
+  midnightRose:  {name:'Midnight Rose',   kind:'rose',     rarity:'rare',     w:1, petal:'#37474f',stem:'#212121',sell:90},
+  // ── Legendary ───────────────────────────────────────────────
+  blueRose:      {name:'Blue Rose',       kind:'rose',     rarity:'legendary',w:3, petal:'#3f51b5',stem:'#388e3c',sell:60},
+  blueTulip:     {name:'Blue Tulip',      kind:'tulip',    rarity:'legendary',w:3, petal:'#1565c0',stem:'#1b5e20',sell:65},
+  goldenRose:    {name:'Golden Rose',     kind:'rose',     rarity:'legendary',w:2, petal:'#f9a825',stem:'#33691e',sell:75},
+  blackRose:     {name:'Black Rose',      kind:'rose',     rarity:'legendary',w:1, petal:'#212121',stem:'#1b5e20',sell:85},
+  whitePeony:    {name:'White Peony',     kind:'peony',    rarity:'legendary',w:2, petal:'#fafafa',stem:'#33691e',sell:80},
+  pinkOrchid:    {name:'Pink Orchid',     kind:'orchid',   rarity:'legendary',w:2, petal:'#f06292',stem:'#33691e',sell:85},
+  blueOrchid:    {name:'Blue Orchid',     kind:'orchid',   rarity:'legendary',w:1, petal:'#42a5f5',stem:'#1b5e20',sell:90},
 };
-const RARITY_LABEL={common:'Common',uncommon:'Uncommon',rare:'★ Legendary'};
+const RARITY_LABEL={common:'Common',uncommon:'Uncommon',rare:'★ Rare',legendary:'✦ Legendary'};
 const STAGE_NAMES=['🌰 Seed','🌱 Sprout','🌿 Growing','🌸 Bloomed!'];
 const STAGE_WATERS=3,MAX_STAGE=3;
 
@@ -705,6 +696,42 @@ function flowerSVG(key,stage){
     if(stage===1) return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="65" stroke="${S}" stroke-width="2.5" stroke-linecap="round"/><path d="M30 83 Q20 76 18 67 Q26 71 30 80" fill="${S}"/><ellipse cx="30" cy="60" rx="5" ry="5.5" fill="${p}" opacity=".78"/><ellipse cx="30" cy="58" rx="3" ry="3.5" fill="${pll}" opacity=".55"/><circle cx="27" cy="57" r="2" fill="${pd}" opacity=".6"/><circle cx="33" cy="57" r="2" fill="${pd}" opacity=".6"/></svg>`;
     if(stage===2) return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="54" stroke="${S}" stroke-width="2.5" stroke-linecap="round"/><path d="M30 78 Q17 71 15 62 Q24 67 30 74" fill="${S}"/><ellipse cx="30" cy="30" rx="5.5" ry="8" fill="${p}" opacity=".88" transform="rotate(0,30,44)"/><ellipse cx="30" cy="30" rx="5.5" ry="8" fill="${pl}" opacity=".82" transform="rotate(72,30,44)"/><ellipse cx="30" cy="30" rx="5.5" ry="8" fill="${p}" opacity=".88" transform="rotate(144,30,44)"/><ellipse cx="30" cy="30" rx="5.5" ry="8" fill="${pl}" opacity=".82" transform="rotate(216,30,44)"/><ellipse cx="30" cy="30" rx="5.5" ry="8" fill="${p}" opacity=".88" transform="rotate(288,30,44)"/><circle cx="30" cy="44" r="6" fill="${pd}"/><circle cx="30" cy="44" r="4" fill="${pll}"/></svg>`;
     return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="52" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 76 Q14 65 12 52 Q23 58 30 70" fill="${S}"/><path d="M30 76 Q46 65 48 52 Q37 58 30 70" fill="${S}"/>${rare?`<circle cx="30" cy="40" r="21" fill="${pll}" opacity=".35"/><circle cx="30" cy="40" r="21" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/><text x="30" y="9" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>`:''}<ellipse cx="30" cy="23" rx="7" ry="10" fill="${p}" transform="rotate(0,30,40)"/><ellipse cx="30" cy="23" rx="7" ry="10" fill="${pl}" transform="rotate(72,30,40)"/><ellipse cx="30" cy="23" rx="7" ry="10" fill="${p}" transform="rotate(144,30,40)"/><ellipse cx="30" cy="23" rx="7" ry="10" fill="${pl}" transform="rotate(216,30,40)"/><ellipse cx="30" cy="23" rx="7" ry="10" fill="${p}" transform="rotate(288,30,40)"/><circle cx="30" cy="40" r="8" fill="${pd}"/><circle cx="30" cy="40" r="6" fill="${pll}"/><circle cx="28" cy="37" r="1.5" fill="${pd}" opacity=".8"/><circle cx="32" cy="37" r="1.5" fill="${pd}" opacity=".8"/><circle cx="30" cy="35" r="1.5" fill="${pd}" opacity=".7"/></svg>`;
+  }
+  // VIOLET
+  if(f.kind==='violet'){
+    if(stage===1) return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="66" stroke="${S}" stroke-width="2.5" stroke-linecap="round"/><ellipse cx="30" cy="61" rx="4" ry="5" fill="${p}" opacity=".85"/><ellipse cx="30" cy="59" rx="2.5" ry="3" fill="${pll}" opacity=".6"/></svg>`;
+    if(stage===2) return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="60" stroke="${S}" stroke-width="2.5" stroke-linecap="round"/><path d="M30 80 Q18 73 16 63 Q24 68 30 75" fill="${S}"/><ellipse cx="30" cy="41" rx="5" ry="8" fill="${p}" opacity=".85" transform="rotate(0,30,50)"/><ellipse cx="30" cy="41" rx="5" ry="8" fill="${pl}" opacity=".8" transform="rotate(72,30,50)"/><ellipse cx="30" cy="41" rx="5" ry="8" fill="${p}" opacity=".85" transform="rotate(144,30,50)"/><circle cx="30" cy="50" r="4" fill="#fdd835"/></svg>`;
+    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="58" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 78 Q15 68 13 55 Q23 62 30 72" fill="${S}"/><path d="M30 78 Q45 68 47 55 Q37 62 30 72" fill="${S}"/>${rare?`<circle cx="30" cy="38" r="20" fill="${pll}" opacity=".4"/><circle cx="30" cy="38" r="20" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/><text x="30" y="9" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>`:''}<ellipse cx="30" cy="23" rx="6" ry="9" fill="${p}" transform="rotate(0,30,38)"/><ellipse cx="30" cy="23" rx="6" ry="9" fill="${p}" transform="rotate(72,30,38)"/><ellipse cx="30" cy="23" rx="6" ry="9" fill="${pl}" transform="rotate(144,30,38)"/><ellipse cx="30" cy="23" rx="6" ry="9" fill="${pl}" transform="rotate(216,30,38)"/><ellipse cx="30" cy="23" rx="6" ry="9" fill="${p}" transform="rotate(288,30,38)"/><circle cx="30" cy="38" r="6" fill="#fdd835"/><circle cx="30" cy="38" r="4" fill="#f9a825"/><ellipse cx="28" cy="36" rx="1" ry="1.5" fill="${pd}" opacity=".7"/><ellipse cx="32" cy="36" rx="1" ry="1.5" fill="${pd}" opacity=".7"/></svg>`;
+  }
+  // LILY
+  if(f.kind==='lily'){
+    if(stage===1) return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="60" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 80 Q19 73 17 63 Q25 68 30 77" fill="${S}"/><path d="M25 62 Q24 52 30 47 Q36 52 35 62 Q32 65 30 66 Q28 65 25 62Z" fill="${p}" opacity=".85"/></svg>`;
+    if(stage===2) return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="54" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 78 Q15 68 13 55 Q23 62 30 72" fill="${S}"/><path d="M30 78 Q45 68 47 55 Q37 62 30 72" fill="${S}"/><path d="M21 55 Q18 42 30 37 Q42 42 39 55" fill="${p}" opacity=".88"/><path d="M25 55 Q22 43 30 38 Q38 43 35 55" fill="${pl}" opacity=".3"/><line x1="30" y1="52" x2="24" y2="44" stroke="${pd}" stroke-width="1.2"/><line x1="30" y1="52" x2="36" y2="44" stroke="${pd}" stroke-width="1.2"/><line x1="30" y1="52" x2="30" y2="40" stroke="${pd}" stroke-width="1.2"/><circle cx="24" cy="43" r="1.5" fill="${pd}"/><circle cx="36" cy="43" r="1.5" fill="${pd}"/><circle cx="30" cy="39" r="1.5" fill="${pd}"/></svg>`;
+    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="52" stroke="${S}" stroke-width="3.5" stroke-linecap="round"/><path d="M30 76 Q12 64 10 50 Q22 57 30 70" fill="${S}"/><path d="M30 76 Q48 64 50 50 Q38 57 30 70" fill="${S}"/>${rare?`<circle cx="30" cy="35" r="22" fill="${pll}" opacity=".35"/><circle cx="30" cy="35" r="22" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/><text x="30" y="5" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>`:''}<ellipse cx="30" cy="20" rx="5" ry="12" fill="${p}" transform="rotate(0,30,38)"/><ellipse cx="30" cy="20" rx="5" ry="12" fill="${pl}" transform="rotate(60,30,38)"/><ellipse cx="30" cy="20" rx="5" ry="12" fill="${p}" transform="rotate(120,30,38)"/><ellipse cx="30" cy="20" rx="5" ry="12" fill="${pl}" transform="rotate(180,30,38)"/><ellipse cx="30" cy="20" rx="5" ry="12" fill="${p}" transform="rotate(240,30,38)"/><ellipse cx="30" cy="20" rx="5" ry="12" fill="${pl}" transform="rotate(300,30,38)"/><line x1="30" y1="38" x2="20" y2="26" stroke="${pd}" stroke-width="1.5"/><line x1="30" y1="38" x2="40" y2="26" stroke="${pd}" stroke-width="1.5"/><line x1="30" y1="38" x2="30" y2="22" stroke="${pd}" stroke-width="1.5"/><circle cx="20" cy="25" r="2" fill="${pd}"/><circle cx="40" cy="25" r="2" fill="${pd}"/><circle cx="30" cy="21" r="2" fill="${pd}"/></svg>`;
+  }
+  // IRIS
+  if(f.kind==='iris'){
+    if(stage===1) return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="62" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 80 Q19 73 17 63 Q25 68 30 77" fill="${S}"/><path d="M26 64 Q25 54 30 49 Q35 54 34 64 Q32 67 30 68 Q28 67 26 64Z" fill="${p}" opacity=".85"/><ellipse cx="30" cy="54" rx="4" ry="5" fill="${pl}" opacity=".55"/></svg>`;
+    if(stage===2) return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="55" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 78 Q15 68 13 56 Q23 62 30 72" fill="${S}"/><path d="M17 55 Q22 42 30 43 Q38 42 43 55 Q38 61 30 62 Q22 61 17 55Z" fill="${p}" opacity=".88"/><path d="M22 49 Q27 40 30 43 Q33 40 38 49 Q34 54 30 55 Q26 54 22 49Z" fill="${pl}" opacity=".4"/><ellipse cx="25" cy="43" rx="4" ry="6" fill="${p}" opacity=".8" transform="rotate(-15,25,43)"/><ellipse cx="35" cy="43" rx="4" ry="6" fill="${p}" opacity=".8" transform="rotate(15,35,43)"/></svg>`;
+    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="52" stroke="${S}" stroke-width="3.5" stroke-linecap="round"/><path d="M30 76 Q12 64 10 50 Q22 57 30 70" fill="${S}"/><path d="M30 76 Q48 64 50 50 Q37 57 30 70" fill="${S}"/>${rare?`<circle cx="30" cy="36" r="22" fill="${pll}" opacity=".35"/><circle cx="30" cy="36" r="22" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/><text x="30" y="6" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>`:''}<path d="M12 52 Q18 36 30 40 Q42 36 48 52 Q40 62 30 63 Q20 62 12 52Z" fill="${p}"/><path d="M18 50 Q22 38 30 40 Q38 38 42 50 Q36 57 30 58 Q24 57 18 50Z" fill="${pl}" opacity=".4"/><ellipse cx="20" cy="36" rx="5" ry="9" fill="${p}" transform="rotate(-30,20,36)"/><ellipse cx="40" cy="36" rx="5" ry="9" fill="${p}" transform="rotate(30,40,36)"/><ellipse cx="30" cy="26" rx="5" ry="8" fill="${pl}"/><ellipse cx="28" cy="50" rx="2" ry="3" fill="#fdd835" opacity=".8"/><ellipse cx="32" cy="50" rx="2" ry="3" fill="#fdd835" opacity=".8"/></svg>`;
+  }
+  // DAFFODIL
+  if(f.kind==='daffodil'){
+    if(stage===1) return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="56" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 78 Q20 72 18 63 Q25 68 30 76" fill="${S}"/><ellipse cx="30" cy="50" rx="5" ry="8" fill="${p}" opacity=".82" transform="rotate(-20,30,50)"/></svg>`;
+    if(stage===2) return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="54" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 78 Q15 68 13 55 Q23 62 30 72" fill="${S}"/><ellipse cx="30" cy="27" rx="5" ry="11" fill="${p}" opacity=".85" transform="rotate(0,30,42)"/><ellipse cx="30" cy="27" rx="5" ry="11" fill="${p}" opacity=".85" transform="rotate(60,30,42)"/><ellipse cx="30" cy="27" rx="5" ry="11" fill="${p}" opacity=".85" transform="rotate(120,30,42)"/><ellipse cx="30" cy="27" rx="5" ry="11" fill="${p}" opacity=".85" transform="rotate(180,30,42)"/><ellipse cx="30" cy="27" rx="5" ry="11" fill="${p}" opacity=".85" transform="rotate(240,30,42)"/><ellipse cx="30" cy="27" rx="5" ry="11" fill="${p}" opacity=".85" transform="rotate(300,30,42)"/><circle cx="30" cy="42" r="9" fill="${pd}"/><circle cx="30" cy="42" r="7" fill="#fdd835" opacity=".9"/><circle cx="30" cy="42" r="5" fill="${p}"/></svg>`;
+    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="50" stroke="${S}" stroke-width="3.5" stroke-linecap="round"/><path d="M30 76 Q12 64 10 50 Q23 57 30 70" fill="${S}"/><path d="M30 76 Q48 64 50 50 Q37 57 30 70" fill="${S}"/>${rare?`<circle cx="30" cy="35" r="22" fill="${pll}" opacity=".35"/><circle cx="30" cy="35" r="22" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/><text x="30" y="5" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>`:''}<ellipse cx="30" cy="20" rx="5.5" ry="12" fill="${p}" transform="rotate(0,30,38)"/><ellipse cx="30" cy="20" rx="5.5" ry="12" fill="${p}" transform="rotate(60,30,38)"/><ellipse cx="30" cy="20" rx="5.5" ry="12" fill="${p}" transform="rotate(120,30,38)"/><ellipse cx="30" cy="20" rx="5.5" ry="12" fill="${p}" transform="rotate(180,30,38)"/><ellipse cx="30" cy="20" rx="5.5" ry="12" fill="${p}" transform="rotate(240,30,38)"/><ellipse cx="30" cy="20" rx="5.5" ry="12" fill="${p}" transform="rotate(300,30,38)"/><circle cx="30" cy="38" r="11" fill="${pd}"/><circle cx="30" cy="38" r="9" fill="#fdd835"/><circle cx="30" cy="38" r="6" fill="${darker(p,20)}" opacity=".9"/><circle cx="30" cy="38" r="4" fill="${pll}" opacity=".7"/></svg>`;
+  }
+  // PEONY
+  if(f.kind==='peony'){
+    if(stage===1) return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="62" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 80 Q19 73 17 63 Q25 68 30 77" fill="${S}"/><circle cx="30" cy="55" r="9" fill="${p}" opacity=".88"/><circle cx="30" cy="53" r="6" fill="${pl}" opacity=".65"/><circle cx="30" cy="51" r="3.5" fill="${pll}" opacity=".5"/></svg>`;
+    if(stage===2) return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="54" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 78 Q15 68 13 55 Q23 62 30 72" fill="${S}"/><path d="M30 78 Q45 68 47 55 Q37 62 30 72" fill="${S}"/><circle cx="30" cy="38" r="16" fill="${p}" opacity=".9"/><circle cx="22" cy="34" r="12" fill="${pl}"/><circle cx="38" cy="34" r="12" fill="${pl}"/><circle cx="30" cy="28" r="12" fill="${p}"/><circle cx="30" cy="40" r="10" fill="${pd}"/><circle cx="30" cy="37" r="7" fill="${pl}"/><circle cx="30" cy="35" r="4" fill="${pll}" opacity=".8"/></svg>`;
+    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="50" stroke="${S}" stroke-width="3.5" stroke-linecap="round"/><path d="M30 76 Q12 64 10 50 Q22 57 30 70" fill="${S}"/><path d="M30 76 Q48 64 50 50 Q37 57 30 70" fill="${S}"/>${rare?`<circle cx="30" cy="32" r="24" fill="${pll}" opacity=".35"/><circle cx="30" cy="32" r="24" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/><text x="30" y="2" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>`:''}<circle cx="30" cy="33" r="19" fill="${p}"/><circle cx="18" cy="27" r="14" fill="${pl}"/><circle cx="42" cy="27" r="14" fill="${pl}"/><circle cx="30" cy="20" r="14" fill="${p}"/><circle cx="18" cy="37" r="12" fill="${pd}"/><circle cx="42" cy="37" r="12" fill="${pd}"/><circle cx="30" cy="43" r="13" fill="${p}"/><circle cx="30" cy="31" r="10" fill="${pl}"/><circle cx="30" cy="28" r="7" fill="${pll}"/><circle cx="28" cy="25" r="1.5" fill="#fdd835" opacity=".9"/><circle cx="32" cy="25" r="1.5" fill="#fdd835" opacity=".9"/><circle cx="30" cy="23" r="1.5" fill="#fdd835" opacity=".9"/></svg>`;
+  }
+  // ORCHID
+  if(f.kind==='orchid'){
+    if(stage===1) return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="60" stroke="${S}" stroke-width="2.5" stroke-linecap="round"/><path d="M30 80 Q20 74 18 65 Q25 69 30 77" fill="${S}"/><ellipse cx="30" cy="55" rx="4.5" ry="6.5" fill="${p}" opacity=".85"/><ellipse cx="30" cy="53" rx="2.5" ry="3.5" fill="${pll}" opacity=".6"/></svg>`;
+    if(stage===2) return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="54" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 78 Q16 70 14 57 Q24 64 30 73" fill="${S}"/><ellipse cx="21" cy="40" rx="5" ry="10" fill="${p}" opacity=".88" transform="rotate(-30,21,40)"/><ellipse cx="39" cy="40" rx="5" ry="10" fill="${p}" opacity=".88" transform="rotate(30,39,40)"/><ellipse cx="30" cy="30" rx="5" ry="9" fill="${pl}" opacity=".85"/><ellipse cx="30" cy="48" rx="7" ry="5" fill="${pd}" opacity=".9"/><ellipse cx="30" cy="48" rx="4" ry="3" fill="${pll}" opacity=".7"/></svg>`;
+    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="52" stroke="${S}" stroke-width="3.5" stroke-linecap="round"/><path d="M30 76 Q13 65 11 50 Q23 57 30 70" fill="${S}"/><path d="M30 76 Q47 65 49 50 Q37 57 30 70" fill="${S}"/>${rare?`<circle cx="30" cy="34" r="22" fill="${pll}" opacity=".35"/><circle cx="30" cy="34" r="22" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/><text x="30" y="4" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>`:''}<ellipse cx="16" cy="36" rx="5" ry="12" fill="${p}" transform="rotate(-40,16,36)"/><ellipse cx="44" cy="36" rx="5" ry="12" fill="${p}" transform="rotate(40,44,36)"/><ellipse cx="30" cy="20" rx="4.5" ry="10" fill="${pl}"/><ellipse cx="18" cy="50" rx="5" ry="9" fill="${pl}" transform="rotate(25,18,50)"/><ellipse cx="42" cy="50" rx="5" ry="9" fill="${pl}" transform="rotate(-25,42,50)"/><ellipse cx="30" cy="44" rx="9" ry="7" fill="${pd}"/><ellipse cx="30" cy="44" rx="6" ry="4.5" fill="${pll}"/><ellipse cx="30" cy="43" rx="3" ry="2.5" fill="${p}" opacity=".7"/><circle cx="30" cy="41" r="2" fill="#fdd835" opacity=".9"/></svg>`;
   }
   if(stage===1){
     if(f.kind==='tulip') return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -904,13 +931,18 @@ function potCardSVG(p){
   }
 
   // Rare/legendary crown badge
-  const crownEl=p.state!=='empty'&&FLOWERS[p.key].rarity==='rare'
+  const _rar=p.state!=='empty'?FLOWERS[p.key].rarity:'';
+  const crownEl=_rar==='legendary'
+    ?`<rect x="4" y="3" width="22" height="13" rx="3" fill="rgba(230,81,0,.88)"/>
+      <text x="15" y="12.5" text-anchor="middle" font-size="6.5"
+        fill="#fff" font-weight="bold">\u2726 L</text>`
+    :_rar==='rare'
     ?`<rect x="4" y="3" width="22" height="13" rx="3" fill="rgba(25,118,210,.86)"/>
       <text x="15" y="12.5" text-anchor="middle" font-size="6.5"
-        fill="#fff" font-weight="bold">\u2605 L</text>`
+        fill="#fff" font-weight="bold">\u2605 R</text>`
     :'';
 
-  return `<svg class="pot-svg" viewBox="0 0 80 103"
+  return `<svg class="pot-svg" viewBox="0 0 80 106"
     fill="none" xmlns="http://www.w3.org/2000/svg">
     ${flPart}
     ${pipEls}
@@ -922,21 +954,31 @@ function potCardSVG(p){
     <!-- Rim underside shadow -->
     <rect x="9" y="67" width="62" height="3" rx="2" fill="${rD}" opacity=".5"/>
     <!-- Pot body (trapezoid) -->
-    <path d="M13 70 L11 90 Q11 96 19 96 L61 96 Q69 96 69 90 L67 70 Z" fill="${bM}"/>
+    <path d="M13 70 L11 90 Q11 97 19 97 L61 97 Q69 97 69 90 L67 70 Z" fill="${bM}"/>
     <!-- Left shine stripe -->
-    <path d="M17 70 L15 87 Q15 91 17.5 92.5"
-      stroke="rgba(255,210,170,.26)" stroke-width="3"
+    <path d="M17 70 L15 87 Q15 92 17.5 93.5"
+      stroke="rgba(255,210,170,.28)" stroke-width="3.5"
       fill="none" stroke-linecap="round"/>
     <!-- Right shade stripe -->
-    <path d="M63 70 L65 87 Q65 91 62.5 92.5"
-      stroke="rgba(0,0,0,.13)" stroke-width="2.5"
+    <path d="M63 70 L65 87 Q65 92 62.5 93.5"
+      stroke="rgba(0,0,0,.14)" stroke-width="2.5"
       fill="none" stroke-linecap="round"/>
+    <!-- Center shine dot -->
+    <ellipse cx="24" cy="76" rx="3.5" ry="6" fill="rgba(255,210,170,.16)" transform="rotate(-6,24,76)"/>
     <!-- Dark base band -->
-    <path d="M11 89 L11 90 Q11 96 19 96 L61 96 Q69 96 69 90 L69 89 Z" fill="${bS}"/>
+    <path d="M11 89 L11 90 Q11 97 19 97 L61 97 Q69 97 69 90 L69 89 Z" fill="${bS}"/>
+    <!-- Pot foot / base ridge -->
+    <rect x="14" y="95" width="52" height="4" rx="2" fill="${bS}" opacity=".7"/>
+    <!-- Ground shadow ellipse -->
+    <ellipse cx="40" cy="103" rx="24" ry="3.5" fill="rgba(0,0,0,.18)"/>
     <!-- Soil surface layers -->
     <ellipse cx="40" cy="66" rx="28" ry="7.5" fill="${sl}"/>
     <ellipse cx="40" cy="64" rx="25" ry="6"   fill="${sm}"/>
     <ellipse cx="40" cy="63" rx="20" ry="4.5" fill="${sd}"/>
+    <!-- Soil texture dots -->
+    <circle cx="35" cy="63" r="1.5" fill="${sl}" opacity=".6"/>
+    <circle cx="44" cy="62" r="1.2" fill="${sl}" opacity=".5"/>
+    <circle cx="30" cy="64" r="1"   fill="${sl}" opacity=".4"/>
     ${barEl}
     ${labelEl}
   </svg>`;
@@ -1035,18 +1077,19 @@ function doOpenPacket(){
     document.getElementById('resFlower').innerHTML=`<div style="width:100%;height:100%">${flowerSVG(G.openedKey,MAX_STAGE)}</div>`;
     document.getElementById('resName').textContent=f.name;
     const rl=document.getElementById('resRarity');
-    rl.textContent=RARITY_LABEL[f.rarity]+(f.rarity==='rare'?' ✦✦✦':'');
+    rl.textContent=RARITY_LABEL[f.rarity];
     rl.className=`res-rarity ${f.rarity}`;
     const msgs={
       common:'A lovely flower for your garden! 🌸',
       uncommon:'A beautiful find — how wonderful! 💕',
-      rare:`✨ OH WOW! A legendary ${f.name}! One of the rarest flowers — just like you, one of a kind! ✨`,
+      rare:`✨ A rare ${f.name}! A stunning bloom, so hard to find! ✨`,
+      legendary:`🌟 OH WOW! A legendary ${f.name}! One of the rarest flowers — just like you, one of a kind! 🌟`,
     };
-    document.getElementById('resMsg').textContent=msgs[f.rarity];
+    document.getElementById('resMsg').textContent=msgs[f.rarity]||'A beautiful flower! 🌸';
     const res=document.getElementById('pktResult');
     res.classList.add('show');
     G.opening=false;
-    if(f.rarity==='rare') multiSparkle();
+    if(f.rarity==='legendary') multiSparkle();
     else spawnSparkle(window.innerWidth/2,window.innerHeight*.4,'✨');
   },540);
 }
@@ -1187,7 +1230,7 @@ function sellFromGreenhouse(idx){
 }
 
 function openJournalModal(){
-  const order=['pinkTulip','redTulip','yellowTulip','orangeTulip','purpleTulip','lilacTulip','tealTulip','creamTulip','coralTulip','whiteDaisy','yellowDaisy','pinkDaisy','sunflower','lavender','whiteTulip','redRose','pinkRose','redPoppy','orangePoppy','cherryBlossom','deepCherry','yellowRose','peachRose','purpleRose','blueRose','blueTulip','goldenRose','blackRose','blackTulip','silverRose','crystalDaisy','violetPoppy','goldenCherry','midnightRose'];
+  const order=['pinkTulip','redTulip','yellowTulip','purpleViolet','blueViolet','whiteLily','purpleIris','yellowDaffodil','whiteDaisy','yellowDaisy','pinkDaisy','sunflower','lavender','whiteTulip','redRose','pinkRose','pinkLily','blueIris','whiteDaffodil','whiteViolet','pinkPeony','redPoppy','orangePoppy','cherryBlossom','deepCherry','yellowRose','peachRose','purpleRose','tigerLily','goldenIris','pinkDaffodil','redPeony','purpleOrchid','blackTulip','silverRose','crystalDaisy','violetPoppy','goldenCherry','midnightRose','blueRose','blueTulip','goldenRose','blackRose','whitePeony','pinkOrchid','blueOrchid'];
   const grid=document.getElementById('jnlGrid');
   grid.innerHTML='';
   const unlocked=order.filter(k=>G.discovered.includes(k)).length;
@@ -1221,10 +1264,10 @@ function closeModal(id){document.getElementById(id).classList.remove('on');}
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on');}));
 
 const PKT_POOLS={
-  common:   {pinkTulip:30,redTulip:26,yellowTulip:22,orangeTulip:20,purpleTulip:16,lilacTulip:18,tealTulip:14,creamTulip:12,coralTulip:10,whiteDaisy:20,yellowDaisy:16,pinkDaisy:12,sunflower:5,lavender:4,whiteTulip:4,redRose:6,pinkRose:3,redPoppy:3,cherryBlossom:2,blueRose:1,blueTulip:1},
-  uncommon: {sunflower:22,lavender:18,whiteTulip:14,redRose:18,pinkRose:12,redPoppy:18,orangePoppy:14,cherryBlossom:16,deepCherry:10,yellowRose:10,peachRose:8,purpleRose:6,blueRose:3,blueTulip:3},
-  rare:     {sunflower:8,lavender:6,redRose:12,pinkRose:10,blueRose:16,blueTulip:16,goldenRose:12,blackRose:6,blackTulip:12,silverRose:10,crystalDaisy:10,violetPoppy:10,goldenCherry:8,midnightRose:6},
-  legendary:{blueRose:25,blueTulip:25,goldenRose:20,blackRose:12,blackTulip:15,silverRose:12,crystalDaisy:10,violetPoppy:10,goldenCherry:8,midnightRose:6},
+  common:   {pinkTulip:30,redTulip:26,yellowTulip:22,purpleViolet:20,blueViolet:18,whiteLily:16,purpleIris:14,yellowDaffodil:18,whiteDaisy:20,yellowDaisy:16,pinkDaisy:12,sunflower:5,lavender:4,whiteTulip:4,redRose:6,pinkRose:3,redPoppy:3,cherryBlossom:2,blueRose:1,blueTulip:1},
+  uncommon: {sunflower:22,lavender:18,whiteTulip:14,redRose:18,pinkRose:12,pinkLily:14,blueIris:12,whiteDaffodil:12,whiteViolet:10,pinkPeony:10,redPoppy:18,orangePoppy:14,cherryBlossom:16,deepCherry:10,yellowRose:10,peachRose:8,purpleRose:6,blueRose:3,blueTulip:3},
+  rare:     {sunflower:8,lavender:6,redRose:12,pinkRose:10,tigerLily:12,goldenIris:10,pinkDaffodil:10,redPeony:10,purpleOrchid:10,blueRose:16,blueTulip:16,goldenRose:12,blackRose:6,blackTulip:12,silverRose:10,crystalDaisy:10,violetPoppy:10,goldenCherry:8,midnightRose:6},
+  legendary:{blueRose:25,blueTulip:25,goldenRose:20,blackRose:12,whitePeony:10,pinkOrchid:8,blueOrchid:6,blackTulip:15,silverRose:12,crystalDaisy:10,violetPoppy:10,goldenCherry:8,midnightRose:6},
 };
 function weightedRandom(type='common'){
   const pool=PKT_POOLS[type]||PKT_POOLS.common;
