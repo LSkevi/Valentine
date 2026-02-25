@@ -24,10 +24,13 @@
     #gameScreen{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;padding-bottom:calc(120px + env(safe-area-inset-bottom));}
     .top-bar{
       background:rgba(255,255,255,.93);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-      padding:9px 11px;padding-top:calc(9px + env(safe-area-inset-top));
-      display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+      padding:6px 10px;padding-top:calc(6px + env(safe-area-inset-top));
       box-shadow:0 2px 18px rgba(0,0,0,.09);position:sticky;top:0;z-index:20;
     }
+    .top-row-stats{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+    .top-row-btns{display:flex;align-items:center;gap:5px;overflow-x:auto;scrollbar-width:none;
+      -webkit-overflow-scrolling:touch;padding-bottom:2px;}
+    .top-row-btns::-webkit-scrollbar{display:none;}
     .stat-pill{
       background:linear-gradient(135deg,#fce4ec,#f8bbd0);border-radius:20px;
       padding:6px 11px;font-size:.85em;font-weight:bold;color:#c2185b;
@@ -40,7 +43,7 @@
     }
     .tbtn:active{transform:scale(.92);}
     .tbtn-open   {background:linear-gradient(135deg,#ce93d8,#ab47bc);color:#fff;}
-    .tbtn-house  {background:linear-gradient(135deg,#a5d6a7,#43a047);color:#fff;margin-left:auto;}
+    .tbtn-house  {background:linear-gradient(135deg,#a5d6a7,#43a047);color:#fff;}
     .tbtn-shop   {background:linear-gradient(135deg,#ffe082,#ffa000);color:#fff;}
     .tbtn-journal{background:linear-gradient(135deg,#80deea,#00838f);color:#fff;}
     /* journal */
@@ -154,7 +157,7 @@
     .tray-empty{text-align:center;color:#bbb;font-size:.82em;padding:8px;}
     .overlay{
       display:none;position:fixed;top:0;left:0;right:0;bottom:0;
-      background:rgba(0,0,0,.5);z-index:100;
+      background:rgba(0,0,0,.5);z-index:9999;
       justify-content:center;align-items:flex-end;
       touch-action:manipulation;
     }
@@ -358,12 +361,16 @@
 <!-- GAME SCREEN -->
 <div id="gameScreen">
   <div class="top-bar">
-    <div class="stat-pill"><span class="ic">C</span><span id="coinDisp">10</span></div>
-    <div class="stat-pill">📦 <span id="pktDisp">3</span></div>
-    <button class="tbtn tbtn-open"    onclick="openPktModal()">🎁 Open Packet</button>
-    <button class="tbtn tbtn-journal" onclick="openJournalModal()">📖 Journal</button>
-    <button class="tbtn tbtn-house"   onclick="openGhModal()">🌿 Garden House</button>
-    <button class="tbtn tbtn-shop"    onclick="openShopModal()">🛒 Shop</button>
+    <div class="top-row-stats">
+      <div class="stat-pill"><span class="ic">C</span><span id="coinDisp">10</span></div>
+      <div class="stat-pill">📦 <span id="pktDisp">3</span></div>
+    </div>
+    <div class="top-row-btns">
+      <button class="tbtn tbtn-open"    id="btnOpenPkt">🎁 Open Packet</button>
+      <button class="tbtn tbtn-journal" id="btnJournal">📖 Journal</button>
+      <button class="tbtn tbtn-house"   id="btnGarden">🏡 Garden House</button>
+      <button class="tbtn tbtn-shop"    id="btnShop">🛒 Shop</button>
+    </div>
   </div>
   <div class="garden-header">
     <h2>🌸 Yurie's Flower Garden</h2>
