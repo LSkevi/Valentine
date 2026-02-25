@@ -182,17 +182,30 @@
       cursor:pointer;display:flex;align-items:center;justify-content:center;
       touch-action:manipulation;
     }
-    .pkt-count{color:#bbb;font-size:.84em;text-align:center;margin-bottom:12px;}
+    .pkt-sel-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:4px 0 8px;}
+    .pkt-sel-card{border-radius:20px;cursor:pointer;touch-action:manipulation;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:6px;padding:18px 8px;border:3px solid transparent;transition:transform .13s;}
+    .pkt-sel-card:not(.empty):active{transform:scale(.93);}
+    .pkt-sel-card.empty{opacity:.38;pointer-events:none;}
+    .pkt-sel-card.pkt-common  {background:linear-gradient(155deg,#fce4ec,#f8bbd0);}
+    .pkt-sel-card.pkt-uncommon{background:linear-gradient(155deg,#f3e5f5,#e1bee7);}
+    .pkt-sel-card.pkt-rare    {background:linear-gradient(155deg,#e3f2fd,#c5cae9);border-color:#7986cb;}
+    .pkt-sel-card.pkt-legendary{background:linear-gradient(155deg,#fff8e1,#ffe0b2);border-color:#ff8f00;}
+    .pkt-sel-icon{font-size:2.4em;line-height:1;}
+    .pkt-sel-name{font-size:.75em;font-weight:bold;color:#555;text-align:center;}
+    .pkt-sel-cnt{font-size:.68em;font-weight:bold;color:#fff;background:#e91e63;border-radius:10px;padding:2px 9px;min-width:28px;text-align:center;}
+    .pkt-sel-cnt.none{background:#bbb;}
     .pkt-body{display:flex;flex-direction:column;align-items:center;gap:12px;}
     .pkt-card{
       width:110px;height:148px;border-radius:16px;
       display:flex;flex-direction:column;align-items:center;justify-content:center;
-      cursor:pointer;touch-action:manipulation;
-      background:linear-gradient(155deg,#ce93d8,#7b1fa2);
-      box-shadow:0 8px 28px rgba(123,31,162,.38);
-      border:3px solid rgba(255,255,255,.35);gap:8px;transition:transform .18s;
+      gap:8px;border:3px solid rgba(255,255,255,.35);transition:transform .18s;
     }
-    .pkt-card:active{transform:scale(.94);}
+    .pkt-card.t-common   {background:linear-gradient(155deg,#f48fb1,#e91e63);box-shadow:0 8px 28px rgba(233,30,99,.38);}
+    .pkt-card.t-uncommon {background:linear-gradient(155deg,#ce93d8,#7b1fa2);box-shadow:0 8px 28px rgba(123,31,162,.38);}
+    .pkt-card.t-rare     {background:linear-gradient(155deg,#5c6bc0,#283593);box-shadow:0 8px 28px rgba(57,73,171,.38);}
+    .pkt-card.t-legendary{background:linear-gradient(155deg,#ffb300,#e65100);box-shadow:0 8px 28px rgba(230,81,0,.38);}
     .pkt-card.shaking{animation:pktShake .52s ease;}
     @keyframes pktShake{
       0%,100%{transform:rotate(0)}18%{transform:rotate(-9deg) scale(1.05)}
@@ -410,12 +423,12 @@
   <div class="sheet">
     <button class="sh-close" onclick="closeModal('pktOverlay')">✕</button>
     <div class="sh-handle"></div>
-    <div class="sh-title">🎁 Open a Seed Packet</div>
-    <div class="pkt-count" id="pktCountLbl"></div>
-    <div class="pkt-body">
-      <div id="pktCardEl" class="pkt-card" onclick="doOpenPacket()">
-        <span class="pkt-icon">🌸</span>
-        <span class="pkt-label">TAP TO OPEN</span>
+    <div class="sh-title" id="pktTitle">🎁 Open a Packet</div>
+    <div id="pktSelector" class="pkt-sel-grid"></div>
+    <div id="pktOpenWrap" class="pkt-body" style="display:none">
+      <div id="pktCardEl" class="pkt-card">
+        <span class="pkt-icon"></span>
+        <span class="pkt-label">OPENING…</span>
       </div>
       <p class="pkt-hint" id="pktHint">Something beautiful might be inside… ✨</p>
     </div>
@@ -1045,53 +1058,62 @@ function renderTray(){
   });
 }
 
-function openPktModal(type){
+function openPktModal(){
   const total=Object.values(G.pkt).reduce((a,b)=>a+b,0);
   if(!total){toast('No packets! Buy some in the shop 🛒',2000);return;}
-  // pick the type to open — prefer passed type, fallback to first available
-  const fallback=Object.keys(G.pkt).find(k=>G.pkt[k]>0)||'common';
-  G.pendingPktType=(type&&G.pkt[type]>0)?type:fallback;
   G.openedKey=null;G.opening=false;
-  const card=document.getElementById('pktCardEl');
-  card.style.display='flex';
-  const res=document.getElementById('pktResult');
-  res.classList.remove('show');res.style.display='';
-  document.getElementById('pktHint').style.display='';
-  document.getElementById('pktCardEl').querySelector('.pkt-icon').textContent=PKT_ICON[G.pendingPktType];
-  const cnt=G.pkt[G.pendingPktType];
-  document.getElementById('pktCountLbl').textContent=`${PKT_ICON[G.pendingPktType]} ${PKT_LABEL[G.pendingPktType]} Packet · You have ${cnt}`;
-  document.querySelector('#pktOverlay .sh-title').textContent=`${PKT_ICON[G.pendingPktType]} Open a ${PKT_LABEL[G.pendingPktType]} Packet`;
+  // render selector cards
+  const types=['common','uncommon','rare','legendary'];
+  document.getElementById('pktSelector').innerHTML=types.map(t=>{
+    const cnt=G.pkt[t]||0;
+    return `<div class="pkt-sel-card pkt-${t}${cnt?'':' empty'}" onclick="selectPktType('${t}')">
+      <span class="pkt-sel-icon">${PKT_ICON[t]}</span>
+      <span class="pkt-sel-name">${PKT_LABEL[t]} Packet</span>
+      <span class="pkt-sel-cnt${cnt?'':' none'}">×${cnt}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('pktSelector').style.display='';
+  document.getElementById('pktOpenWrap').style.display='none';
+  document.getElementById('pktResult').classList.remove('show');
+  document.getElementById('pktTitle').textContent='🎁 Open a Packet';
   openModal('pktOverlay');
 }
-function doOpenPacket(){
-  if(!G.pkt[G.pendingPktType]||G.opening) return;
+function selectPktType(type){
+  if(!G.pkt[type]||G.opening) return;
+  G.pendingPktType=type;
   G.opening=true;
+  document.getElementById('pktSelector').style.display='none';
+  document.getElementById('pktTitle').textContent=`${PKT_ICON[type]} Open a ${PKT_LABEL[type]} Packet`;
   const card=document.getElementById('pktCardEl');
-  card.classList.add('shaking');
+  card.className=`pkt-card t-${type}`;
+  card.querySelector('.pkt-icon').textContent=PKT_ICON[type];
+  document.getElementById('pktOpenWrap').style.display='';
+  document.getElementById('pktHint').style.display='';
   setTimeout(()=>{
-    G.pkt[G.pendingPktType]--;updateHUD();saveG();
-    G.openedKey=weightedRandom(G.pendingPktType);
-    const f=FLOWERS[G.openedKey];
-    card.style.display='none';
-    document.getElementById('pktHint').style.display='none';
-    document.getElementById('resFlower').innerHTML=`<div style="width:100%;height:100%">${flowerSVG(G.openedKey,MAX_STAGE)}</div>`;
-    document.getElementById('resName').textContent=f.name;
-    const rl=document.getElementById('resRarity');
-    rl.textContent=RARITY_LABEL[f.rarity];
-    rl.className=`res-rarity ${f.rarity}`;
-    const msgs={
-      common:'A lovely flower for your garden! 🌸',
-      uncommon:'A beautiful find — how wonderful! 💕',
-      rare:`✨ A rare ${f.name}! A stunning bloom, so hard to find! ✨`,
-      legendary:`🌟 OH WOW! A legendary ${f.name}! One of the rarest flowers — just like you, one of a kind! 🌟`,
-    };
-    document.getElementById('resMsg').textContent=msgs[f.rarity]||'A beautiful flower! 🌸';
-    const res=document.getElementById('pktResult');
-    res.classList.add('show');
-    G.opening=false;
-    if(f.rarity==='legendary') multiSparkle();
-    else spawnSparkle(window.innerWidth/2,window.innerHeight*.4,'✨');
-  },540);
+    card.classList.add('shaking');
+    setTimeout(()=>{
+      G.pkt[type]--;updateHUD();saveG();
+      G.openedKey=weightedRandom(type);
+      const f=FLOWERS[G.openedKey];
+      document.getElementById('pktOpenWrap').style.display='none';
+      document.getElementById('resFlower').innerHTML=`<div style="width:100%;height:100%">${flowerSVG(G.openedKey,MAX_STAGE)}</div>`;
+      document.getElementById('resName').textContent=f.name;
+      const rl=document.getElementById('resRarity');
+      rl.textContent=RARITY_LABEL[f.rarity];
+      rl.className=`res-rarity ${f.rarity}`;
+      const msgs={
+        common:'A lovely flower for your garden! 🌸',
+        uncommon:'A beautiful find — how wonderful! 💕',
+        rare:`✨ A rare ${f.name}! A stunning bloom, so hard to find! ✨`,
+        legendary:`🌟 OH WOW! A legendary ${f.name}! One of the rarest flowers — just like you, one of a kind! 🌟`,
+      };
+      document.getElementById('resMsg').textContent=msgs[f.rarity]||'A beautiful flower! 🌸';
+      document.getElementById('pktResult').classList.add('show');
+      G.opening=false;
+      if(f.rarity==='legendary') multiSparkle();
+      else spawnSparkle(window.innerWidth/2,window.innerHeight*.4,'✨');
+    },540);
+  },100);
 }
 function collectSeed(){
   if(!G.openedKey) return;
