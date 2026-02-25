@@ -4,6 +4,7 @@ const FLOWERS = {
   pinkTulip: {
     name: "Pink Tulip",
     kind: "tulip",
+    appearance: "tulip",
     rarity: "common",
     w: 32,
     petal: "#f06292",
@@ -13,6 +14,7 @@ const FLOWERS = {
   redTulip: {
     name: "Red Tulip",
     kind: "tulip",
+    appearance: "tulip",
     rarity: "common",
     w: 28,
     petal: "#e53935",
@@ -22,6 +24,7 @@ const FLOWERS = {
   yellowTulip: {
     name: "Yellow Tulip",
     kind: "tulip",
+    appearance: "tulip",
     rarity: "common",
     w: 24,
     petal: "#fdd835",
@@ -31,6 +34,7 @@ const FLOWERS = {
   purpleViolet: {
     name: "Purple Violet",
     kind: "violet",
+    appearance: "violet",
     rarity: "common",
     w: 20,
     petal: "#7e57c2",
@@ -40,6 +44,7 @@ const FLOWERS = {
   blueViolet: {
     name: "Blue Violet",
     kind: "violet",
+    appearance: "violet",
     rarity: "common",
     w: 18,
     petal: "#5c6bc0",
@@ -49,6 +54,7 @@ const FLOWERS = {
   purpleIris: {
     name: "Purple Iris",
     kind: "iris",
+    appearance: "iris",
     rarity: "common",
     w: 14,
     petal: "#9c27b0",
@@ -58,6 +64,7 @@ const FLOWERS = {
   yellowDaffodil: {
     name: "Yellow Daffodil",
     kind: "daffodil",
+    appearance: "daffodil",
     rarity: "common",
     w: 18,
     petal: "#fff176",
@@ -67,6 +74,7 @@ const FLOWERS = {
   whiteDaisy: {
     name: "White Daisy",
     kind: "daisy",
+    appearance: "daisy",
     rarity: "common",
     w: 22,
     petal: "#f5f5f5",
@@ -76,6 +84,7 @@ const FLOWERS = {
   yellowDaisy: {
     name: "Yellow Daisy",
     kind: "daisy",
+    appearance: "daisy",
     rarity: "common",
     w: 18,
     petal: "#fff176",
@@ -85,6 +94,7 @@ const FLOWERS = {
   pinkDaisy: {
     name: "Pink Daisy",
     kind: "daisy",
+    appearance: "daisy",
     rarity: "common",
     w: 14,
     petal: "#f48fb1",
@@ -94,6 +104,7 @@ const FLOWERS = {
   pinkCarnation: {
     name: "Pink Carnation",
     kind: "carnation",
+    appearance: "carnation",
     rarity: "common",
     w: 25,
     petal: "#f48fb1",
@@ -103,6 +114,7 @@ const FLOWERS = {
   redCarnation: {
     name: "Red Carnation",
     kind: "carnation",
+    appearance: "carnation",
     rarity: "common",
     w: 22,
     petal: "#f44336",
@@ -112,6 +124,7 @@ const FLOWERS = {
   whiteCarnation: {
     name: "White Carnation",
     kind: "carnation",
+    appearance: "carnation",
     rarity: "common",
     w: 20,
     petal: "#fafafa",
@@ -121,6 +134,7 @@ const FLOWERS = {
   purpleHyacinth: {
     name: "Purple Hyacinth",
     kind: "hyacinth",
+    appearance: "hyacinth",
     rarity: "common",
     w: 22,
     petal: "#7b1fa2",
@@ -130,6 +144,7 @@ const FLOWERS = {
   pinkHyacinth: {
     name: "Pink Hyacinth",
     kind: "hyacinth",
+    appearance: "hyacinth",
     rarity: "common",
     w: 18,
     petal: "#ec407a",
@@ -139,6 +154,7 @@ const FLOWERS = {
   yellowChrysanthemum: {
     name: "Yellow Chrysanthemum",
     kind: "chrysanthemum",
+    appearance: "chrysanthemum",
     rarity: "common",
     w: 18,
     petal: "#fdd835",
@@ -148,6 +164,7 @@ const FLOWERS = {
   pinkChrysanthemum: {
     name: "Pink Chrysanthemum",
     kind: "chrysanthemum",
+    appearance: "chrysanthemum",
     rarity: "common",
     w: 16,
     petal: "#f48fb1",
@@ -157,6 +174,7 @@ const FLOWERS = {
   redGeranium: {
     name: "Red Geranium",
     kind: "geranium",
+    appearance: "geranium",
     rarity: "common",
     w: 22,
     petal: "#e53935",
@@ -166,6 +184,7 @@ const FLOWERS = {
   pinkGeranium: {
     name: "Pink Geranium",
     kind: "geranium",
+    appearance: "geranium",
     rarity: "common",
     w: 20,
     petal: "#f06292",
@@ -175,6 +194,7 @@ const FLOWERS = {
   blueBluebell: {
     name: "Blue Bluebell",
     kind: "bluebell",
+    appearance: "bluebell",
     rarity: "common",
     w: 20,
     petal: "#7986cb",
@@ -184,6 +204,7 @@ const FLOWERS = {
   purpleBluebell: {
     name: "Purple Bluebell",
     kind: "bluebell",
+    appearance: "bluebell",
     rarity: "common",
     w: 16,
     petal: "#9c27b0",
@@ -193,6 +214,7 @@ const FLOWERS = {
   yellowMarigold: {
     name: "Yellow Marigold",
     kind: "marigold",
+    appearance: "marigold",
     rarity: "common",
     w: 24,
     petal: "#fdd835",
@@ -202,6 +224,7 @@ const FLOWERS = {
   orangeMarigold: {
     name: "Orange Marigold",
     kind: "marigold",
+    appearance: "marigold",
     rarity: "common",
     w: 20,
     petal: "#ff8a65",
@@ -211,6 +234,7 @@ const FLOWERS = {
   purplePansy: {
     name: "Purple Pansy",
     kind: "pansy",
+    appearance: "pansy",
     rarity: "common",
     w: 22,
     petal: "#7b1fa2",
@@ -220,6 +244,7 @@ const FLOWERS = {
   yellowPansy: {
     name: "Yellow Pansy",
     kind: "pansy",
+    appearance: "pansy",
     rarity: "common",
     w: 20,
     petal: "#fdd835",
@@ -229,6 +254,7 @@ const FLOWERS = {
   pinkPetunia: {
     name: "Pink Petunia",
     kind: "petunia",
+    appearance: "petunia",
     rarity: "common",
     w: 22,
     petal: "#f48fb1",
@@ -238,6 +264,7 @@ const FLOWERS = {
   purplePetunia: {
     name: "Purple Petunia",
     kind: "petunia",
+    appearance: "petunia",
     rarity: "common",
     w: 20,
     petal: "#9c27b0",
@@ -247,6 +274,7 @@ const FLOWERS = {
   yellowPrimrose: {
     name: "Yellow Primrose",
     kind: "primrose",
+    appearance: "primrose",
     rarity: "common",
     w: 22,
     petal: "#fff176",
@@ -256,6 +284,7 @@ const FLOWERS = {
   pinkPrimrose: {
     name: "Pink Primrose",
     kind: "primrose",
+    appearance: "primrose",
     rarity: "common",
     w: 18,
     petal: "#f48fb1",
@@ -265,6 +294,7 @@ const FLOWERS = {
   purpleCrocus: {
     name: "Purple Crocus",
     kind: "crocus",
+    appearance: "crocus",
     rarity: "common",
     w: 20,
     petal: "#7b1fa2",
@@ -274,6 +304,7 @@ const FLOWERS = {
   yellowCrocus: {
     name: "Yellow Crocus",
     kind: "crocus",
+    appearance: "crocus",
     rarity: "common",
     w: 18,
     petal: "#fdd835",
@@ -283,6 +314,7 @@ const FLOWERS = {
   orangeCalendula: {
     name: "Orange Calendula",
     kind: "calendula",
+    appearance: "calendula",
     rarity: "common",
     w: 22,
     petal: "#ff8a65",
@@ -292,6 +324,7 @@ const FLOWERS = {
   yellowCalendula: {
     name: "Yellow Calendula",
     kind: "calendula",
+    appearance: "calendula",
     rarity: "common",
     w: 20,
     petal: "#fdd835",
@@ -301,6 +334,7 @@ const FLOWERS = {
   pinkCosmos: {
     name: "Pink Cosmos",
     kind: "cosmos",
+    appearance: "cosmos",
     rarity: "common",
     w: 22,
     petal: "#f48fb1",
@@ -310,6 +344,7 @@ const FLOWERS = {
   whiteCosmos: {
     name: "White Cosmos",
     kind: "cosmos",
+    appearance: "cosmos",
     rarity: "common",
     w: 18,
     petal: "#f5f5f5",
@@ -319,6 +354,7 @@ const FLOWERS = {
   pinkZinnia: {
     name: "Pink Zinnia",
     kind: "zinnia",
+    appearance: "zinnia",
     rarity: "common",
     w: 20,
     petal: "#f48fb1",
@@ -328,6 +364,7 @@ const FLOWERS = {
   orangeZinnia: {
     name: "Orange Zinnia",
     kind: "zinnia",
+    appearance: "zinnia",
     rarity: "common",
     w: 18,
     petal: "#ff8a65",
@@ -337,6 +374,7 @@ const FLOWERS = {
   pinkSnapdragon: {
     name: "Pink Snapdragon",
     kind: "snapdragon",
+    appearance: "snapdragon",
     rarity: "common",
     w: 18,
     petal: "#f48fb1",
@@ -346,6 +384,7 @@ const FLOWERS = {
   yellowSnapdragon: {
     name: "Yellow Snapdragon",
     kind: "snapdragon",
+    appearance: "snapdragon",
     rarity: "common",
     w: 16,
     petal: "#fdd835",
@@ -355,6 +394,7 @@ const FLOWERS = {
   blueForgetMeNot: {
     name: "Blue Forget-me-not",
     kind: "forgetmenot",
+    appearance: "forgetmenot",
     rarity: "common",
     w: 24,
     petal: "#64b5f6",
@@ -364,6 +404,7 @@ const FLOWERS = {
   pinkAster: {
     name: "Pink Aster",
     kind: "aster",
+    appearance: "aster",
     rarity: "common",
     w: 18,
     petal: "#f48fb1",
@@ -373,6 +414,7 @@ const FLOWERS = {
   purpleAster: {
     name: "Purple Aster",
     kind: "aster",
+    appearance: "aster",
     rarity: "common",
     w: 16,
     petal: "#9c27b0",
@@ -382,6 +424,7 @@ const FLOWERS = {
   blueCornflower: {
     name: "Blue Cornflower",
     kind: "cornflower",
+    appearance: "cornflower",
     rarity: "common",
     w: 22,
     petal: "#1e88e5",
@@ -391,6 +434,7 @@ const FLOWERS = {
   pinkImpatiens: {
     name: "Pink Impatiens",
     kind: "impatiens",
+    appearance: "impatiens",
     rarity: "common",
     w: 20,
     petal: "#f48fb1",
@@ -400,6 +444,7 @@ const FLOWERS = {
   pinkVerbena: {
     name: "Pink Verbena",
     kind: "verbena",
+    appearance: "verbena",
     rarity: "common",
     w: 18,
     petal: "#f48fb1",
@@ -409,6 +454,7 @@ const FLOWERS = {
   purpleHeather: {
     name: "Purple Heather",
     kind: "heather",
+    appearance: "heather",
     rarity: "common",
     w: 18,
     petal: "#9c27b0",
@@ -418,6 +464,7 @@ const FLOWERS = {
   purpleStatice: {
     name: "Purple Statice",
     kind: "statice",
+    appearance: "statice",
     rarity: "common",
     w: 20,
     petal: "#9c27b0",
@@ -427,6 +474,7 @@ const FLOWERS = {
   orangeGerbera: {
     name: "Orange Gerbera Daisy",
     kind: "gerbera",
+    appearance: "gerbera",
     rarity: "common",
     w: 20,
     petal: "#ff8a65",
@@ -436,6 +484,7 @@ const FLOWERS = {
   pinkGerbera: {
     name: "Pink Gerbera Daisy",
     kind: "gerbera",
+    appearance: "gerbera",
     rarity: "common",
     w: 18,
     petal: "#f48fb1",
@@ -445,6 +494,7 @@ const FLOWERS = {
   blackEyedSusan: {
     name: "Black-eyed Susan",
     kind: "blackeyedsusan",
+    appearance: "blackeyedsusan",
     rarity: "common",
     w: 20,
     petal: "#fdd835",
@@ -454,6 +504,7 @@ const FLOWERS = {
   blueSalvia: {
     name: "Blue Salvia",
     kind: "salvia",
+    appearance: "salvia",
     rarity: "common",
     w: 18,
     petal: "#3949ab",
@@ -463,6 +514,7 @@ const FLOWERS = {
   yellowAlstroemeria: {
     name: "Yellow Alstroemeria",
     kind: "alstroemeria",
+    appearance: "alstroemeria",
     rarity: "common",
     w: 18,
     petal: "#fff176",
@@ -472,6 +524,7 @@ const FLOWERS = {
   orangeNasturtium: {
     name: "Orange Nasturtium",
     kind: "nasturtium",
+    appearance: "nasturtium",
     rarity: "common",
     w: 20,
     petal: "#ff8a65",
@@ -481,6 +534,7 @@ const FLOWERS = {
   pinkPhlox: {
     name: "Pink Phlox",
     kind: "phlox",
+    appearance: "phlox",
     rarity: "common",
     w: 18,
     petal: "#f48fb1",
@@ -490,6 +544,7 @@ const FLOWERS = {
   purpleVeronica: {
     name: "Purple Veronica",
     kind: "veronica",
+    appearance: "veronica",
     rarity: "common",
     w: 16,
     petal: "#9c27b0",
@@ -499,6 +554,7 @@ const FLOWERS = {
   pinkSweetPea: {
     name: "Pink Sweet Pea",
     kind: "sweetpea",
+    appearance: "sweetpea",
     rarity: "common",
     w: 18,
     petal: "#f8bbd0",
@@ -508,6 +564,7 @@ const FLOWERS = {
   yellowWallflower: {
     name: "Yellow Wallflower",
     kind: "wallflower",
+    appearance: "wallflower",
     rarity: "common",
     w: 16,
     petal: "#fdd835",
@@ -517,6 +574,7 @@ const FLOWERS = {
   redGaillardia: {
     name: "Red Gaillardia",
     kind: "gaillardia",
+    appearance: "gaillardia",
     rarity: "common",
     w: 16,
     petal: "#f44336",
@@ -526,6 +584,7 @@ const FLOWERS = {
   pinkStock: {
     name: "Pink Stock",
     kind: "stock",
+    appearance: "stock",
     rarity: "common",
     w: 18,
     petal: "#f06292",
@@ -536,6 +595,7 @@ const FLOWERS = {
   sunflower: {
     name: "Sunflower",
     kind: "sunflower",
+    appearance: "sunflower",
     rarity: "uncommon",
     w: 16,
     petal: "#fdd835",
@@ -545,6 +605,7 @@ const FLOWERS = {
   lavender: {
     name: "Lavender",
     kind: "lavender",
+    appearance: "lavender",
     rarity: "uncommon",
     w: 14,
     petal: "#b39ddb",
@@ -554,6 +615,7 @@ const FLOWERS = {
   whiteTulip: {
     name: "White Tulip",
     kind: "tulip",
+    appearance: "tulip",
     rarity: "uncommon",
     w: 12,
     petal: "#eceff1",
@@ -563,6 +625,7 @@ const FLOWERS = {
   redRose: {
     name: "Red Rose",
     kind: "rose",
+    appearance: "rose",
     rarity: "uncommon",
     w: 12,
     petal: "#c62828",
@@ -572,6 +635,7 @@ const FLOWERS = {
   pinkRose: {
     name: "Pink Rose",
     kind: "rose",
+    appearance: "rose",
     rarity: "uncommon",
     w: 8,
     petal: "#e91e63",
@@ -581,6 +645,7 @@ const FLOWERS = {
   pinkLily: {
     name: "Pink Lily",
     kind: "lily",
+    appearance: "lily",
     rarity: "uncommon",
     w: 12,
     petal: "#f48fb1",
@@ -590,6 +655,7 @@ const FLOWERS = {
   blueIris: {
     name: "Blue Iris",
     kind: "iris",
+    appearance: "iris",
     rarity: "uncommon",
     w: 10,
     petal: "#1976d2",
@@ -599,6 +665,7 @@ const FLOWERS = {
   whiteDaffodil: {
     name: "White Daffodil",
     kind: "daffodil",
+    appearance: "daffodil",
     rarity: "uncommon",
     w: 10,
     petal: "#f5f5f5",
@@ -608,6 +675,7 @@ const FLOWERS = {
   whiteViolet: {
     name: "White Violet",
     kind: "violet",
+    appearance: "violet",
     rarity: "uncommon",
     w: 8,
     petal: "#ede7f6",
@@ -617,6 +685,7 @@ const FLOWERS = {
   pinkPeony: {
     name: "Pink Peony",
     kind: "peony",
+    appearance: "peony",
     rarity: "uncommon",
     w: 10,
     petal: "#f48fb1",
@@ -626,6 +695,7 @@ const FLOWERS = {
   redPoppy: {
     name: "Red Poppy",
     kind: "poppy",
+    appearance: "poppy",
     rarity: "uncommon",
     w: 18,
     petal: "#f44336",
@@ -635,6 +705,7 @@ const FLOWERS = {
   orangePoppy: {
     name: "Orange Poppy",
     kind: "poppy",
+    appearance: "poppy",
     rarity: "uncommon",
     w: 14,
     petal: "#ff6d00",
@@ -644,6 +715,7 @@ const FLOWERS = {
   cherryBlossom: {
     name: "Cherry Blossom",
     kind: "cherry",
+    appearance: "cherry",
     rarity: "uncommon",
     w: 16,
     petal: "#fce4ec",
@@ -653,6 +725,7 @@ const FLOWERS = {
   deepCherry: {
     name: "Deep Cherry",
     kind: "cherry",
+    appearance: "cherry",
     rarity: "uncommon",
     w: 10,
     petal: "#e91e63",
@@ -662,6 +735,7 @@ const FLOWERS = {
   yellowRose: {
     name: "Yellow Rose",
     kind: "rose",
+    appearance: "rose",
     rarity: "uncommon",
     w: 10,
     petal: "#f9a825",
@@ -671,6 +745,7 @@ const FLOWERS = {
   peachRose: {
     name: "Peach Rose",
     kind: "rose",
+    appearance: "rose",
     rarity: "uncommon",
     w: 8,
     petal: "#ffcc80",
@@ -680,6 +755,7 @@ const FLOWERS = {
   purpleRose: {
     name: "Purple Rose",
     kind: "rose",
+    appearance: "rose",
     rarity: "uncommon",
     w: 6,
     petal: "#7b1fa2",
@@ -689,6 +765,7 @@ const FLOWERS = {
   pinkAlstroemeria: {
     name: "Pink Alstroemeria",
     kind: "alstroemeria",
+    appearance: "alstroemeria",
     rarity: "uncommon",
     w: 14,
     petal: "#f48fb1",
@@ -698,6 +775,7 @@ const FLOWERS = {
   blueHyacinth: {
     name: "Blue Hyacinth",
     kind: "hyacinth",
+    appearance: "hyacinth",
     rarity: "uncommon",
     w: 12,
     petal: "#1e88e5",
@@ -707,6 +785,7 @@ const FLOWERS = {
   purpleChrysanthemum: {
     name: "Purple Chrysanthemum",
     kind: "chrysanthemum",
+    appearance: "chrysanthemum",
     rarity: "uncommon",
     w: 12,
     petal: "#7b1fa2",
@@ -716,6 +795,7 @@ const FLOWERS = {
   whiteMagnolia: {
     name: "White Magnolia",
     kind: "magnolia",
+    appearance: "magnolia",
     rarity: "uncommon",
     w: 14,
     petal: "#fafafa",
@@ -725,6 +805,7 @@ const FLOWERS = {
   pinkMagnolia: {
     name: "Pink Magnolia",
     kind: "magnolia",
+    appearance: "magnolia",
     rarity: "uncommon",
     w: 10,
     petal: "#ffcdd2",
@@ -734,6 +815,7 @@ const FLOWERS = {
   redBegonia: {
     name: "Red Begonia",
     kind: "begonia",
+    appearance: "begonia",
     rarity: "uncommon",
     w: 14,
     petal: "#f44336",
@@ -743,6 +825,7 @@ const FLOWERS = {
   pinkBegonia: {
     name: "Pink Begonia",
     kind: "begonia",
+    appearance: "begonia",
     rarity: "uncommon",
     w: 12,
     petal: "#f48fb1",
@@ -752,6 +835,7 @@ const FLOWERS = {
   pinkDahlia: {
     name: "Pink Dahlia",
     kind: "dahlia",
+    appearance: "dahlia",
     rarity: "uncommon",
     w: 14,
     petal: "#f48fb1",
@@ -761,6 +845,7 @@ const FLOWERS = {
   purpleDahlia: {
     name: "Purple Dahlia",
     kind: "dahlia",
+    appearance: "dahlia",
     rarity: "uncommon",
     w: 12,
     petal: "#9c27b0",
@@ -770,6 +855,7 @@ const FLOWERS = {
   orangeDahlia: {
     name: "Orange Dahlia",
     kind: "dahlia",
+    appearance: "dahlia",
     rarity: "uncommon",
     w: 10,
     petal: "#ff8a65",
@@ -779,6 +865,7 @@ const FLOWERS = {
   pinkAzalea: {
     name: "Pink Azalea",
     kind: "azalea",
+    appearance: "azalea",
     rarity: "uncommon",
     w: 14,
     petal: "#f48fb1",
@@ -788,6 +875,7 @@ const FLOWERS = {
   redAnemone: {
     name: "Red Anemone",
     kind: "anemone",
+    appearance: "anemone",
     rarity: "uncommon",
     w: 14,
     petal: "#f44336",
@@ -797,6 +885,7 @@ const FLOWERS = {
   purpleAnemone: {
     name: "Purple Anemone",
     kind: "anemone",
+    appearance: "anemone",
     rarity: "uncommon",
     w: 12,
     petal: "#9c27b0",
@@ -806,6 +895,7 @@ const FLOWERS = {
   yellowFreesia: {
     name: "Yellow Freesia",
     kind: "freesia",
+    appearance: "freesia",
     rarity: "uncommon",
     w: 14,
     petal: "#fff176",
@@ -815,6 +905,7 @@ const FLOWERS = {
   pinkFreesia: {
     name: "Pink Freesia",
     kind: "freesia",
+    appearance: "freesia",
     rarity: "uncommon",
     w: 12,
     petal: "#f48fb1",
@@ -824,6 +915,7 @@ const FLOWERS = {
   pinkGladiolus: {
     name: "Pink Gladiolus",
     kind: "gladiolus",
+    appearance: "gladiolus",
     rarity: "uncommon",
     w: 14,
     petal: "#f48fb1",
@@ -833,6 +925,7 @@ const FLOWERS = {
   purpleGladiolus: {
     name: "Purple Gladiolus",
     kind: "gladiolus",
+    appearance: "gladiolus",
     rarity: "uncommon",
     w: 12,
     petal: "#9c27b0",
@@ -842,6 +935,7 @@ const FLOWERS = {
   pinkHibiscus: {
     name: "Pink Hibiscus",
     kind: "hibiscus",
+    appearance: "hibiscus",
     rarity: "uncommon",
     w: 14,
     petal: "#f48fb1",
@@ -851,6 +945,7 @@ const FLOWERS = {
   redHibiscus: {
     name: "Red Hibiscus",
     kind: "hibiscus",
+    appearance: "hibiscus",
     rarity: "uncommon",
     w: 12,
     petal: "#f44336",
@@ -860,6 +955,7 @@ const FLOWERS = {
   lilyValley: {
     name: "Lily of the Valley",
     kind: "lilyvalley",
+    appearance: "lilyvalley",
     rarity: "uncommon",
     w: 12,
     petal: "#f5f5f5",
@@ -869,6 +965,7 @@ const FLOWERS = {
   purpleWisteria: {
     name: "Purple Wisteria",
     kind: "wisteria",
+    appearance: "wisteria",
     rarity: "uncommon",
     w: 10,
     petal: "#9c27b0",
@@ -878,6 +975,7 @@ const FLOWERS = {
   purpleFoxglove: {
     name: "Purple Foxglove",
     kind: "foxglove",
+    appearance: "foxglove",
     rarity: "uncommon",
     w: 12,
     petal: "#9c27b0",
@@ -887,6 +985,7 @@ const FLOWERS = {
   pinkFoxglove: {
     name: "Pink Foxglove",
     kind: "foxglove",
+    appearance: "foxglove",
     rarity: "uncommon",
     w: 14,
     petal: "#f48fb1",
@@ -896,6 +995,7 @@ const FLOWERS = {
   whiteGardenia: {
     name: "White Gardenia",
     kind: "gardenia",
+    appearance: "gardenia",
     rarity: "uncommon",
     w: 10,
     petal: "#fafafa",
@@ -905,6 +1005,7 @@ const FLOWERS = {
   pinkCyclamen: {
     name: "Pink Cyclamen",
     kind: "cyclamen",
+    appearance: "cyclamen",
     rarity: "uncommon",
     w: 12,
     petal: "#f48fb1",
@@ -914,6 +1015,7 @@ const FLOWERS = {
   pinkRanunculus: {
     name: "Pink Ranunculus",
     kind: "ranunculus",
+    appearance: "ranunculus",
     rarity: "uncommon",
     w: 12,
     petal: "#f48fb1",
@@ -923,6 +1025,7 @@ const FLOWERS = {
   whiteJasmine: {
     name: "White Jasmine",
     kind: "jasmine",
+    appearance: "jasmine",
     rarity: "uncommon",
     w: 12,
     petal: "#fafafa",
@@ -932,6 +1035,7 @@ const FLOWERS = {
   purpleBuddleia: {
     name: "Purple Buddleia",
     kind: "buddleia",
+    appearance: "buddleia",
     rarity: "uncommon",
     w: 12,
     petal: "#9c27b0",
@@ -941,6 +1045,7 @@ const FLOWERS = {
   purpleLantana: {
     name: "Purple Lantana",
     kind: "lantana",
+    appearance: "lantana",
     rarity: "uncommon",
     w: 12,
     petal: "#9c27b0",
@@ -951,6 +1056,7 @@ const FLOWERS = {
   tigerLily: {
     name: "Tiger Lily",
     kind: "lily",
+    appearance: "lily",
     rarity: "rare",
     w: 4,
     petal: "#ff7043",
@@ -960,6 +1066,7 @@ const FLOWERS = {
   goldenIris: {
     name: "Golden Iris",
     kind: "iris",
+    appearance: "iris",
     rarity: "rare",
     w: 4,
     petal: "#f9a825",
@@ -969,6 +1076,7 @@ const FLOWERS = {
   pinkDaffodil: {
     name: "Pink Daffodil",
     kind: "daffodil",
+    appearance: "daffodil",
     rarity: "rare",
     w: 3,
     petal: "#f8bbd0",
@@ -978,6 +1086,7 @@ const FLOWERS = {
   redPeony: {
     name: "Red Peony",
     kind: "peony",
+    appearance: "peony",
     rarity: "rare",
     w: 3,
     petal: "#e53935",
@@ -987,6 +1096,7 @@ const FLOWERS = {
   purpleOrchid: {
     name: "Purple Orchid",
     kind: "orchid",
+    appearance: "orchid",
     rarity: "rare",
     w: 3,
     petal: "#ab47bc",
@@ -996,6 +1106,7 @@ const FLOWERS = {
   blackTulip: {
     name: "Black Tulip",
     kind: "tulip",
+    appearance: "tulip",
     rarity: "rare",
     w: 2,
     petal: "#263238",
@@ -1005,6 +1116,7 @@ const FLOWERS = {
   silverRose: {
     name: "Silver Rose",
     kind: "rose",
+    appearance: "rose",
     rarity: "rare",
     w: 2,
     petal: "#90a4ae",
@@ -1014,6 +1126,7 @@ const FLOWERS = {
   crystalDaisy: {
     name: "Crystal Daisy",
     kind: "daisy",
+    appearance: "daisy",
     rarity: "rare",
     w: 2,
     petal: "#e3f2fd",
@@ -1023,6 +1136,7 @@ const FLOWERS = {
   violetPoppy: {
     name: "Violet Poppy",
     kind: "poppy",
+    appearance: "poppy",
     rarity: "rare",
     w: 2,
     petal: "#6a1b9a",
@@ -1032,6 +1146,7 @@ const FLOWERS = {
   goldenCherry: {
     name: "Golden Cherry",
     kind: "cherry",
+    appearance: "cherry",
     rarity: "rare",
     w: 1,
     petal: "#f9a825",
@@ -1041,6 +1156,7 @@ const FLOWERS = {
   midnightRose: {
     name: "Midnight Rose",
     kind: "rose",
+    appearance: "rose",
     rarity: "rare",
     w: 1,
     petal: "#37474f",
@@ -1050,6 +1166,7 @@ const FLOWERS = {
   purpleCarnation: {
     name: "Purple Carnation",
     kind: "carnation",
+    appearance: "carnation",
     rarity: "rare",
     w: 4,
     petal: "#9c27b0",
@@ -1059,6 +1176,7 @@ const FLOWERS = {
   pinkFuchsia: {
     name: "Pink Fuchsia",
     kind: "fuchsia",
+    appearance: "fuchsia",
     rarity: "rare",
     w: 4,
     petal: "#f06292",
@@ -1068,6 +1186,7 @@ const FLOWERS = {
   purpleClematis: {
     name: "Purple Clematis",
     kind: "clematis",
+    appearance: "clematis",
     rarity: "rare",
     w: 4,
     petal: "#7b1fa2",
@@ -1077,6 +1196,7 @@ const FLOWERS = {
   blueHydrangea: {
     name: "Blue Hydrangea",
     kind: "hydrangea",
+    appearance: "hydrangea",
     rarity: "rare",
     w: 4,
     petal: "#64b5f6",
@@ -1086,6 +1206,7 @@ const FLOWERS = {
   pinkHydrangea: {
     name: "Pink Hydrangea",
     kind: "hydrangea",
+    appearance: "hydrangea",
     rarity: "rare",
     w: 3,
     petal: "#f48fb1",
@@ -1095,6 +1216,7 @@ const FLOWERS = {
   whiteCamellia: {
     name: "White Camellia",
     kind: "camellia",
+    appearance: "camellia",
     rarity: "rare",
     w: 4,
     petal: "#fafafa",
@@ -1104,6 +1226,7 @@ const FLOWERS = {
   redCamellia: {
     name: "Red Camellia",
     kind: "camellia",
+    appearance: "camellia",
     rarity: "rare",
     w: 3,
     petal: "#e53935",
@@ -1113,6 +1236,7 @@ const FLOWERS = {
   pinkLotus: {
     name: "Pink Lotus",
     kind: "lotus",
+    appearance: "lotus",
     rarity: "rare",
     w: 3,
     petal: "#f48fb1",
@@ -1122,6 +1246,7 @@ const FLOWERS = {
   pinkPlumeria: {
     name: "Pink Plumeria",
     kind: "plumeria",
+    appearance: "plumeria",
     rarity: "rare",
     w: 3,
     petal: "#f8bbd0",
@@ -1131,6 +1256,7 @@ const FLOWERS = {
   pinkBleedingHeart: {
     name: "Pink Bleeding Heart",
     kind: "bleedingheart",
+    appearance: "bleedingheart",
     rarity: "rare",
     w: 3,
     petal: "#f48fb1",
@@ -1140,6 +1266,7 @@ const FLOWERS = {
   blueMorningGlory: {
     name: "Blue Morning Glory",
     kind: "morningglory",
+    appearance: "morningglory",
     rarity: "rare",
     w: 3,
     petal: "#1e88e5",
@@ -1149,6 +1276,7 @@ const FLOWERS = {
   purpleHellebore: {
     name: "Purple Hellebore",
     kind: "hellebore",
+    appearance: "hellebore",
     rarity: "rare",
     w: 3,
     petal: "#6a1b9a",
@@ -1158,6 +1286,7 @@ const FLOWERS = {
   purpleAllium: {
     name: "Purple Allium",
     kind: "allium",
+    appearance: "allium",
     rarity: "rare",
     w: 3,
     petal: "#9c27b0",
@@ -1167,6 +1296,7 @@ const FLOWERS = {
   purpleGloxinia: {
     name: "Purple Gloxinia",
     kind: "gloxinia",
+    appearance: "gloxinia",
     rarity: "rare",
     w: 3,
     petal: "#9c27b0",
@@ -1176,6 +1306,7 @@ const FLOWERS = {
   yellowPlumeria: {
     name: "Yellow Plumeria",
     kind: "plumeria",
+    appearance: "plumeria",
     rarity: "rare",
     w: 2,
     petal: "#fff176",
@@ -1185,6 +1316,7 @@ const FLOWERS = {
   magentaBougainvillea: {
     name: "Magenta Bougainvillea",
     kind: "bougainvillea",
+    appearance: "bougainvillea",
     rarity: "rare",
     w: 3,
     petal: "#e91e63",
@@ -1195,6 +1327,7 @@ const FLOWERS = {
   blueRose: {
     name: "Blue Rose",
     kind: "rose",
+    appearance: "rose",
     rarity: "legendary",
     w: 3,
     petal: "#3f51b5",
@@ -1204,6 +1337,7 @@ const FLOWERS = {
   blueTulip: {
     name: "Blue Tulip",
     kind: "tulip",
+    appearance: "tulip",
     rarity: "legendary",
     w: 3,
     petal: "#1565c0",
@@ -1213,6 +1347,7 @@ const FLOWERS = {
   goldenRose: {
     name: "Golden Rose",
     kind: "rose",
+    appearance: "rose",
     rarity: "legendary",
     w: 2,
     petal: "#f9a825",
@@ -1222,6 +1357,7 @@ const FLOWERS = {
   blackRose: {
     name: "Black Rose",
     kind: "rose",
+    appearance: "rose",
     rarity: "legendary",
     w: 1,
     petal: "#212121",
@@ -1231,6 +1367,7 @@ const FLOWERS = {
   whitePeony: {
     name: "White Peony",
     kind: "peony",
+    appearance: "peony",
     rarity: "legendary",
     w: 2,
     petal: "#fafafa",
@@ -1240,6 +1377,7 @@ const FLOWERS = {
   pinkOrchid: {
     name: "Pink Orchid",
     kind: "orchid",
+    appearance: "orchid",
     rarity: "legendary",
     w: 2,
     petal: "#f06292",
@@ -1249,6 +1387,7 @@ const FLOWERS = {
   blueOrchid: {
     name: "Blue Orchid",
     kind: "orchid",
+    appearance: "orchid",
     rarity: "legendary",
     w: 1,
     petal: "#42a5f5",
@@ -1258,6 +1397,7 @@ const FLOWERS = {
   whiteLotus: {
     name: "White Lotus",
     kind: "lotus",
+    appearance: "lotus",
     rarity: "legendary",
     w: 3,
     petal: "#fafafa",
@@ -1267,6 +1407,7 @@ const FLOWERS = {
   saffron: {
     name: "Saffron Crocus",
     kind: "saffron",
+    appearance: "saffron",
     rarity: "legendary",
     w: 2,
     petal: "#ba68c8",
@@ -1276,6 +1417,7 @@ const FLOWERS = {
   whitePlumeria: {
     name: "White Plumeria",
     kind: "plumeria",
+    appearance: "plumeria",
     rarity: "legendary",
     w: 2,
     petal: "#fafafa",
@@ -1285,6 +1427,7 @@ const FLOWERS = {
   greenHydrangea: {
     name: "Green Hydrangea",
     kind: "hydrangea",
+    appearance: "hydrangea",
     rarity: "legendary",
     w: 2,
     petal: "#a5d6a7",
@@ -1294,6 +1437,7 @@ const FLOWERS = {
   whiteWisteria: {
     name: "White Wisteria",
     kind: "wisteria",
+    appearance: "wisteria",
     rarity: "legendary",
     w: 2,
     petal: "#fafafa",
@@ -1303,6 +1447,7 @@ const FLOWERS = {
   redAmaryllis: {
     name: "Red Amaryllis",
     kind: "amaryllis",
+    appearance: "amaryllis",
     rarity: "legendary",
     w: 2,
     petal: "#f44336",
@@ -1312,6 +1457,7 @@ const FLOWERS = {
   orangeBromeliad: {
     name: "Orange Bromeliad",
     kind: "bromeliad",
+    appearance: "bromeliad",
     rarity: "legendary",
     w: 2,
     petal: "#ff8a65",
@@ -1321,6 +1467,7 @@ const FLOWERS = {
   darkHellebore: {
     name: "Dark Hellebore",
     kind: "hellebore",
+    appearance: "hellebore",
     rarity: "legendary",
     w: 1,
     petal: "#4a148c",
@@ -1331,6 +1478,7 @@ const FLOWERS = {
   whiteLily: {
     name: "White Lily",
     kind: "lily",
+    appearance: "lily",
     rarity: "unique",
     w: 1,
     petal: "#f5f5f5",
@@ -1436,6 +1584,745 @@ function darker(hex, a = 44) {
   return `rgb(${Math.max(0, r - a)},${Math.max(0, g - a)},${Math.max(0, b - a)})`;
 }
 
+// ── Parametric Flower Engine ─────────────────────────────────
+function _fc(f) {
+  const p = f.petal,
+    S = f.stem;
+  return {
+    p,
+    S,
+    pl: lighter(p),
+    pll: lighter(p, 85),
+    pd: darker(p),
+    SD: darker(S, 25),
+    rare: f.rarity === "rare" || f.rarity === "unique",
+  };
+}
+function _aura(cy, r, pll, rare) {
+  if (!rare) return "";
+  return (
+    `<circle cx="30" cy="${cy}" r="${r}" fill="${pll}" opacity=".4"/>` +
+    `<circle cx="30" cy="${cy}" r="${r}" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/>` +
+    `<text x="30" y="${cy - r + 7}" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>`
+  );
+}
+function _ring(n, rx, ry, cy, fill, sc) {
+  let s = "";
+  sc = sc || 1;
+  for (let i = 0; i < n; i++) {
+    const a = ((360 / n) * i).toFixed(1);
+    s += `<ellipse cx="30" cy="${(cy - ry * sc).toFixed(1)}" rx="${(rx * sc).toFixed(1)}" ry="${(ry * sc).toFixed(1)}" fill="${fill}" transform="rotate(${a},30,${cy})"/>`;
+  }
+  return s;
+}
+function _svg(body) {
+  return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+}
+function _stem(S, sw, y2) {
+  return `<line x1="30" y1="${y2 + 2}" x2="30" y2="${y2}" stroke="${S}" stroke-width="${sw}" stroke-linecap="round"/>`;
+}
+function _leaf(S) {
+  return `<path d="M30 76 Q12 64 10 50 Q23 57 30 70" fill="${S}"/><path d="M30 76 Q48 64 50 50 Q37 57 30 70" fill="${S}"/>`;
+}
+const _sh = `<ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/>`;
+const _sh1 = `<ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/>`;
+
+// 1. RADIAL — n ellipse petals evenly rotating from center (daisy, sunflower, cosmos…)
+function renderRadial(f, stage, P) {
+  const { p, pll, pd, S, rare } = _fc(f);
+  const { n, rx, ry, cy, cR, cFill, c2R, c2Fill, leaves } = P;
+  if (stage === 1)
+    return _svg(
+      _sh1 +
+        _stem(S, 2.5, 65) +
+        `<path d="M30 82 Q19 75 17 66 Q25 70 30 78" fill="${S}"/>` +
+        `<ellipse cx="30" cy="60" rx="${(rx * 0.6).toFixed(1)}" ry="${(ry * 0.45).toFixed(1)}" fill="${pd}" opacity=".7"/>`,
+    );
+  const lv = leaves ? _leaf(S) : "";
+  if (stage === 2)
+    return _svg(
+      _sh +
+        _stem(S, 2.5, 52) +
+        `<path d="M30 78 Q16 70 14 60 Q24 65 30 72" fill="${S}"/>` +
+        _ring(n, rx, ry, cy, p, 0.7) +
+        `<circle cx="30" cy="${cy}" r="${(cR * 0.75).toFixed(1)}" fill="${cFill}"/>`,
+    );
+  return _svg(
+    _sh +
+      _stem(S, 3.5, 50) +
+      lv +
+      _aura(cy, cR + 9, pll, rare) +
+      _ring(n, rx, ry, cy, p, 1) +
+      `<circle cx="30" cy="${cy}" r="${cR}" fill="${cFill}"/>` +
+      (c2R ? `<circle cx="30" cy="${cy}" r="${c2R}" fill="${c2Fill}"/>` : ""),
+  );
+}
+
+// 2. CUP — goblet shape (open:0=tight tulip → open:1=wide poppy)
+function renderCup(f, stage, P) {
+  const { p, pl, pll, pd, S, rare } = _fc(f);
+  const o = P.open;
+  const cy = Math.round(36 + o * 4);
+  if (stage === 1)
+    return _svg(
+      _sh1 +
+        _stem(S, 3, 62) +
+        `<path d="M30 80 Q18 72 16 62 Q24 67 30 77" fill="${S}"/>` +
+        `<path d="M${25 - o * 3} 65 Q${23 - o * 2} ${51 + o * 6} 30 ${47 + o * 7} Q${37 + o * 2} ${51 + o * 6} ${35 + o * 3} 65 Q32 68 30 69 Q28 68 ${25 - o * 3} 65Z" fill="${p}" opacity=".82"/>`,
+    );
+  if (stage === 2)
+    return _svg(
+      _sh +
+        _stem(S, 3, 52) +
+        `<path d="M30 78 Q14 67 12 54 Q23 61 30 73" fill="${S}"/>` +
+        `<path d="M30 78 Q46 67 48 54 Q37 61 30 73" fill="${S}"/>` +
+        `<path d="M${22 - o * 3} 55 Q${20 - o * 3} ${38 + o * 6} 30 ${33 + o * 7} Q${40 + o * 3} ${38 + o * 6} ${38 + o * 3} 55 Q35 60 30 61 Q25 60 ${22 - o * 3} 55Z" fill="${p}"/>` +
+        `<path d="M${26 - o * 2} 55 Q${24 - o * 2} ${41 + o * 5} 30 ${36 + o * 6}" fill="${pl}" opacity=".3"/>`,
+    );
+  return _svg(
+    _sh +
+      _stem(S, 3.5, 48) +
+      `<path d="M30 75 Q12 62 10 47 Q22 55 30 68" fill="${S}"/>` +
+      `<path d="M30 75 Q48 62 50 47 Q38 55 30 68" fill="${S}"/>` +
+      _aura(cy, 22 + o * 3, pll, rare) +
+      `<path d="M${18 - o * 5} 49 Q${16 - o * 4} ${29 + o * 9} 30 ${22 + o * 11} Q${44 + o * 4} ${29 + o * 9} ${42 + o * 5} 49 Q${38 + o * 2} 55 30 ${57 + o * 5} Q${22 - o * 2} 55 ${18 - o * 5} 49Z" fill="${p}"/>` +
+      `<path d="M${23 - o * 3} 49 Q${22 - o * 2} ${32 + o * 8} 30 ${25 + o * 9}" fill="${pl}" opacity=".28"/>` +
+      `<path d="M24 31 Q27 24 30 23" stroke="rgba(255,255,255,.5)" stroke-width="1.5" stroke-linecap="round"/>` +
+      `<ellipse cx="30" cy="${50 + o * 4}" rx="${(5 + o * 2).toFixed(1)}" ry="${(4 + o).toFixed(1)}" fill="${pd}" opacity=".35"/>`,
+  );
+}
+
+// 3. SPIKE — vertical column of tiny oval blobs (lavender, hyacinth, foxglove…)
+function renderSpike(f, stage, P) {
+  const { p, pd, pll, S, rare } = _fc(f);
+  const { cols, rows } = P;
+  if (stage === 1)
+    return _svg(
+      _sh1 +
+        _stem(S, 2, 62) +
+        `<path d="M30 82 Q20 76 18 68 Q25 72 30 79" fill="${S}"/>` +
+        `<ellipse cx="28" cy="60" rx="2.5" ry="3.5" fill="${p}" opacity=".65"/>` +
+        `<ellipse cx="32" cy="57" rx="2.5" ry="3.5" fill="${p}" opacity=".65"/>`,
+    );
+  const topY = stage === 2 ? 52 : 55;
+  const bR = stage === 2 ? Math.ceil(rows * 0.65) : rows;
+  let blobs = "";
+  for (let r = 0; r < bR; r++) {
+    const y = topY - r * 4.5;
+    const xs = cols === 2 ? (r % 2 === 0 ? [27, 33] : [30]) : [30];
+    const fill = r === bR - 1 ? pd : p;
+    const op = Math.min(0.93, 0.65 + r * 0.03).toFixed(2);
+    xs.forEach((x) => {
+      blobs += `<ellipse cx="${x}" cy="${y.toFixed(1)}" rx="3" ry="4" fill="${fill}" opacity="${op}"/>`;
+    });
+  }
+  if (stage === 2)
+    return _svg(
+      _sh +
+        _stem(S, 2.5, 52) +
+        `<path d="M30 80 Q17 73 15 63 Q24 67 30 75" fill="${S}"/>` +
+        `<path d="M30 80 Q43 73 45 63 Q36 67 30 75" fill="${S}"/>` +
+        blobs,
+    );
+  const tipY = topY - (bR - 1) * 4.5;
+  return _svg(
+    _sh +
+      _stem(S, 3, 55) +
+      `<path d="M30 78 Q15 70 13 58 Q23 64 30 72" fill="${S}"/>` +
+      `<path d="M30 78 Q45 70 47 58 Q37 64 30 72" fill="${S}"/>` +
+      _aura(tipY, 14, pll, rare) +
+      blobs,
+  );
+}
+
+// 4. STAR — wide flat petals at alternating tilts (lily, iris, orchid, daffodil…)
+function renderStar(f, stage, P) {
+  const { p, pl, pll, pd, S, rare } = _fc(f);
+  const { n, rx, ry, cy, cR, cFill } = P;
+  if (stage === 1)
+    return _svg(
+      _sh1 +
+        _stem(S, 3, 60) +
+        `<path d="M30 80 Q19 73 17 63 Q25 68 30 77" fill="${S}"/>` +
+        `<path d="M25 62 Q24 52 30 47 Q36 52 35 62 Q32 65 30 66 Q28 65 25 62Z" fill="${p}" opacity=".85"/>`,
+    );
+  const petals = (sc) => {
+    let s = "";
+    for (let i = 0; i < n; i++) {
+      const a = ((360 / n) * i).toFixed(1);
+      s += `<ellipse cx="30" cy="${(cy - ry * sc).toFixed(1)}" rx="${(rx * sc).toFixed(1)}" ry="${(ry * sc).toFixed(1)}" fill="${i % 2 ? pl : p}" transform="rotate(${a},30,${cy})"/>`;
+    }
+    return s;
+  };
+  if (stage === 2)
+    return _svg(
+      _sh +
+        _stem(S, 3, 54) +
+        `<path d="M30 78 Q15 68 13 55 Q23 62 30 72" fill="${S}"/>` +
+        petals(0.75) +
+        (cR
+          ? `<circle cx="30" cy="${cy}" r="${(cR * 0.75).toFixed(1)}" fill="${cFill}"/>`
+          : ""),
+    );
+  return _svg(
+    _sh +
+      _stem(S, 3.5, 52) +
+      `<path d="M30 76 Q12 64 10 50 Q22 57 30 70" fill="${S}"/>` +
+      `<path d="M30 76 Q48 64 50 50 Q37 57 30 70" fill="${S}"/>` +
+      _aura(cy, (cR || 12) + 8, pll, rare) +
+      petals(1) +
+      (cR
+        ? `<circle cx="30" cy="${cy}" r="${cR}" fill="${cFill}"/><circle cx="30" cy="${cy}" r="${(cR * 0.55).toFixed(1)}" fill="${pll}"/>`
+        : ""),
+  );
+}
+
+// 5. BELL — drooping bell/pendant shapes (bluebell, wisteria, fuchsia…)
+function renderBell(f, stage, P) {
+  const { p, pl, pll, pd, S, rare } = _fc(f);
+  const { bells, bw, bh } = P;
+  if (stage === 1)
+    return _svg(
+      _sh1 +
+        _stem(S, 2.5, 62) +
+        `<path d="M30 82 Q20 76 18 68 Q25 72 30 79" fill="${S}"/>` +
+        `<ellipse cx="30" cy="60" rx="${(bw * 0.6).toFixed(1)}" ry="${(bh * 0.5).toFixed(1)}" fill="${p}" opacity=".7"/>`,
+    );
+  const pts =
+    bells <= 1
+      ? [[30, 43]]
+      : bells === 2
+        ? [
+            [23, 42],
+            [37, 43],
+          ]
+        : bells === 3
+          ? [
+              [21, 40],
+              [30, 43],
+              [39, 41],
+            ]
+          : [
+              [19, 39],
+              [27, 42],
+              [33, 42],
+              [41, 40],
+            ];
+  const bellSVG = (x, y, sc) =>
+    `<path d="M${x - bw * sc} ${y - bh * sc * 0.3} Q${x - bw * sc * 1.1} ${y + bh * sc * 0.7} ${x} ${y + bh * sc} Q${x + bw * sc * 1.1} ${y + bh * sc * 0.7} ${x + bw * sc} ${y - bh * sc * 0.3} Q${x} ${y - bh * sc * 0.6} ${x - bw * sc} ${y - bh * sc * 0.3}Z" fill="${p}"/>` +
+    `<path d="M${x - bw * sc * 0.45} ${y - bh * sc * 0.2} Q${x} ${y + bh * sc * 0.35} ${x + bw * sc * 0.45} ${y - bh * sc * 0.2}" fill="${pl}" opacity=".4"/>` +
+    `<circle cx="${x}" cy="${y + bh * sc * 0.9}" r="1.5" fill="${pd}" opacity=".6"/>`;
+  const branches = pts
+    .map(
+      ([x, y]) =>
+        `<line x1="30" y1="55" x2="${x}" y2="${y}" stroke="${S}" stroke-width="1.2"/>`,
+    )
+    .join("");
+  if (stage === 2)
+    return _svg(
+      _sh +
+        _stem(S, 2.5, 55) +
+        `<path d="M30 78 Q16 70 14 60 Q24 65 30 72" fill="${S}"/>` +
+        branches +
+        pts.map(([x, y]) => bellSVG(x, y, 0.8)).join(""),
+    );
+  return _svg(
+    _sh +
+      _stem(S, 3, 55) +
+      `<path d="M30 78 Q14 68 12 55 Q23 61 30 72" fill="${S}"/>` +
+      `<path d="M30 78 Q46 68 48 55 Q37 61 30 72" fill="${S}"/>` +
+      _aura(43, 17, pll, rare) +
+      branches +
+      pts.map(([x, y]) => bellSVG(x, y, 1)).join(""),
+  );
+}
+
+// 6. ROSETTE — layered overlapping circles (rose, peony, carnation, dahlia…)
+function renderRosette(f, stage, P) {
+  const { p, pl, pll, pd, S, rare } = _fc(f);
+  const { cy, r0, tight, yellowCenter } = P;
+  const d = r0 * (1 - (tight || 0.5));
+  if (stage === 1)
+    return _svg(
+      _sh1 +
+        _stem(S, 3, 62) +
+        `<path d="M30 80 Q19 73 17 63 Q25 68 30 77" fill="${S}"/>` +
+        `<circle cx="30" cy="55" r="${(r0 * 0.5).toFixed(1)}" fill="${p}" opacity=".88"/>` +
+        `<circle cx="30" cy="53" r="${(r0 * 0.32).toFixed(1)}" fill="${pl}" opacity=".65"/>` +
+        `<circle cx="30" cy="51" r="${(r0 * 0.18).toFixed(1)}" fill="${pll}" opacity=".5"/>`,
+    );
+  if (stage === 2)
+    return _svg(
+      _sh +
+        _stem(S, 3, 54) +
+        `<path d="M30 78 Q15 68 13 55 Q23 62 30 72" fill="${S}"/>` +
+        `<path d="M30 78 Q45 68 47 55 Q37 62 30 72" fill="${S}"/>` +
+        `<circle cx="30" cy="${cy}" r="${(r0 * 0.85).toFixed(1)}" fill="${p}" opacity=".9"/>` +
+        `<circle cx="${(30 - d).toFixed(1)}" cy="${(cy - d * 0.7).toFixed(1)}" r="${(r0 * 0.68).toFixed(1)}" fill="${pl}"/>` +
+        `<circle cx="${(30 + d).toFixed(1)}" cy="${(cy - d * 0.7).toFixed(1)}" r="${(r0 * 0.68).toFixed(1)}" fill="${pl}"/>` +
+        `<circle cx="30" cy="${(cy - d * 1.2).toFixed(1)}" r="${(r0 * 0.63).toFixed(1)}" fill="${p}"/>` +
+        `<circle cx="30" cy="${(cy + d * 0.4).toFixed(1)}" r="${(r0 * 0.5).toFixed(1)}" fill="${pd}"/>` +
+        `<circle cx="30" cy="${(cy - d * 0.3).toFixed(1)}" r="${(r0 * 0.37).toFixed(1)}" fill="${pl}"/>` +
+        `<circle cx="30" cy="${(cy - d * 0.6).toFixed(1)}" r="${(r0 * 0.22).toFixed(1)}" fill="${pll}" opacity=".8"/>`,
+    );
+  return _svg(
+    _sh +
+      _stem(S, 3.5, 50) +
+      `<path d="M30 76 Q12 64 10 50 Q22 57 30 70" fill="${S}"/>` +
+      `<path d="M30 76 Q48 64 50 50 Q37 57 30 70" fill="${S}"/>` +
+      _aura(cy, r0 + 7, pll, rare) +
+      `<circle cx="30" cy="${cy}" r="${r0}" fill="${p}"/>` +
+      `<circle cx="${(30 - d * 1.2).toFixed(1)}" cy="${(cy - d).toFixed(1)}" r="${(r0 * 0.75).toFixed(1)}" fill="${pl}"/>` +
+      `<circle cx="${(30 + d * 1.2).toFixed(1)}" cy="${(cy - d).toFixed(1)}" r="${(r0 * 0.75).toFixed(1)}" fill="${pl}"/>` +
+      `<circle cx="30" cy="${(cy - d * 1.5).toFixed(1)}" r="${(r0 * 0.72).toFixed(1)}" fill="${p}"/>` +
+      `<circle cx="${(30 - d).toFixed(1)}" cy="${(cy + d * 0.7).toFixed(1)}" r="${(r0 * 0.62).toFixed(1)}" fill="${pd}"/>` +
+      `<circle cx="${(30 + d).toFixed(1)}" cy="${(cy + d * 0.7).toFixed(1)}" r="${(r0 * 0.62).toFixed(1)}" fill="${pd}"/>` +
+      `<circle cx="30" cy="${(cy + d * 0.4).toFixed(1)}" r="${(r0 * 0.6).toFixed(1)}" fill="${p}"/>` +
+      `<circle cx="30" cy="${(cy - d * 0.5).toFixed(1)}" r="${(r0 * 0.46).toFixed(1)}" fill="${pl}"/>` +
+      `<circle cx="30" cy="${(cy - d).toFixed(1)}" r="${(r0 * 0.3).toFixed(1)}" fill="${pll}"/>` +
+      (yellowCenter
+        ? `<circle cx="${(30 - d * 0.35).toFixed(1)}" cy="${(cy - d * 0.5).toFixed(1)}" r="1.5" fill="#fdd835" opacity=".9"/><circle cx="${(30 + d * 0.35).toFixed(1)}" cy="${(cy - d * 0.5).toFixed(1)}" r="1.5" fill="#fdd835" opacity=".9"/><circle cx="30" cy="${(cy - d * 0.8).toFixed(1)}" r="1.5" fill="#fdd835" opacity=".9"/>`
+        : ""),
+  );
+}
+
+const FLOWER_RENDERERS = {
+  radial: renderRadial,
+  cup: renderCup,
+  spike: renderSpike,
+  star: renderStar,
+  bell: renderBell,
+  rosette: renderRosette,
+};
+
+// Shape parameters for all 77 flower appearances
+// fn: renderer key | radial: n petals | cup: open 0=tight→1=wide
+// spike: cols/rows | star: n wide petals | bell: bells count
+// rosette: cy center, r0 outer radius, tight packing ratio
+const SHAPE_PARAMS = {
+  // ── RADIAL ───────────────────────────────────────────────────
+  sunflower: {
+    fn: "radial",
+    n: 8,
+    rx: 5.5,
+    ry: 11,
+    cy: 33,
+    cR: 10,
+    cFill: "#795548",
+    c2R: 8,
+    c2Fill: "#4e342e",
+    leaves: true,
+  },
+  daisy: {
+    fn: "radial",
+    n: 12,
+    rx: 3.5,
+    ry: 9,
+    cy: 41,
+    cR: 10,
+    cFill: "#fdd835",
+    c2R: 8,
+    c2Fill: "#f9a825",
+    leaves: true,
+  },
+  cosmos: {
+    fn: "radial",
+    n: 8,
+    rx: 4,
+    ry: 10,
+    cy: 40,
+    cR: 8,
+    cFill: "#ce93d8",
+    leaves: true,
+  },
+  zinnia: {
+    fn: "radial",
+    n: 10,
+    rx: 3.5,
+    ry: 9,
+    cy: 40,
+    cR: 8,
+    cFill: "#fdd835",
+    c2R: 6,
+    c2Fill: "#f9a825",
+    leaves: true,
+  },
+  aster: {
+    fn: "radial",
+    n: 14,
+    rx: 3,
+    ry: 8,
+    cy: 40,
+    cR: 8,
+    cFill: "#fdd835",
+    leaves: true,
+  },
+  gerbera: {
+    fn: "radial",
+    n: 16,
+    rx: 3,
+    ry: 8,
+    cy: 40,
+    cR: 7,
+    cFill: "#1a1a1a",
+    c2R: 5,
+    c2Fill: "#263238",
+    leaves: true,
+  },
+  marigold: {
+    fn: "radial",
+    n: 14,
+    rx: 3,
+    ry: 7,
+    cy: 38,
+    cR: 8,
+    cFill: "#e65100",
+    leaves: true,
+  },
+  calendula: {
+    fn: "radial",
+    n: 12,
+    rx: 3,
+    ry: 8,
+    cy: 40,
+    cR: 7,
+    cFill: "#e65100",
+    c2R: 5,
+    c2Fill: "#bf360c",
+    leaves: true,
+  },
+  blackeyedsusan: {
+    fn: "radial",
+    n: 12,
+    rx: 3.5,
+    ry: 9,
+    cy: 40,
+    cR: 7,
+    cFill: "#1a1a1a",
+    c2R: 5,
+    c2Fill: "#37474f",
+    leaves: true,
+  },
+  cornflower: {
+    fn: "radial",
+    n: 12,
+    rx: 3,
+    ry: 7,
+    cy: 40,
+    cR: 6,
+    cFill: "#1e88e5",
+    leaves: true,
+  },
+  allium: {
+    fn: "radial",
+    n: 16,
+    rx: 2,
+    ry: 5,
+    cy: 36,
+    cR: 5,
+    cFill: "#6a1b9a",
+    leaves: true,
+  },
+  forgetmenot: {
+    fn: "radial",
+    n: 5,
+    rx: 4,
+    ry: 7,
+    cy: 40,
+    cR: 5,
+    cFill: "#fdd835",
+    leaves: false,
+  },
+  cherry: {
+    fn: "radial",
+    n: 5,
+    rx: 7,
+    ry: 10,
+    cy: 40,
+    cR: 8,
+    cFill: "#c62828",
+    c2R: 6,
+    c2Fill: "#fce4ec",
+    leaves: true,
+  },
+  violet: {
+    fn: "radial",
+    n: 5,
+    rx: 6,
+    ry: 9,
+    cy: 38,
+    cR: 6,
+    cFill: "#fdd835",
+    c2R: 4,
+    c2Fill: "#f9a825",
+    leaves: true,
+  },
+  anemone: {
+    fn: "radial",
+    n: 6,
+    rx: 6.5,
+    ry: 10,
+    cy: 40,
+    cR: 8,
+    cFill: "#1a1a1a",
+    c2R: 5,
+    c2Fill: "#263238",
+    leaves: true,
+  },
+  pansy: {
+    fn: "radial",
+    n: 5,
+    rx: 7,
+    ry: 9,
+    cy: 39,
+    cR: 5,
+    cFill: "#f9a825",
+    leaves: true,
+  },
+  jasmine: {
+    fn: "radial",
+    n: 5,
+    rx: 4.5,
+    ry: 8,
+    cy: 40,
+    cR: 5,
+    cFill: "#f9a825",
+    leaves: false,
+  },
+  geranium: {
+    fn: "radial",
+    n: 5,
+    rx: 5,
+    ry: 8,
+    cy: 40,
+    cR: 6,
+    cFill: "#fdd835",
+    leaves: true,
+  },
+  primrose: {
+    fn: "radial",
+    n: 5,
+    rx: 5,
+    ry: 8,
+    cy: 40,
+    cR: 6,
+    cFill: "#fdd835",
+    c2R: 4,
+    c2Fill: "#f9a825",
+    leaves: false,
+  },
+  phlox: {
+    fn: "radial",
+    n: 5,
+    rx: 5,
+    ry: 8,
+    cy: 41,
+    cR: 5,
+    cFill: "#fdd835",
+    leaves: false,
+  },
+  impatiens: {
+    fn: "radial",
+    n: 5,
+    rx: 5.5,
+    ry: 8,
+    cy: 40,
+    cR: 5,
+    cFill: "#fdd835",
+    leaves: false,
+  },
+  nasturtium: {
+    fn: "radial",
+    n: 5,
+    rx: 6,
+    ry: 9,
+    cy: 40,
+    cR: 5,
+    cFill: "#f9a825",
+    leaves: true,
+  },
+  sweetpea: {
+    fn: "radial",
+    n: 5,
+    rx: 5,
+    ry: 8,
+    cy: 40,
+    cR: 4,
+    cFill: "#fce4ec",
+    leaves: false,
+  },
+  wallflower: {
+    fn: "radial",
+    n: 4,
+    rx: 5,
+    ry: 8,
+    cy: 40,
+    cR: 5,
+    cFill: "#795548",
+    leaves: false,
+  },
+  clematis: {
+    fn: "radial",
+    n: 6,
+    rx: 6,
+    ry: 10,
+    cy: 39,
+    cR: 6,
+    cFill: "#fdd835",
+    c2R: 4,
+    c2Fill: "#f9a825",
+    leaves: false,
+  },
+  alstroemeria: {
+    fn: "radial",
+    n: 6,
+    rx: 5,
+    ry: 9,
+    cy: 40,
+    cR: 5,
+    cFill: "#f9a825",
+    leaves: true,
+  },
+  verbena: {
+    fn: "radial",
+    n: 5,
+    rx: 4.5,
+    ry: 7,
+    cy: 40,
+    cR: 5,
+    cFill: "#fdd835",
+    leaves: false,
+  },
+  gaillardia: {
+    fn: "radial",
+    n: 12,
+    rx: 3.5,
+    ry: 8,
+    cy: 40,
+    cR: 7,
+    cFill: "#795548",
+    c2R: 5,
+    c2Fill: "#4e342e",
+    leaves: true,
+  },
+  plumeria: {
+    fn: "radial",
+    n: 5,
+    rx: 6,
+    ry: 10,
+    cy: 39,
+    cR: 6,
+    cFill: "#fdd835",
+    leaves: false,
+  },
+  lotus: {
+    fn: "radial",
+    n: 8,
+    rx: 5,
+    ry: 10,
+    cy: 38,
+    cR: 7,
+    cFill: "#fdd835",
+    c2R: 5,
+    c2Fill: "#f9a825",
+    leaves: true,
+  },
+  lantana: {
+    fn: "radial",
+    n: 5,
+    rx: 3.5,
+    ry: 6,
+    cy: 40,
+    cR: 5,
+    cFill: "#fdd835",
+    leaves: false,
+  },
+  hellebore: {
+    fn: "radial",
+    n: 5,
+    rx: 6,
+    ry: 9,
+    cy: 39,
+    cR: 6,
+    cFill: "#fdd835",
+    leaves: true,
+  },
+  // ── CUP (open: 0=tight tulip → 1=wide poppy) ─────────────────
+  tulip: { fn: "cup", open: 0 },
+  crocus: { fn: "cup", open: 0.3 },
+  poppy: { fn: "cup", open: 1 },
+  hibiscus: { fn: "cup", open: 0.9 },
+  petunia: { fn: "cup", open: 0.85 },
+  morningglory: { fn: "cup", open: 0.8 },
+  azalea: { fn: "cup", open: 0.6 },
+  cyclamen: { fn: "cup", open: 0.35 },
+  // ── SPIKE (cols:1=single|2=paired; rows:blob count) ───────────
+  lavender: { fn: "spike", cols: 2, rows: 8 },
+  hyacinth: { fn: "spike", cols: 2, rows: 9 },
+  foxglove: { fn: "spike", cols: 1, rows: 7 },
+  gladiolus: { fn: "spike", cols: 1, rows: 7 },
+  snapdragon: { fn: "spike", cols: 1, rows: 6 },
+  salvia: { fn: "spike", cols: 1, rows: 6 },
+  veronica: { fn: "spike", cols: 1, rows: 7 },
+  buddleia: { fn: "spike", cols: 2, rows: 8 },
+  stock: { fn: "spike", cols: 2, rows: 7 },
+  statice: { fn: "spike", cols: 2, rows: 6 },
+  freesia: { fn: "spike", cols: 1, rows: 5 },
+  heather: { fn: "spike", cols: 2, rows: 6 },
+  // ── STAR (wide flat petals: lily/iris/orchid type) ────────────
+  lily: { fn: "star", n: 6, rx: 5, ry: 12, cy: 38, cR: 0, cFill: "" },
+  iris: { fn: "star", n: 6, rx: 5.5, ry: 11, cy: 38, cR: 6, cFill: "#fdd835" },
+  orchid: {
+    fn: "star",
+    n: 5,
+    rx: 5.5,
+    ry: 12,
+    cy: 38,
+    cR: 7,
+    cFill: "#f06292",
+  },
+  daffodil: {
+    fn: "star",
+    n: 6,
+    rx: 5.5,
+    ry: 12,
+    cy: 38,
+    cR: 11,
+    cFill: "#f9a825",
+  },
+  magnolia: { fn: "star", n: 6, rx: 7, ry: 12, cy: 37, cR: 0, cFill: "" },
+  saffron: { fn: "star", n: 6, rx: 4, ry: 10, cy: 40, cR: 5, cFill: "#f9a825" },
+  amaryllis: {
+    fn: "star",
+    n: 6,
+    rx: 6,
+    ry: 11,
+    cy: 37,
+    cR: 6,
+    cFill: "#fdd835",
+  },
+  // ── BELL (drooping pendant bells) ────────────────────────────
+  bluebell: { fn: "bell", bells: 4, bw: 5, bh: 8 },
+  lilyvalley: { fn: "bell", bells: 4, bw: 4, bh: 6 },
+  fuchsia: { fn: "bell", bells: 2, bw: 6, bh: 9 },
+  wisteria: { fn: "bell", bells: 4, bw: 5, bh: 7 },
+  gloxinia: { fn: "bell", bells: 2, bw: 7, bh: 9 },
+  bleedingheart: { fn: "bell", bells: 3, bw: 5, bh: 9 },
+  bromeliad: { fn: "bell", bells: 2, bw: 7, bh: 8 },
+  bougainvillea: { fn: "bell", bells: 4, bw: 6, bh: 7 },
+  // ── ROSETTE (layered concentric petal circles) ─────────────────
+  rose: { fn: "rosette", cy: 35, r0: 18, tight: 0.5 },
+  peony: { fn: "rosette", cy: 33, r0: 19, tight: 0.45, yellowCenter: true },
+  carnation: { fn: "rosette", cy: 36, r0: 16, tight: 0.55 },
+  dahlia: { fn: "rosette", cy: 36, r0: 16, tight: 0.5 },
+  chrysanthemum: { fn: "rosette", cy: 37, r0: 15, tight: 0.5 },
+  ranunculus: { fn: "rosette", cy: 37, r0: 15, tight: 0.5 },
+  begonia: { fn: "rosette", cy: 37, r0: 15, tight: 0.55 },
+  hydrangea: { fn: "rosette", cy: 38, r0: 13, tight: 0.6 },
+  gardenia: { fn: "rosette", cy: 36, r0: 16, tight: 0.5 },
+  camellia: { fn: "rosette", cy: 36, r0: 16, tight: 0.5 },
+};
+
 function flowerSVG(key, stage) {
   const f = FLOWERS[key],
     p = f.petal,
@@ -1444,178 +2331,19 @@ function flowerSVG(key, stage) {
     pll = lighter(p, 85),
     pd = darker(p),
     SD = darker(S, 25);
-  const rare = f.rarity === "rare" || f.rarity === "unique";
   if (stage === 0)
     return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">
     <ellipse cx="30" cy="95" rx="14" ry="4" fill="#6d4c41" opacity=".3"/>
     <path d="M30 93 Q26 78 28 64 Q30 70 32 64 Q34 78 30 93" fill="${S}"/>
     <ellipse cx="30" cy="62" rx="5" ry="4" fill="${SD}" opacity=".9"/>
   </svg>`;
-  // SUNFLOWER
-  if (f.kind === "sunflower") {
-    const ct = "#795548",
-      ctD = "#4e342e";
-    if (stage === 1)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="68" stroke="${S}" stroke-width="2.5" stroke-linecap="round"/><path d="M30 83 Q19 76 17 67 Q25 71 30 79" fill="${S}"/><ellipse cx="30" cy="63" rx="6" ry="5" fill="${pd}" opacity=".7"/><ellipse cx="30" cy="61" rx="3.5" ry="2.5" fill="${p}" opacity=".6"/></svg>`;
-    if (stage === 2)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="50" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 78 Q16 70 14 60 Q24 65 30 74" fill="${S}"/><path d="M30 78 Q44 70 46 60 Q36 65 30 74" fill="${S}"/><ellipse cx="30" cy="20" rx="5" ry="9" fill="${p}" transform="rotate(0,30,40)" opacity=".8"/><ellipse cx="30" cy="20" rx="5" ry="9" fill="${p}" transform="rotate(90,30,40)" opacity=".8"/><ellipse cx="30" cy="20" rx="5" ry="9" fill="${p}" transform="rotate(180,30,40)" opacity=".8"/><ellipse cx="30" cy="20" rx="5" ry="9" fill="${p}" transform="rotate(270,30,40)" opacity=".8"/><circle cx="30" cy="40" r="9" fill="${ct}"/><circle cx="30" cy="40" r="7" fill="${ctD}"/></svg>`;
-    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="45" stroke="${S}" stroke-width="3.5" stroke-linecap="round"/><path d="M30 76 Q12 64 10 50 Q23 57 30 70" fill="${S}"/><path d="M30 76 Q48 64 50 50 Q37 57 30 70" fill="${S}"/><ellipse cx="30" cy="19" rx="5.5" ry="10" fill="${p}" transform="rotate(0,30,33)"/><ellipse cx="30" cy="19" rx="5.5" ry="10" fill="${p}" transform="rotate(45,30,33)"/><ellipse cx="30" cy="19" rx="5.5" ry="10" fill="${p}" transform="rotate(90,30,33)"/><ellipse cx="30" cy="19" rx="5.5" ry="10" fill="${p}" transform="rotate(135,30,33)"/><ellipse cx="30" cy="19" rx="5.5" ry="10" fill="${p}" transform="rotate(180,30,33)"/><ellipse cx="30" cy="19" rx="5.5" ry="10" fill="${p}" transform="rotate(225,30,33)"/><ellipse cx="30" cy="19" rx="5.5" ry="10" fill="${p}" transform="rotate(270,30,33)"/><ellipse cx="30" cy="19" rx="5.5" ry="10" fill="${p}" transform="rotate(315,30,33)"/><circle cx="30" cy="33" r="10" fill="${ct}"/><circle cx="30" cy="33" r="8" fill="${ctD}"/><circle cx="26" cy="29" r="1.5" fill="${ct}" opacity=".6"/><circle cx="31" cy="27" r="1.5" fill="${ct}" opacity=".6"/><circle cx="34" cy="31" r="1.5" fill="${ct}" opacity=".6"/><circle cx="29" cy="35" r="1.5" fill="${ct}" opacity=".6"/></svg>`;
-  }
-  // LAVENDER
-  if (f.kind === "lavender") {
-    if (stage === 1)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="62" stroke="${S}" stroke-width="2" stroke-linecap="round"/><path d="M30 82 Q20 76 18 68 Q25 72 30 79" fill="${S}"/><ellipse cx="28" cy="60" rx="3" ry="4" fill="${p}" opacity=".65"/><ellipse cx="32" cy="57" rx="3" ry="4" fill="${p}" opacity=".65"/></svg>`;
-    if (stage === 2)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="52" stroke="${S}" stroke-width="2.5" stroke-linecap="round"/><path d="M30 80 Q17 73 15 63 Q24 67 30 75" fill="${S}"/><path d="M30 80 Q43 73 45 63 Q36 67 30 75" fill="${S}"/><line x1="30" y1="66" x2="22" y2="55" stroke="${S}" stroke-width="1.5"/><line x1="30" y1="66" x2="38" y2="55" stroke="${S}" stroke-width="1.5"/><ellipse cx="28" cy="53" rx="3.5" ry="5" fill="${p}" opacity=".8"/><ellipse cx="32" cy="49" rx="3" ry="4.5" fill="${p}" opacity=".8"/><ellipse cx="28" cy="44" rx="3" ry="4" fill="${p}" opacity=".75"/><ellipse cx="32" cy="40" rx="3" ry="4" fill="${p}" opacity=".7"/><ellipse cx="30" cy="35" rx="2.5" ry="3.5" fill="${p}" opacity=".65"/></svg>`;
-    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="55" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 78 Q15 70 13 58 Q23 64 30 72" fill="${S}"/><path d="M30 78 Q45 70 47 58 Q37 64 30 72" fill="${S}"/><line x1="30" y1="65" x2="21" y2="52" stroke="${S}" stroke-width="1.5"/><line x1="30" y1="65" x2="39" y2="52" stroke="${S}" stroke-width="1.5"/><ellipse cx="21" cy="50" rx="3" ry="4" fill="${pd}"/><ellipse cx="39" cy="50" rx="3" ry="4" fill="${pd}"/><ellipse cx="27" cy="55" rx="3.5" ry="5" fill="${p}"/><ellipse cx="33" cy="55" rx="3.5" ry="5" fill="${p}"/><ellipse cx="26" cy="47" rx="3" ry="4.5" fill="${p}"/><ellipse cx="34" cy="47" rx="3" ry="4.5" fill="${p}"/><ellipse cx="27" cy="39" rx="3" ry="4" fill="${p}"/><ellipse cx="33" cy="39" rx="3" ry="4" fill="${p}"/><ellipse cx="28" cy="32" rx="2.5" ry="3.5" fill="${p}"/><ellipse cx="32" cy="32" rx="2.5" ry="3.5" fill="${p}"/><ellipse cx="30" cy="25" rx="2.5" ry="3.5" fill="${p}"/><ellipse cx="30" cy="19" rx="2" ry="3" fill="${pd}" opacity=".9"/><ellipse cx="27" cy="54" rx="1.5" ry="1.5" fill="${pll}" opacity=".5"/><ellipse cx="33" cy="46" rx="1.5" ry="1.5" fill="${pll}" opacity=".45"/></svg>`;
-  }
-  // DAISY
-  if (f.kind === "daisy") {
-    if (stage === 1)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="64" stroke="${S}" stroke-width="2.5" stroke-linecap="round"/><path d="M30 82 Q19 75 17 66 Q25 70 30 78" fill="${S}"/><ellipse cx="30" cy="59" rx="5" ry="4.5" fill="${pd}" opacity=".7"/><ellipse cx="30" cy="57" rx="3.5" ry="3" fill="${p}" opacity=".65"/></svg>`;
-    if (stage === 2)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="52" stroke="${S}" stroke-width="2.5" stroke-linecap="round"/><path d="M30 78 Q16 70 14 60 Q24 65 30 72" fill="${S}"/><ellipse cx="30" cy="31" rx="3" ry="7" fill="${p}" opacity=".85" transform="rotate(0,30,44)"/><ellipse cx="30" cy="31" rx="3" ry="7" fill="${p}" opacity=".85" transform="rotate(45,30,44)"/><ellipse cx="30" cy="31" rx="3" ry="7" fill="${p}" opacity=".85" transform="rotate(90,30,44)"/><ellipse cx="30" cy="31" rx="3" ry="7" fill="${p}" opacity=".85" transform="rotate(135,30,44)"/><ellipse cx="30" cy="31" rx="3" ry="7" fill="${p}" opacity=".85" transform="rotate(180,30,44)"/><ellipse cx="30" cy="31" rx="3" ry="7" fill="${p}" opacity=".85" transform="rotate(225,30,44)"/><ellipse cx="30" cy="31" rx="3" ry="7" fill="${p}" opacity=".85" transform="rotate(270,30,44)"/><ellipse cx="30" cy="31" rx="3" ry="7" fill="${p}" opacity=".85" transform="rotate(315,30,44)"/><circle cx="30" cy="44" r="8" fill="#fdd835"/><circle cx="30" cy="44" r="6" fill="#f9a825"/></svg>`;
-    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="50" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 76 Q12 64 10 50 Q23 57 30 70" fill="${S}"/><path d="M30 76 Q48 64 50 50 Q37 57 30 70" fill="${S}"/>${rare ? `<circle cx="30" cy="41" r="20" fill="${pll}" opacity=".4"/><circle cx="30" cy="41" r="20" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/><text x="30" y="11" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>` : ""}<ellipse cx="30" cy="27" rx="3.5" ry="9" fill="${p}" transform="rotate(0,30,41)"/><ellipse cx="30" cy="27" rx="3.5" ry="9" fill="${p}" transform="rotate(30,30,41)"/><ellipse cx="30" cy="27" rx="3.5" ry="9" fill="${p}" transform="rotate(60,30,41)"/><ellipse cx="30" cy="27" rx="3.5" ry="9" fill="${p}" transform="rotate(90,30,41)"/><ellipse cx="30" cy="27" rx="3.5" ry="9" fill="${p}" transform="rotate(120,30,41)"/><ellipse cx="30" cy="27" rx="3.5" ry="9" fill="${p}" transform="rotate(150,30,41)"/><ellipse cx="30" cy="27" rx="3.5" ry="9" fill="${p}" transform="rotate(180,30,41)"/><ellipse cx="30" cy="27" rx="3.5" ry="9" fill="${p}" transform="rotate(210,30,41)"/><ellipse cx="30" cy="27" rx="3.5" ry="9" fill="${p}" transform="rotate(240,30,41)"/><ellipse cx="30" cy="27" rx="3.5" ry="9" fill="${p}" transform="rotate(270,30,41)"/><ellipse cx="30" cy="27" rx="3.5" ry="9" fill="${p}" transform="rotate(300,30,41)"/><ellipse cx="30" cy="27" rx="3.5" ry="9" fill="${p}" transform="rotate(330,30,41)"/><circle cx="30" cy="41" r="10" fill="#fdd835"/><circle cx="30" cy="41" r="8" fill="#f9a825"/><circle cx="27" cy="38" r="1.5" fill="#e65100" opacity=".7"/><circle cx="33" cy="38" r="1.5" fill="#e65100" opacity=".7"/><circle cx="30" cy="44" r="1.5" fill="#e65100" opacity=".7"/></svg>`;
-  }
-  // POPPY
-  if (f.kind === "poppy") {
-    if (stage === 1)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="63" stroke="${S}" stroke-width="2.5" stroke-linecap="round"/><path d="M30 82 Q19 75 17 65 Q25 70 30 78" fill="${S}"/><ellipse cx="30" cy="56" rx="7" ry="9" fill="${p}" opacity=".82"/><ellipse cx="30" cy="54" rx="4.5" ry="5.5" fill="${pl}" opacity=".55"/><ellipse cx="30" cy="52" rx="2.5" ry="3" fill="${pll}" opacity=".4"/></svg>`;
-    if (stage === 2)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="54" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 78 Q16 70 14 60 Q24 66 30 72" fill="${S}"/><circle cx="30" cy="30" r="12" fill="${p}" opacity=".88" transform="rotate(0,30,44)"/><circle cx="30" cy="30" r="12" fill="${pd}" opacity=".82" transform="rotate(90,30,44)"/><circle cx="30" cy="30" r="12" fill="${p}" opacity=".88" transform="rotate(180,30,44)"/><circle cx="30" cy="30" r="12" fill="${pd}" opacity=".82" transform="rotate(270,30,44)"/><circle cx="30" cy="44" r="9" fill="#1a1a1a"/><circle cx="30" cy="44" r="7" fill="#263238"/></svg>`;
-    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="52" stroke="${S}" stroke-width="3.5" stroke-linecap="round"/><path d="M30 76 Q12 64 10 52 Q23 58 30 70" fill="${S}"/><path d="M30 76 Q48 64 50 52 Q37 58 30 70" fill="${S}"/>${rare ? `<circle cx="30" cy="39" r="20" fill="${pll}" opacity=".4"/><circle cx="30" cy="39" r="20" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/><text x="30" y="9" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>` : ""}<circle cx="30" cy="25" r="14" fill="${p}"/><circle cx="44" cy="39" r="14" fill="${pd}"/><circle cx="30" cy="53" r="14" fill="${p}"/><circle cx="16" cy="39" r="14" fill="${pd}"/><circle cx="30" cy="39" r="10" fill="#1a1a1a"/><circle cx="30" cy="39" r="8" fill="#263238"/><circle cx="28" cy="36" r="1.5" fill="#80cbc4" opacity=".8"/><circle cx="32" cy="36" r="1.5" fill="#80cbc4" opacity=".8"/><circle cx="33" cy="40" r="1.5" fill="#80cbc4" opacity=".8"/><circle cx="27" cy="40" r="1.5" fill="#80cbc4" opacity=".8"/><circle cx="30" cy="34" r="1.5" fill="#80cbc4" opacity=".75"/></svg>`;
-  }
-  // CHERRY BLOSSOM
-  if (f.kind === "cherry") {
-    if (stage === 1)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="65" stroke="${S}" stroke-width="2.5" stroke-linecap="round"/><path d="M30 83 Q20 76 18 67 Q26 71 30 80" fill="${S}"/><ellipse cx="30" cy="60" rx="5" ry="5.5" fill="${p}" opacity=".78"/><ellipse cx="30" cy="58" rx="3" ry="3.5" fill="${pll}" opacity=".55"/><circle cx="27" cy="57" r="2" fill="${pd}" opacity=".6"/><circle cx="33" cy="57" r="2" fill="${pd}" opacity=".6"/></svg>`;
-    if (stage === 2)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="54" stroke="${S}" stroke-width="2.5" stroke-linecap="round"/><path d="M30 78 Q17 71 15 62 Q24 67 30 74" fill="${S}"/><ellipse cx="30" cy="30" rx="5.5" ry="8" fill="${p}" opacity=".88" transform="rotate(0,30,44)"/><ellipse cx="30" cy="30" rx="5.5" ry="8" fill="${pl}" opacity=".82" transform="rotate(72,30,44)"/><ellipse cx="30" cy="30" rx="5.5" ry="8" fill="${p}" opacity=".88" transform="rotate(144,30,44)"/><ellipse cx="30" cy="30" rx="5.5" ry="8" fill="${pl}" opacity=".82" transform="rotate(216,30,44)"/><ellipse cx="30" cy="30" rx="5.5" ry="8" fill="${p}" opacity=".88" transform="rotate(288,30,44)"/><circle cx="30" cy="44" r="6" fill="${pd}"/><circle cx="30" cy="44" r="4" fill="${pll}"/></svg>`;
-    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="52" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 76 Q14 65 12 52 Q23 58 30 70" fill="${S}"/><path d="M30 76 Q46 65 48 52 Q37 58 30 70" fill="${S}"/>${rare ? `<circle cx="30" cy="40" r="21" fill="${pll}" opacity=".35"/><circle cx="30" cy="40" r="21" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/><text x="30" y="9" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>` : ""}<ellipse cx="30" cy="23" rx="7" ry="10" fill="${p}" transform="rotate(0,30,40)"/><ellipse cx="30" cy="23" rx="7" ry="10" fill="${pl}" transform="rotate(72,30,40)"/><ellipse cx="30" cy="23" rx="7" ry="10" fill="${p}" transform="rotate(144,30,40)"/><ellipse cx="30" cy="23" rx="7" ry="10" fill="${pl}" transform="rotate(216,30,40)"/><ellipse cx="30" cy="23" rx="7" ry="10" fill="${p}" transform="rotate(288,30,40)"/><circle cx="30" cy="40" r="8" fill="${pd}"/><circle cx="30" cy="40" r="6" fill="${pll}"/><circle cx="28" cy="37" r="1.5" fill="${pd}" opacity=".8"/><circle cx="32" cy="37" r="1.5" fill="${pd}" opacity=".8"/><circle cx="30" cy="35" r="1.5" fill="${pd}" opacity=".7"/></svg>`;
-  }
-  // VIOLET
-  if (f.kind === "violet") {
-    if (stage === 1)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="66" stroke="${S}" stroke-width="2.5" stroke-linecap="round"/><ellipse cx="30" cy="61" rx="4" ry="5" fill="${p}" opacity=".85"/><ellipse cx="30" cy="59" rx="2.5" ry="3" fill="${pll}" opacity=".6"/></svg>`;
-    if (stage === 2)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="60" stroke="${S}" stroke-width="2.5" stroke-linecap="round"/><path d="M30 80 Q18 73 16 63 Q24 68 30 75" fill="${S}"/><ellipse cx="30" cy="41" rx="5" ry="8" fill="${p}" opacity=".85" transform="rotate(0,30,50)"/><ellipse cx="30" cy="41" rx="5" ry="8" fill="${pl}" opacity=".8" transform="rotate(72,30,50)"/><ellipse cx="30" cy="41" rx="5" ry="8" fill="${p}" opacity=".85" transform="rotate(144,30,50)"/><circle cx="30" cy="50" r="4" fill="#fdd835"/></svg>`;
-    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="58" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 78 Q15 68 13 55 Q23 62 30 72" fill="${S}"/><path d="M30 78 Q45 68 47 55 Q37 62 30 72" fill="${S}"/>${rare ? `<circle cx="30" cy="38" r="20" fill="${pll}" opacity=".4"/><circle cx="30" cy="38" r="20" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/><text x="30" y="9" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>` : ""}<ellipse cx="30" cy="23" rx="6" ry="9" fill="${p}" transform="rotate(0,30,38)"/><ellipse cx="30" cy="23" rx="6" ry="9" fill="${p}" transform="rotate(72,30,38)"/><ellipse cx="30" cy="23" rx="6" ry="9" fill="${pl}" transform="rotate(144,30,38)"/><ellipse cx="30" cy="23" rx="6" ry="9" fill="${pl}" transform="rotate(216,30,38)"/><ellipse cx="30" cy="23" rx="6" ry="9" fill="${p}" transform="rotate(288,30,38)"/><circle cx="30" cy="38" r="6" fill="#fdd835"/><circle cx="30" cy="38" r="4" fill="#f9a825"/><ellipse cx="28" cy="36" rx="1" ry="1.5" fill="${pd}" opacity=".7"/><ellipse cx="32" cy="36" rx="1" ry="1.5" fill="${pd}" opacity=".7"/></svg>`;
-  }
-  // LILY
-  if (f.kind === "lily") {
-    if (stage === 1)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="60" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 80 Q19 73 17 63 Q25 68 30 77" fill="${S}"/><path d="M25 62 Q24 52 30 47 Q36 52 35 62 Q32 65 30 66 Q28 65 25 62Z" fill="${p}" opacity=".85"/></svg>`;
-    if (stage === 2)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="54" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 78 Q15 68 13 55 Q23 62 30 72" fill="${S}"/><path d="M30 78 Q45 68 47 55 Q37 62 30 72" fill="${S}"/><path d="M21 55 Q18 42 30 37 Q42 42 39 55" fill="${p}" opacity=".88"/><path d="M25 55 Q22 43 30 38 Q38 43 35 55" fill="${pl}" opacity=".3"/><line x1="30" y1="52" x2="24" y2="44" stroke="${pd}" stroke-width="1.2"/><line x1="30" y1="52" x2="36" y2="44" stroke="${pd}" stroke-width="1.2"/><line x1="30" y1="52" x2="30" y2="40" stroke="${pd}" stroke-width="1.2"/><circle cx="24" cy="43" r="1.5" fill="${pd}"/><circle cx="36" cy="43" r="1.5" fill="${pd}"/><circle cx="30" cy="39" r="1.5" fill="${pd}"/></svg>`;
-    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="52" stroke="${S}" stroke-width="3.5" stroke-linecap="round"/><path d="M30 76 Q12 64 10 50 Q22 57 30 70" fill="${S}"/><path d="M30 76 Q48 64 50 50 Q38 57 30 70" fill="${S}"/>${rare ? `<circle cx="30" cy="35" r="22" fill="${pll}" opacity=".35"/><circle cx="30" cy="35" r="22" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/><text x="30" y="5" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>` : ""}<ellipse cx="30" cy="20" rx="5" ry="12" fill="${p}" transform="rotate(0,30,38)"/><ellipse cx="30" cy="20" rx="5" ry="12" fill="${pl}" transform="rotate(60,30,38)"/><ellipse cx="30" cy="20" rx="5" ry="12" fill="${p}" transform="rotate(120,30,38)"/><ellipse cx="30" cy="20" rx="5" ry="12" fill="${pl}" transform="rotate(180,30,38)"/><ellipse cx="30" cy="20" rx="5" ry="12" fill="${p}" transform="rotate(240,30,38)"/><ellipse cx="30" cy="20" rx="5" ry="12" fill="${pl}" transform="rotate(300,30,38)"/><line x1="30" y1="38" x2="20" y2="26" stroke="${pd}" stroke-width="1.5"/><line x1="30" y1="38" x2="40" y2="26" stroke="${pd}" stroke-width="1.5"/><line x1="30" y1="38" x2="30" y2="22" stroke="${pd}" stroke-width="1.5"/><circle cx="20" cy="25" r="2" fill="${pd}"/><circle cx="40" cy="25" r="2" fill="${pd}"/><circle cx="30" cy="21" r="2" fill="${pd}"/></svg>`;
-  }
-  // IRIS
-  if (f.kind === "iris") {
-    if (stage === 1)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="62" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 80 Q19 73 17 63 Q25 68 30 77" fill="${S}"/><path d="M26 64 Q25 54 30 49 Q35 54 34 64 Q32 67 30 68 Q28 67 26 64Z" fill="${p}" opacity=".85"/><ellipse cx="30" cy="54" rx="4" ry="5" fill="${pl}" opacity=".55"/></svg>`;
-    if (stage === 2)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="55" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 78 Q15 68 13 56 Q23 62 30 72" fill="${S}"/><path d="M17 55 Q22 42 30 43 Q38 42 43 55 Q38 61 30 62 Q22 61 17 55Z" fill="${p}" opacity=".88"/><path d="M22 49 Q27 40 30 43 Q33 40 38 49 Q34 54 30 55 Q26 54 22 49Z" fill="${pl}" opacity=".4"/><ellipse cx="25" cy="43" rx="4" ry="6" fill="${p}" opacity=".8" transform="rotate(-15,25,43)"/><ellipse cx="35" cy="43" rx="4" ry="6" fill="${p}" opacity=".8" transform="rotate(15,35,43)"/></svg>`;
-    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="52" stroke="${S}" stroke-width="3.5" stroke-linecap="round"/><path d="M30 76 Q12 64 10 50 Q22 57 30 70" fill="${S}"/><path d="M30 76 Q48 64 50 50 Q37 57 30 70" fill="${S}"/>${rare ? `<circle cx="30" cy="36" r="22" fill="${pll}" opacity=".35"/><circle cx="30" cy="36" r="22" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/><text x="30" y="6" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>` : ""}<path d="M12 52 Q18 36 30 40 Q42 36 48 52 Q40 62 30 63 Q20 62 12 52Z" fill="${p}"/><path d="M18 50 Q22 38 30 40 Q38 38 42 50 Q36 57 30 58 Q24 57 18 50Z" fill="${pl}" opacity=".4"/><ellipse cx="20" cy="36" rx="5" ry="9" fill="${p}" transform="rotate(-30,20,36)"/><ellipse cx="40" cy="36" rx="5" ry="9" fill="${p}" transform="rotate(30,40,36)"/><ellipse cx="30" cy="26" rx="5" ry="8" fill="${pl}"/><ellipse cx="28" cy="50" rx="2" ry="3" fill="#fdd835" opacity=".8"/><ellipse cx="32" cy="50" rx="2" ry="3" fill="#fdd835" opacity=".8"/></svg>`;
-  }
-  // DAFFODIL
-  if (f.kind === "daffodil") {
-    if (stage === 1)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="56" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 78 Q20 72 18 63 Q25 68 30 76" fill="${S}"/><ellipse cx="30" cy="50" rx="5" ry="8" fill="${p}" opacity=".82" transform="rotate(-20,30,50)"/></svg>`;
-    if (stage === 2)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="54" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 78 Q15 68 13 55 Q23 62 30 72" fill="${S}"/><ellipse cx="30" cy="27" rx="5" ry="11" fill="${p}" opacity=".85" transform="rotate(0,30,42)"/><ellipse cx="30" cy="27" rx="5" ry="11" fill="${p}" opacity=".85" transform="rotate(60,30,42)"/><ellipse cx="30" cy="27" rx="5" ry="11" fill="${p}" opacity=".85" transform="rotate(120,30,42)"/><ellipse cx="30" cy="27" rx="5" ry="11" fill="${p}" opacity=".85" transform="rotate(180,30,42)"/><ellipse cx="30" cy="27" rx="5" ry="11" fill="${p}" opacity=".85" transform="rotate(240,30,42)"/><ellipse cx="30" cy="27" rx="5" ry="11" fill="${p}" opacity=".85" transform="rotate(300,30,42)"/><circle cx="30" cy="42" r="9" fill="${pd}"/><circle cx="30" cy="42" r="7" fill="#fdd835" opacity=".9"/><circle cx="30" cy="42" r="5" fill="${p}"/></svg>`;
-    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="50" stroke="${S}" stroke-width="3.5" stroke-linecap="round"/><path d="M30 76 Q12 64 10 50 Q23 57 30 70" fill="${S}"/><path d="M30 76 Q48 64 50 50 Q37 57 30 70" fill="${S}"/>${rare ? `<circle cx="30" cy="35" r="22" fill="${pll}" opacity=".35"/><circle cx="30" cy="35" r="22" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/><text x="30" y="5" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>` : ""}<ellipse cx="30" cy="20" rx="5.5" ry="12" fill="${p}" transform="rotate(0,30,38)"/><ellipse cx="30" cy="20" rx="5.5" ry="12" fill="${p}" transform="rotate(60,30,38)"/><ellipse cx="30" cy="20" rx="5.5" ry="12" fill="${p}" transform="rotate(120,30,38)"/><ellipse cx="30" cy="20" rx="5.5" ry="12" fill="${p}" transform="rotate(180,30,38)"/><ellipse cx="30" cy="20" rx="5.5" ry="12" fill="${p}" transform="rotate(240,30,38)"/><ellipse cx="30" cy="20" rx="5.5" ry="12" fill="${p}" transform="rotate(300,30,38)"/><circle cx="30" cy="38" r="11" fill="${pd}"/><circle cx="30" cy="38" r="9" fill="#fdd835"/><circle cx="30" cy="38" r="6" fill="${darker(p, 20)}" opacity=".9"/><circle cx="30" cy="38" r="4" fill="${pll}" opacity=".7"/></svg>`;
-  }
-  // PEONY
-  if (f.kind === "peony") {
-    if (stage === 1)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="62" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 80 Q19 73 17 63 Q25 68 30 77" fill="${S}"/><circle cx="30" cy="55" r="9" fill="${p}" opacity=".88"/><circle cx="30" cy="53" r="6" fill="${pl}" opacity=".65"/><circle cx="30" cy="51" r="3.5" fill="${pll}" opacity=".5"/></svg>`;
-    if (stage === 2)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="54" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 78 Q15 68 13 55 Q23 62 30 72" fill="${S}"/><path d="M30 78 Q45 68 47 55 Q37 62 30 72" fill="${S}"/><circle cx="30" cy="38" r="16" fill="${p}" opacity=".9"/><circle cx="22" cy="34" r="12" fill="${pl}"/><circle cx="38" cy="34" r="12" fill="${pl}"/><circle cx="30" cy="28" r="12" fill="${p}"/><circle cx="30" cy="40" r="10" fill="${pd}"/><circle cx="30" cy="37" r="7" fill="${pl}"/><circle cx="30" cy="35" r="4" fill="${pll}" opacity=".8"/></svg>`;
-    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="50" stroke="${S}" stroke-width="3.5" stroke-linecap="round"/><path d="M30 76 Q12 64 10 50 Q22 57 30 70" fill="${S}"/><path d="M30 76 Q48 64 50 50 Q37 57 30 70" fill="${S}"/>${rare ? `<circle cx="30" cy="32" r="24" fill="${pll}" opacity=".35"/><circle cx="30" cy="32" r="24" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/><text x="30" y="2" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>` : ""}<circle cx="30" cy="33" r="19" fill="${p}"/><circle cx="18" cy="27" r="14" fill="${pl}"/><circle cx="42" cy="27" r="14" fill="${pl}"/><circle cx="30" cy="20" r="14" fill="${p}"/><circle cx="18" cy="37" r="12" fill="${pd}"/><circle cx="42" cy="37" r="12" fill="${pd}"/><circle cx="30" cy="43" r="13" fill="${p}"/><circle cx="30" cy="31" r="10" fill="${pl}"/><circle cx="30" cy="28" r="7" fill="${pll}"/><circle cx="28" cy="25" r="1.5" fill="#fdd835" opacity=".9"/><circle cx="32" cy="25" r="1.5" fill="#fdd835" opacity=".9"/><circle cx="30" cy="23" r="1.5" fill="#fdd835" opacity=".9"/></svg>`;
-  }
-  // ORCHID
-  if (f.kind === "orchid") {
-    if (stage === 1)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="96" x2="30" y2="60" stroke="${S}" stroke-width="2.5" stroke-linecap="round"/><path d="M30 80 Q20 74 18 65 Q25 69 30 77" fill="${S}"/><ellipse cx="30" cy="55" rx="4.5" ry="6.5" fill="${p}" opacity=".85"/><ellipse cx="30" cy="53" rx="2.5" ry="3.5" fill="${pll}" opacity=".6"/></svg>`;
-    if (stage === 2)
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="54" stroke="${S}" stroke-width="3" stroke-linecap="round"/><path d="M30 78 Q16 70 14 57 Q24 64 30 73" fill="${S}"/><ellipse cx="21" cy="40" rx="5" ry="10" fill="${p}" opacity=".88" transform="rotate(-30,21,40)"/><ellipse cx="39" cy="40" rx="5" ry="10" fill="${p}" opacity=".88" transform="rotate(30,39,40)"/><ellipse cx="30" cy="30" rx="5" ry="9" fill="${pl}" opacity=".85"/><ellipse cx="30" cy="48" rx="7" ry="5" fill="${pd}" opacity=".9"/><ellipse cx="30" cy="48" rx="4" ry="3" fill="${pll}" opacity=".7"/></svg>`;
-    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/><line x1="30" y1="98" x2="30" y2="52" stroke="${S}" stroke-width="3.5" stroke-linecap="round"/><path d="M30 76 Q13 65 11 50 Q23 57 30 70" fill="${S}"/><path d="M30 76 Q47 65 49 50 Q37 57 30 70" fill="${S}"/>${rare ? `<circle cx="30" cy="34" r="22" fill="${pll}" opacity=".35"/><circle cx="30" cy="34" r="22" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/><text x="30" y="4" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>` : ""}<ellipse cx="16" cy="36" rx="5" ry="12" fill="${p}" transform="rotate(-40,16,36)"/><ellipse cx="44" cy="36" rx="5" ry="12" fill="${p}" transform="rotate(40,44,36)"/><ellipse cx="30" cy="20" rx="4.5" ry="10" fill="${pl}"/><ellipse cx="18" cy="50" rx="5" ry="9" fill="${pl}" transform="rotate(25,18,50)"/><ellipse cx="42" cy="50" rx="5" ry="9" fill="${pl}" transform="rotate(-25,42,50)"/><ellipse cx="30" cy="44" rx="9" ry="7" fill="${pd}"/><ellipse cx="30" cy="44" rx="6" ry="4.5" fill="${pll}"/><ellipse cx="30" cy="43" rx="3" ry="2.5" fill="${p}" opacity=".7"/><circle cx="30" cy="41" r="2" fill="#fdd835" opacity=".9"/></svg>`;
-  }
-  if (stage === 1) {
-    if (f.kind === "tulip")
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/>
-      <line x1="30" y1="96" x2="30" y2="62" stroke="${S}" stroke-width="3" stroke-linecap="round"/>
-      <path d="M30 80 Q18 72 16 62 Q24 67 30 77" fill="${S}"/>
-      <path d="M25 65 Q24 56 30 51 Q36 56 35 65 Q32 68 30 69 Q28 68 25 65Z" fill="${p}" opacity=".82"/>
-    </svg>`;
-    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="30" cy="97" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/>
-      <line x1="30" y1="96" x2="30" y2="62" stroke="${S}" stroke-width="3" stroke-linecap="round"/>
-      <path d="M30 82 Q17 73 15 62 Q23 67 30 78" fill="${S}"/>
-      <circle cx="30" cy="53" r="9.5" fill="${pll}" opacity=".8"/>
-      <circle cx="30" cy="53" r="7" fill="${p}" opacity=".85"/>
-    </svg>`;
-  }
-  if (stage === 2) {
-    if (f.kind === "tulip")
-      return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/>
-      <line x1="30" y1="98" x2="30" y2="52" stroke="${S}" stroke-width="3" stroke-linecap="round"/>
-      <path d="M30 78 Q14 67 12 54 Q23 61 30 73" fill="${S}"/>
-      <path d="M30 78 Q46 67 48 54 Q37 61 30 73" fill="${S}"/>
-      <path d="M22 55 Q21 40 30 35 Q39 40 38 55 Q35 60 30 61 Q25 60 22 55Z" fill="${p}"/>
-      <path d="M26 55 Q25 41 30 36 Q35 41 34 55" fill="${pl}" opacity=".3"/>
-    </svg>`;
-    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="30" cy="99" rx="13" ry="3.5" fill="#6d4c41" opacity=".28"/>
-      <line x1="30" y1="98" x2="30" y2="52" stroke="${S}" stroke-width="3" stroke-linecap="round"/>
-      <path d="M30 78 Q14 67 12 53 Q23 60 30 72" fill="${S}"/>
-      <path d="M30 78 Q46 67 48 53 Q37 60 30 72" fill="${S}"/>
-      <circle cx="30" cy="43" r="14" fill="${pll}" opacity=".7"/>
-      <circle cx="22" cy="39" r="10" fill="${pl}"/>
-      <circle cx="38" cy="39" r="10" fill="${pl}"/>
-      <circle cx="30" cy="36" r="10" fill="${p}"/>
-      <circle cx="30" cy="44" r="10" fill="${pd}"/>
-    </svg>`;
-  }
-  if (f.kind === "tulip")
-    return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/>
-    <line x1="30" y1="98" x2="30" y2="48" stroke="${S}" stroke-width="3.5" stroke-linecap="round"/>
-    <path d="M30 75 Q12 62 10 47 Q22 55 30 68" fill="${S}"/>
-    <path d="M30 75 Q48 62 50 47 Q38 55 30 68" fill="${S}"/>
-    ${rare ? `<circle cx="30" cy="38" r="22" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".65"/><text x="30" y="11" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>` : ""}
-    <path d="M18 49 Q17 30 30 23 Q43 30 42 49 Q38 55 30 57 Q22 55 18 49Z" fill="${p}"/>
-    <path d="M23 49 Q22 32 30 25 Q38 32 37 49" fill="${pl}" opacity=".28"/>
-    <path d="M24 31 Q27 24 30 23" stroke="rgba(255,255,255,.5)" stroke-width="1.5" stroke-linecap="round"/>
-    <path d="M30 23 Q34 24 36 30" stroke="rgba(255,255,255,.38)" stroke-width="1" stroke-linecap="round"/>
-    <ellipse cx="30" cy="50" rx="5" ry="4" fill="${pd}" opacity=".35"/>
-  </svg>`;
-  return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <ellipse cx="30" cy="99" rx="13" ry="4" fill="#6d4c41" opacity=".28"/>
-    <line x1="30" y1="98" x2="30" y2="50" stroke="${S}" stroke-width="3.5" stroke-linecap="round"/>
-    <path d="M30 76 Q12 64 10 50 Q23 57 30 70" fill="${S}"/>
-    <path d="M30 76 Q48 64 50 50 Q37 57 30 70" fill="${S}"/>
-    <path d="M25 65 L18 55" stroke="${S}" stroke-width="2"/>
-    ${
-      rare
-        ? `<circle cx="30" cy="32" r="17" fill="${pll}" opacity=".55"/>
-         <circle cx="30" cy="32" r="17" fill="none" stroke="#7986cb" stroke-width="2" stroke-dasharray="4 3" opacity=".7"/>
-         <text x="30" y="12" text-anchor="middle" font-size="7" fill="#5c6bc0" opacity=".9">✦ ✦ ✦</text>`
-        : `<circle cx="30" cy="32" r="15" fill="${pll}"/>`
-    }
-    <circle cx="21" cy="27" r="10" fill="${pl}"/>
-    <circle cx="39" cy="27" r="10" fill="${pl}"/>
-    <circle cx="30" cy="22" r="10" fill="${p}"/>
-    <circle cx="22" cy="36" r="9"  fill="${p}"/>
-    <circle cx="38" cy="36" r="9"  fill="${p}"/>
-    <circle cx="30" cy="35" r="10" fill="${pd}"/>
-    <circle cx="30" cy="31" r="6"  fill="${pd}"/>
-    <circle cx="30" cy="29" r="3.5" fill="${darker(p, 75)}"/>
-  </svg>`;
+  const P = SHAPE_PARAMS[f.appearance] || SHAPE_PARAMS[f.kind];
+  if (!P)
+    return _svg(
+      `<text x="30" y="52" text-anchor="middle" font-size="9" fill="#aaa">?</text>`,
+    );
+  return FLOWER_RENDERERS[P.fn](f, stage, P);
 }
-
 function initPetals() {
   const pool = ["🌸", "🌷", "✿", "❀", "💮", "🌺"];
   for (let i = 0; i < 14; i++) {
