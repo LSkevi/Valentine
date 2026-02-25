@@ -1375,7 +1375,7 @@ let G = {
     })),
   water: 10,
   maxWater: 10,
-  pumpClicks: 0,
+  inventory: [],
   bloomPlot: null,
   openedKey: null,
   plantPlot: null,
@@ -1394,7 +1394,7 @@ function saveG() {
     plots: G.plots,
     water: G.water,
     maxWater: G.maxWater,
-    pumpClicks: G.pumpClicks,
+    inventory: G.inventory,
     discovered: G.discovered,
   };
   try {
@@ -1414,7 +1414,7 @@ function loadG() {
       plots: s.plots ?? G.plots,
       water: s.water ?? G.water,
       maxWater: s.maxWater ?? G.maxWater,
-      pumpClicks: s.pumpClicks ?? 0,
+      inventory: s.inventory ?? [],
       discovered: s.discovered ?? [],
     });
     return true;
@@ -1640,12 +1640,13 @@ function initGame() {
   renderTray();
   renderDrops();
   updateHUD();
-  renderPump();
 }
 function updateHUD() {
   document.getElementById("coinDisp").textContent = G.coins;
   const total = Object.values(G.pkt).reduce((a, b) => a + b, 0);
   document.getElementById("pktDisp").textContent = total;
+  const invEl = document.getElementById("invDisp");
+  if (invEl) invEl.textContent = G.inventory.length;
 }
 
 function renderDrops() {
@@ -1656,50 +1657,6 @@ function renderDrops() {
     d.className = "wdrop " + (i < G.water ? "full" : "empty");
     row.appendChild(d);
   }
-}
-function renderPump() {
-  const pct = (G.pumpClicks / 5) * 100;
-  const fill = document.getElementById("pumpProgFill");
-  const lbl = document.getElementById("pumpProgLbl");
-  const plbl = document.getElementById("pumpLabel");
-  if (fill) fill.style.width = pct + "%";
-  if (lbl) lbl.textContent = G.pumpClicks + "/5";
-  if (plbl)
-    plbl.textContent =
-      G.water >= G.maxWater
-        ? "Tank full! 💧"
-        : `Pump! (${5 - G.pumpClicks} more)`;
-}
-function pumpClick() {
-  if (G.water >= G.maxWater) {
-    toast("Watering can is full! 💧", 1400);
-    return;
-  }
-  G.pumpClicks++;
-  // animate handle
-  const h = document.getElementById("pumpHandle");
-  if (h) {
-    h.classList.remove("pumping");
-    void h.offsetWidth;
-    h.classList.add("pumping");
-  }
-  // water drip from spout every 2 clicks
-  if (G.pumpClicks % 2 === 0) {
-    const btn = document.getElementById("pumpBtn");
-    if (btn) {
-      const r = btn.getBoundingClientRect();
-      spawnSplash(r.left + 26, r.top + 84);
-    }
-  }
-  if (G.pumpClicks >= 5) {
-    G.pumpClicks = 0;
-    G.water = Math.min(G.maxWater, G.water + 1);
-    renderDrops();
-    spawnSparkle(window.innerWidth / 2, window.innerHeight * 0.38, "💧");
-    toast("+1 water! Keep pumping 💧", 1200);
-  }
-  renderPump();
-  saveG();
 }
 
 function renderGarden() {
@@ -2069,6 +2026,7 @@ function openBloomModal(i) {
   document.getElementById("btnSell").innerHTML =
     `💰 Sell for <span class="ic">C</span><span class="coin-val">${f.sell}</span>`;
   document.getElementById("btnSell").onclick = sellFlower;
+  document.getElementById("btnStore").onclick = storeFlower;
   openModal("bloomOverlay");
 }
 function sellFlower() {
@@ -2082,6 +2040,64 @@ function sellFlower() {
   updateHUD();
   saveG();
   toast(`Sold for ${f.sell} coins! 💰`, 2000);
+}
+function storeFlower() {
+  if (G.bloomPlot === null) return;
+  const key = G.plots[G.bloomPlot].key;
+  const f = FLOWERS[key];
+  if (!G.discovered.includes(key)) G.discovered.push(key);
+  G.seedId++;
+  G.inventory.push({ key, uid: G.seedId });
+  clearPlot(G.bloomPlot);
+  closeModal("bloomOverlay");
+  updateHUD();
+  saveG();
+  toast(`${f.name} stored in inventory! 🎒`, 2000);
+}
+function openInventoryModal() {
+  const grid = document.getElementById("invGrid");
+  const hdr = document.getElementById("invHeader");
+  if (hdr)
+    hdr.textContent = G.inventory.length
+      ? `${G.inventory.length} flower${G.inventory.length !== 1 ? "s" : ""} stored`
+      : "No flowers stored yet";
+  grid.innerHTML = "";
+  if (!G.inventory.length) {
+    grid.innerHTML =
+      '<div class="tray-empty">Your inventory is empty.<br>Store bloomed flowers to keep them! 🌸</div>';
+    openModal("invOverlay");
+    return;
+  }
+  G.inventory.forEach((item) => {
+    const f = FLOWERS[item.key];
+    const card = document.createElement("div");
+    card.className = "inv-card " + f.rarity;
+    const rarLabel =
+      f.rarity === "legendary"
+        ? "✦ Legendary"
+        : f.rarity === "unique"
+          ? "◆ Unique"
+          : f.rarity.charAt(0).toUpperCase() + f.rarity.slice(1);
+    card.innerHTML =
+      `<div class="inv-fl">${flowerSVG(item.key, MAX_STAGE)}</div>` +
+      `<div class="inv-name">${f.name}</div>` +
+      `<div class="inv-badge ${f.rarity}">${rarLabel}</div>` +
+      `<div class="inv-sell-val"><span class="ic">C</span>${f.sell}</div>` +
+      `<button class="btn-inv-sell" onclick="sellFromInventory(${item.uid})">💰 Sell</button>`;
+    grid.appendChild(card);
+  });
+  openModal("invOverlay");
+}
+function sellFromInventory(uid) {
+  const idx = G.inventory.findIndex((x) => x.uid === uid);
+  if (idx === -1) return;
+  const f = FLOWERS[G.inventory[idx].key];
+  G.coins += f.sell;
+  G.inventory.splice(idx, 1);
+  updateHUD();
+  saveG();
+  toast(`Sold ${f.name} for ${f.sell} coins! 💰`, 2000);
+  openInventoryModal();
 }
 function clearPlot(i) {
   G.plots[i] = {
@@ -2633,6 +2649,7 @@ function weightedRandom(type = "common") {
     btnOpenPkt: openPktModal,
     btnJournal: openJournalModal,
     btnShop: openShopModal,
+    btnInv: openInventoryModal,
   };
   Object.entries(MAP).forEach(([id, fn]) => {
     const el = document.getElementById(id);

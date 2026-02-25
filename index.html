@@ -15,11 +15,13 @@
     <div class="top-row-stats">
       <div class="stat-pill"><span class="ic">C</span><span id="coinDisp">10</span></div>
       <div class="stat-pill">📦 <span id="pktDisp">3</span></div>
+      <div class="stat-pill">🎒 <span id="invDisp">0</span></div>
     </div>
-    <div class="top-row-btns">
+    <div class="top-row-btns" style="grid-template-columns:repeat(4,1fr)">
       <button class="tbtn tbtn-open"    id="btnOpenPkt">🎁 Open Packet</button>
       <button class="tbtn tbtn-journal" id="btnJournal">📖 Journal</button>
       <button class="tbtn tbtn-shop"    id="btnShop">🛒 Shop</button>
+      <button class="tbtn tbtn-inv"     id="btnInv">🎒 Inventory</button>
     </div>
   </div>
   <div class="garden-header">
@@ -62,31 +64,8 @@
       <div class="valve-label" id="valveLabel">Spin for water! 💧</div>
       <div class="valve-prog-bg"><div class="valve-prog-fill" id="valveProgFill" style="width:0%"></div></div>
     </div>
-    <div class="pump-wrap" id="pumpBtn" onclick="pumpClick()">
-      <svg class="pump-svg" viewBox="0 0 90 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="22" y="110" width="46" height="8" rx="3" fill="#4e342e"/>
-        <rect x="37" y="48" width="16" height="64" rx="5" fill="#607d8b"/>
-        <rect x="38" y="50" width="6" height="60" rx="3" fill="#78909c" opacity=".4"/>
-        <rect x="33" y="42" width="24" height="11" rx="5" fill="#546e7a"/>
-        <path d="M39 68 Q22 68 18 80 Q16 89 22 95" stroke="#546e7a" stroke-width="7" fill="none" stroke-linecap="round"/>
-        <ellipse cx="22" cy="96" rx="4.5" ry="3.5" fill="#455a64"/>
-        <rect x="40" y="34" width="10" height="13" rx="3" fill="#455a64"/>
-        <g class="pump-handle" id="pumpHandle">
-          <rect x="15" y="39" width="60" height="9" rx="4.5" fill="#78909c"/>
-          <rect x="11" y="37" width="8" height="13" rx="4" fill="#90a4ae"/>
-          <rect x="71" y="37" width="8" height="13" rx="4" fill="#90a4ae"/>
-        </g>
-        <circle cx="45" cy="43" r="4.5" fill="#37474f"/>
-        <circle cx="45" cy="43" r="2.5" fill="#263238"/>
-      </svg>
-      <div class="pump-label" id="pumpLabel">Tap to pump!</div>
-    </div>
     <div class="water-info">
       <div class="wdrops" id="dropRow"></div>
-      <div class="pump-prog-row">
-        <div class="pump-prog-bg"><div class="pump-prog-fill" id="pumpProgFill" style="width:0%"></div></div>
-        <span class="pump-prog-lbl" id="pumpProgLbl">0/5</span>
-      </div>
     </div>
   </div>
   <div class="garden-grid" id="gardenGrid"></div>
@@ -144,7 +123,8 @@
       <div class="bloom-sub"   id="bloomSub"></div>
       <div class="bloom-reward">🎁 +1 Seed Packet earned for growing this flower!</div>
       <div class="bloom-btns">
-        <button class="btn-sell" id="btnSell">💰 Sell</button>
+        <button class="btn-sell"  id="btnSell">💰 Sell</button>
+        <button class="btn-store" id="btnStore">🎒 Store in Inventory</button>
       </div>
     </div>
   </div>
@@ -207,6 +187,17 @@
       </div>
       <button class="btn-buy" onclick="buyPacket('legendary')"><span class="ic">C</span> 85</button>
     </div>
+  </div>
+</div>
+
+<!-- INVENTORY MODAL -->
+<div class="overlay" id="invOverlay">
+  <div class="sheet">
+    <button class="sh-close" onclick="closeModal('invOverlay')">✕</button>
+    <div class="sh-handle"></div>
+    <div class="sh-title">🎒 Inventory</div>
+    <p class="inv-header" id="invHeader" style="text-align:center;font-size:.78em;color:#888;margin-bottom:12px;"></p>
+    <div class="inv-grid" id="invGrid"></div>
   </div>
 </div>
 
