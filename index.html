@@ -70,6 +70,15 @@
     .wdrop.empty{background:#e0e0e0;}
     /* pump */
     .pump-section{display:flex;align-items:center;justify-content:center;gap:16px;padding:4px 16px 10px;}
+    /* valve wheel */
+    .valve-wrap{display:flex;flex-direction:column;align-items:center;flex-shrink:0;
+      user-select:none;-webkit-user-select:none;touch-action:none;}
+    .valve-svg{width:72px;height:72px;cursor:grab;will-change:transform;
+      filter:drop-shadow(0 3px 8px rgba(198,40,40,.45));transition:filter .2s;}
+    .valve-svg:active{cursor:grabbing;filter:drop-shadow(0 2px 14px rgba(198,40,40,.8));}
+    .valve-label{font-size:.58em;color:#c62828;font-weight:bold;margin-top:3px;white-space:nowrap;}
+    .valve-prog-bg{width:66px;height:6px;background:#f5f5f5;border-radius:3px;overflow:hidden;margin-top:4px;border:1px solid #eee;}
+    .valve-prog-fill{height:100%;background:linear-gradient(90deg,#ef9a9a,#e53935);border-radius:3px;transition:width .15s;}
     .pump-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;flex-shrink:0;}
     .pump-svg{width:68px;height:84px;filter:drop-shadow(0 3px 7px rgba(0,0,0,.2));transition:transform .1s;}
     .pump-wrap:active .pump-svg{transform:scale(.93);}
@@ -361,6 +370,41 @@
     <p>Tap a pot to plant · Tap a plant to water it!</p>
   </div>
   <div class="pump-section">
+    <!-- VALVE WHEEL -->
+    <div class="valve-wrap" id="valveWrap">
+      <svg class="valve-svg" id="valveSvg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- outer ring -->
+        <circle cx="50" cy="50" r="39" stroke="#c62828" stroke-width="8" fill="none"/>
+        <!-- inner ring -->
+        <circle cx="50" cy="50" r="22" stroke="#c62828" stroke-width="6" fill="none"/>
+        <!-- 8 spokes -->
+        <line x1="50" y1="28" x2="50" y2="11" stroke="#c62828" stroke-width="5" stroke-linecap="round"/>
+        <line x1="50" y1="72" x2="50" y2="89" stroke="#c62828" stroke-width="5" stroke-linecap="round"/>
+        <line x1="28" y1="50" x2="11" y2="50" stroke="#c62828" stroke-width="5" stroke-linecap="round"/>
+        <line x1="72" y1="50" x2="89" y2="50" stroke="#c62828" stroke-width="5" stroke-linecap="round"/>
+        <line x1="34" y1="34" x2="22" y2="22" stroke="#c62828" stroke-width="5" stroke-linecap="round"/>
+        <line x1="66" y1="66" x2="78" y2="78" stroke="#c62828" stroke-width="5" stroke-linecap="round"/>
+        <line x1="66" y1="34" x2="78" y2="22" stroke="#c62828" stroke-width="5" stroke-linecap="round"/>
+        <line x1="34" y1="66" x2="22" y2="78" stroke="#c62828" stroke-width="5" stroke-linecap="round"/>
+        <!-- 8 handle bumps -->
+        <ellipse cx="50" cy="7"  rx="7" ry="5" fill="#e53935" transform="rotate(0,50,50)"/>
+        <ellipse cx="50" cy="7"  rx="7" ry="5" fill="#e53935" transform="rotate(45,50,50)"/>
+        <ellipse cx="50" cy="7"  rx="7" ry="5" fill="#e53935" transform="rotate(90,50,50)"/>
+        <ellipse cx="50" cy="7"  rx="7" ry="5" fill="#e53935" transform="rotate(135,50,50)"/>
+        <ellipse cx="50" cy="7"  rx="7" ry="5" fill="#e53935" transform="rotate(180,50,50)"/>
+        <ellipse cx="50" cy="7"  rx="7" ry="5" fill="#e53935" transform="rotate(225,50,50)"/>
+        <ellipse cx="50" cy="7"  rx="7" ry="5" fill="#e53935" transform="rotate(270,50,50)"/>
+        <ellipse cx="50" cy="7"  rx="7" ry="5" fill="#e53935" transform="rotate(315,50,50)"/>
+        <!-- center hub -->
+        <circle cx="50" cy="50" r="11" fill="#c62828"/>
+        <circle cx="50" cy="50" r="8"  fill="#b71c1c"/>
+        <rect   x="46" y="46" width="8" height="8" rx="1.5" fill="#7f0000"/>
+        <!-- shine -->
+        <ellipse cx="38" cy="20" rx="5" ry="3" fill="rgba(255,255,255,.18)" transform="rotate(-30,38,20)"/>
+      </svg>
+      <div class="valve-label" id="valveLabel">Spin for seeds!</div>
+      <div class="valve-prog-bg"><div class="valve-prog-fill" id="valveProgFill" style="width:0%"></div></div>
+    </div>
     <div class="pump-wrap" id="pumpBtn" onclick="pumpClick()">
       <svg class="pump-svg" viewBox="0 0 90 120" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="22" y="110" width="46" height="8" rx="3" fill="#4e342e"/>
@@ -1298,7 +1342,80 @@ function weightedRandom(type='common'){
   return keys.at(-1);
 }
 
-let toastTimer;
+// ── Valve wheel ─────────────────────────────────────────────────────────────
+(function setupValve(){
+  const svg=document.getElementById('valveSvg');
+  const lbl=document.getElementById('valveLabel');
+  const bar=document.getElementById('valveProgFill');
+  const SPINS_NEEDED=5;
+  let tracking=false,lastAngle=0,accumulated=0,completedSpins=0,visualRot=0;
+
+  function angleFrom(cx,cy,ex,ey){return Math.atan2(ey-cy,ex-cx)*180/Math.PI;}
+  function center(){
+    const r=svg.getBoundingClientRect();
+    return{cx:r.left+r.width/2,cy:r.top+r.height/2};
+  }
+  function applyDelta(delta){
+    if(Math.abs(delta)>90) return; // ignore jumps (finger lift)
+    accumulated+=Math.abs(delta);
+    visualRot+=delta;
+    svg.style.transform=`rotate(${visualRot}deg)`;
+    const newSpins=Math.floor(accumulated/360);
+    if(newSpins>completedSpins){
+      completedSpins=newSpins;
+      const progress=completedSpins%SPINS_NEEDED;
+      bar.style.width=(progress/SPINS_NEEDED*100)+'%';
+      lbl.textContent=progress>0?`${progress}/${SPINS_NEEDED} spins!`:'Spin for seeds!';
+      if(completedSpins%SPINS_NEEDED===0){
+        // Reward: 5 random common seeds
+        for(let i=0;i<5;i++) G.seeds.push({id:G.seedId++,key:weightedRandom('common')});
+        updateHUD();renderTray();saveG();
+        bar.style.width='0%';
+        lbl.textContent='Spin for seeds!';
+        toast('🌱 +5 seeds! Keep spinning!',2200);
+        multiSparkle();
+      }
+    }else{
+      const progress=completedSpins%SPINS_NEEDED;
+      bar.style.width=(((accumulated%360)/360+progress)/SPINS_NEEDED*100).toFixed(1)+'%';
+    }
+  }
+
+  // Touch
+  svg.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    const{cx,cy}=center();
+    lastAngle=angleFrom(cx,cy,e.touches[0].clientX,e.touches[0].clientY);
+    tracking=true;
+  },{passive:false});
+  document.addEventListener('touchmove',e=>{
+    if(!tracking) return;
+    e.preventDefault();
+    const{cx,cy}=center();
+    const a=angleFrom(cx,cy,e.touches[0].clientX,e.touches[0].clientY);
+    let d=a-lastAngle;
+    if(d>180)d-=360;if(d<-180)d+=360;
+    applyDelta(d);lastAngle=a;
+  },{passive:false});
+  document.addEventListener('touchend',  ()=>{tracking=false;});
+  document.addEventListener('touchcancel',()=>{tracking=false;});
+
+  // Mouse (desktop)
+  svg.addEventListener('mousedown',e=>{
+    const{cx,cy}=center();
+    lastAngle=angleFrom(cx,cy,e.clientX,e.clientY);
+    tracking=true;
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!tracking) return;
+    const{cx,cy}=center();
+    const a=angleFrom(cx,cy,e.clientX,e.clientY);
+    let d=a-lastAngle;
+    if(d>180)d-=360;if(d<-180)d+=360;
+    applyDelta(d);lastAngle=a;
+  });
+  document.addEventListener('mouseup',()=>{tracking=false;});
+})();
 function toast(msg,ms=2000){
   const el=document.getElementById('toast');
   el.textContent=msg;el.classList.add('show');
