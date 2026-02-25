@@ -2780,7 +2780,7 @@ function storeFlower() {
   closeModal("bloomOverlay");
   updateHUD();
   saveG();
-  toast(`${f.name} stored in inventory! 🎒`, 2000);
+  toast(`${f.name} stored in garden House! `, 2000);
 }
 function openInventoryModal() {
   const grid = document.getElementById("invGrid");
