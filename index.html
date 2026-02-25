@@ -21,33 +21,7 @@
       6%{opacity:.55;}92%{opacity:.35;}
       100%{opacity:0;transform:translateY(105vh) rotate(740deg);}
     }
-    #valentineScreen{
-      display:flex;flex-direction:column;justify-content:center;align-items:center;
-      min-height:100vh;min-height:100dvh;padding:20px;
-    }
-    .v-card{
-      background:rgba(255,255,255,.96);border-radius:28px;text-align:center;
-      padding:clamp(24px,6vw,56px) clamp(20px,5vw,48px);
-      max-width:460px;width:100%;box-shadow:0 20px 60px rgba(233,30,99,.18);
-      animation:cardPop .6s cubic-bezier(.175,.885,.32,1.275);
-    }
-    @keyframes cardPop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
-    .v-card h1{
-      color:#c2185b;font-size:clamp(1.5em,6vw,2.6em);line-height:1.2;
-      margin-bottom:8px;text-shadow:0 2px 12px rgba(233,30,99,.18);
-    }
-    .v-flowers{font-size:clamp(2em,9vw,3.6em);margin-bottom:10px;letter-spacing:6px;animation:floatBloom 3s ease-in-out infinite;}
-    .v-sub{color:#999;font-size:clamp(.82em,3vw,1em);line-height:1.6;margin-bottom:28px;}
-    .btn-enter{
-      background:linear-gradient(135deg,#f48fb1,#e91e63);color:#fff;border:none;
-      border-radius:50px;cursor:pointer;font-weight:bold;touch-action:manipulation;
-      padding:clamp(14px,3.5vw,20px) clamp(36px,9vw,64px);font-size:clamp(1.05em,4vw,1.5em);
-      box-shadow:0 8px 28px rgba(233,30,99,.42);letter-spacing:.5px;
-      transition:transform .15s,box-shadow .15s;
-    }
-    .btn-enter:hover{transform:scale(1.04);box-shadow:0 10px 36px rgba(233,30,99,.56);}
-    .btn-enter:active{transform:scale(.96);}
-    #gameScreen{display:none;flex-direction:column;min-height:100vh;min-height:100dvh;padding-bottom:calc(120px + env(safe-area-inset-bottom));}
+    #gameScreen{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;padding-bottom:calc(120px + env(safe-area-inset-bottom));}
     .top-bar{
       background:rgba(255,255,255,.93);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
       padding:9px 11px;padding-top:calc(9px + env(safe-area-inset-top));
@@ -170,15 +144,16 @@
     }
     .tray-empty{text-align:center;color:#bbb;font-size:.82em;padding:8px;}
     .overlay{
-      display:none;position:fixed;inset:0;
+      display:none;position:fixed;top:0;left:0;right:0;bottom:0;
       background:rgba(0,0,0,.5);z-index:100;
       justify-content:center;align-items:flex-end;
+      touch-action:manipulation;
     }
     .overlay.on{display:flex;}
     .sheet{
       background:#fff;border-radius:26px 26px 0 0;
       padding:16px 16px calc(36px + env(safe-area-inset-bottom));width:100%;max-width:480px;
-      max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+      max-height:92vh;max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
       animation:slideUp .28s ease;position:relative;
     }
     @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
@@ -363,16 +338,6 @@
 </head>
 <body>
 <div class="bg-canvas"></div>
-
-<!-- MENU SCREEN -->
-<div id="valentineScreen">
-  <div class="v-card">
-    <div class="v-flowers">🌸🌷🌺</div>
-    <h1>Yurie's Flower Garden</h1>
-    <p class="v-sub">Grow beautiful flowers, collect rare blooms,<br>and fill your greenhouse with wonders! 🌿</p>
-    <button class="btn-enter" id="enterBtn">Enter the Garden 🌸</button>
-  </div>
-</div>
 
 <!-- GAME SCREEN -->
 <div id="gameScreen">
@@ -837,14 +802,9 @@ function initPetals(){
   }
 }
 
-document.getElementById('enterBtn').addEventListener('click',()=>{
-  document.getElementById('valentineScreen').style.display='none';
-  const gs=document.getElementById('gameScreen');
-  gs.style.display='flex';gs.style.flexDirection='column';
-  const returning=loadG();
-  initGame();
-  toast(returning?'🌸 Welcome back to your garden, Yurie!':'🌸 Welcome to your garden, Yurie!',2800);
-});
+// Start game immediately — no welcome screen
+loadG();
+initGame();
 
 function initGame(){
   initPetals();
@@ -1285,35 +1245,25 @@ function buyPacket(type){
   toast(`${PKT_ICON[type]} ${PKT_LABEL[type]} Packet bought!`,1600);
 }
 
+// .tbtn already has touch-action:manipulation so iOS fires click immediately (no 300ms delay)
+// We use a time guard on backdrop-dismiss to stop any stray click from closing a freshly opened modal
 let _modalOpenTime=0;
 function openModal(id){
-  // Close any other open overlays first — prevents stacking bugs
   document.querySelectorAll('.overlay.on').forEach(o=>{if(o.id!==id)o.classList.remove('on');});
   document.getElementById(id).classList.add('on');
   _modalOpenTime=Date.now();
-  // Reset packet animation state if pkt modal is being force-closed
   if(id!=='pktOverlay') G.opening=false;
 }
 function closeModal(id){document.getElementById(id).classList.remove('on');}
-function _dismissOverlay(o){
-  if(Date.now()-_modalOpenTime<600) return; // guard: ignore touch within 600ms of open
-  o.classList.remove('on');
-  if(o.id==='pktOverlay') G.opening=false;
-}
-// Use touchend for touch devices (avoids iOS ghost-click entirely), click for desktop
+// Backdrop tap closes modal — click only (no touchend), guarded so a tap that opens
+// the modal can't immediately close it in the same gesture
 document.querySelectorAll('.overlay').forEach(o=>{
-  o.addEventListener('touchend',e=>{ if(e.target===o) _dismissOverlay(o); },{passive:true});
-  o.addEventListener('click',   e=>{ if(e.target===o) _dismissOverlay(o); });
-});
-// iOS fix: fire top-bar button actions on touchstart + preventDefault
-// This stops the 300ms-delayed ghost click from being generated at all
-// (script is at bottom of body so DOM is already ready — no DOMContentLoaded needed)
-document.querySelectorAll('.tbtn').forEach(btn=>{
-  btn.addEventListener('touchstart',function(e){
-    e.preventDefault();
-    const fn=this.getAttribute('onclick');
-    if(fn) try{eval(fn);}catch(_){}
-  },{passive:false});
+  o.addEventListener('click',e=>{
+    if(e.target!==o) return;
+    if(Date.now()-_modalOpenTime<700) return;
+    o.classList.remove('on');
+    if(o.id==='pktOverlay') G.opening=false;
+  });
 });
 
 const PKT_POOLS={
