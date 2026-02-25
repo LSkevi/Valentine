@@ -1295,8 +1295,26 @@ function openModal(id){
   if(id!=='pktOverlay') G.opening=false;
 }
 function closeModal(id){document.getElementById(id).classList.remove('on');}
-// 350ms guard prevents iOS ghost-click from immediately closing a freshly opened overlay
-document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o&&Date.now()-_modalOpenTime>350){o.classList.remove('on');if(o.id==='pktOverlay')G.opening=false;}}));
+function _dismissOverlay(o){
+  if(Date.now()-_modalOpenTime<600) return; // guard: ignore touch within 600ms of open
+  o.classList.remove('on');
+  if(o.id==='pktOverlay') G.opening=false;
+}
+// Use touchend for touch devices (avoids iOS ghost-click entirely), click for desktop
+document.querySelectorAll('.overlay').forEach(o=>{
+  o.addEventListener('touchend',e=>{ if(e.target===o) _dismissOverlay(o); },{passive:true});
+  o.addEventListener('click',   e=>{ if(e.target===o) _dismissOverlay(o); });
+});
+// iOS fix: fire top-bar button actions on touchstart + preventDefault
+// This stops the 300ms-delayed ghost click from being generated at all
+// (script is at bottom of body so DOM is already ready — no DOMContentLoaded needed)
+document.querySelectorAll('.tbtn').forEach(btn=>{
+  btn.addEventListener('touchstart',function(e){
+    e.preventDefault();
+    const fn=this.getAttribute('onclick');
+    if(fn) try{eval(fn);}catch(_){}
+  },{passive:false});
+});
 
 const PKT_POOLS={
   common:   {pinkTulip:30,redTulip:26,yellowTulip:22,purpleViolet:20,blueViolet:18,whiteLily:16,purpleIris:14,yellowDaffodil:18,whiteDaisy:20,yellowDaisy:16,pinkDaisy:12,sunflower:5,lavender:4,whiteTulip:4,redRose:6,pinkRose:3,redPoppy:3,cherryBlossom:2,blueRose:1,blueTulip:1},
