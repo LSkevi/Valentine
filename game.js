@@ -2787,12 +2787,12 @@ function openInventoryModal() {
   const hdr = document.getElementById("invHeader");
   if (hdr)
     hdr.textContent = G.inventory.length
-      ? `${G.inventory.length} flower${G.inventory.length !== 1 ? "s" : ""} stored`
-      : "No flowers stored yet";
+      ? `${G.inventory.length} flower${G.inventory.length !== 1 ? "s" : ""} in Garden House`
+      : "Garden House is empty";
   grid.innerHTML = "";
   if (!G.inventory.length) {
     grid.innerHTML =
-      '<div class="tray-empty">Your inventory is empty.<br>Store bloomed flowers to keep them! 🌸</div>';
+      '<div class="tray-empty">Your Garden House is empty.<br>Store bloomed flowers to keep them! 🌸</div>';
     openModal("invOverlay");
     return;
   }
