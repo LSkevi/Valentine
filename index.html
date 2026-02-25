@@ -1285,9 +1285,15 @@ function buyPacket(type){
   toast(`${PKT_ICON[type]} ${PKT_LABEL[type]} Packet bought!`,1600);
 }
 
-function openModal(id){document.getElementById(id).classList.add('on');}
+function openModal(id){
+  // Close any other open overlays first — prevents stacking bugs
+  document.querySelectorAll('.overlay.on').forEach(o=>{if(o.id!==id)o.classList.remove('on');});
+  document.getElementById(id).classList.add('on');
+  // Reset packet animation state if pkt modal is being force-closed
+  if(id!=='pktOverlay') G.opening=false;
+}
 function closeModal(id){document.getElementById(id).classList.remove('on');}
-document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on');}));
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o){o.classList.remove('on');if(o.id==='pktOverlay')G.opening=false;}}));
 
 const PKT_POOLS={
   common:   {pinkTulip:30,redTulip:26,yellowTulip:22,purpleViolet:20,blueViolet:18,whiteLily:16,purpleIris:14,yellowDaffodil:18,whiteDaisy:20,yellowDaisy:16,pinkDaisy:12,sunflower:5,lavender:4,whiteTulip:4,redRose:6,pinkRose:3,redPoppy:3,cherryBlossom:2,blueRose:1,blueTulip:1},
