@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node --version:*)"
+      "Bash(node --version:*)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:pixune.com)",
+      "WebFetch(domain:genieee.com)"
     ]
   }
 }

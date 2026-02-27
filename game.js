@@ -2758,20 +2758,28 @@ function plantSeed(key, plotIdx) {
 function openBloomModal(i) {
   G.bloomPlot = i;
   const f = FLOWERS[G.plots[i].key];
-  document.getElementById("bloomFlEl").innerHTML = flowerSVG(
-    G.plots[i].key,
-    MAX_STAGE,
-  );
-  document.getElementById("bloomTitle").textContent =
-    `${f.name} is fully bloomed! 🎉`;
+  document.getElementById("bloomFlEl").innerHTML = flowerSVG(G.plots[i].key, MAX_STAGE);
+  document.getElementById("bloomTitle").textContent = `${f.name} is fully bloomed! 🎉`;
+
+  // Rarity badge
+  const badge = document.getElementById("bloomBadge");
+  badge.textContent = RARITY_LABEL[f.rarity];
+  badge.className = `bloom-badge ${f.rarity}`;
+
+  // Atmospheric glow color keyed to rarity
+  const glowColors = { common: "#9e9e9e", uncommon: "#ab47bc", rare: "#3949ab", legendary: "#ff8f00" };
+  document.getElementById("bloomGlow").style.background = glowColors[f.rarity] || "#9e9e9e";
+
+  // Rarity-correct sub message
   document.getElementById("bloomSub").textContent =
-    f.rarity === "unique"
-      ? `💎 The rarest flower in existence — your White Lily is in full bloom! ✨ Truly one of a kind!`
+    f.rarity === "legendary"
+      ? `✦ A legendary ${f.name} — one of the rarest blooms! Truly extraordinary! 🌟`
       : f.rarity === "rare"
-        ? `💙 A legendary ${f.name} — incredibly rare and gorgeous! ✨`
+        ? `★ A rare ${f.name} — gorgeous and hard to find! 💙`
         : f.rarity === "uncommon"
           ? `Your ${f.name.toLowerCase()} is absolutely stunning! 💕`
           : `Beautiful! Your ${f.name.toLowerCase()} is glowing! 🌸`;
+
   document.getElementById("btnSell").innerHTML =
     `💰 Sell for <span class="ic">C</span><span class="coin-val">${f.sell}</span>`;
   document.getElementById("btnSell").onclick = sellFlower;
