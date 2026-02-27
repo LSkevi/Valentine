@@ -1547,7 +1547,9 @@ function saveG() {
   };
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify(s));
-  } catch (e) {}
+  } catch (e) {
+    console.warn("[Garden] Save failed:", e);
+  }
 }
 function loadG() {
   try {
@@ -1607,13 +1609,13 @@ function _aura(cy, r, pll, rare) {
   );
 }
 function _ring(n, rx, ry, cy, fill, sc) {
-  let s = "";
   sc = sc || 1;
+  const parts = [];
   for (let i = 0; i < n; i++) {
     const a = ((360 / n) * i).toFixed(1);
-    s += `<ellipse cx="30" cy="${(cy - ry * sc).toFixed(1)}" rx="${(rx * sc).toFixed(1)}" ry="${(ry * sc).toFixed(1)}" fill="${fill}" transform="rotate(${a},30,${cy})"/>`;
+    parts.push(`<ellipse cx="30" cy="${(cy - ry * sc).toFixed(1)}" rx="${(rx * sc).toFixed(1)}" ry="${(ry * sc).toFixed(1)}" fill="${fill}" transform="rotate(${a},30,${cy})"/>`);
   }
-  return s;
+  return parts.join("");
 }
 function _svg(body) {
   return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
@@ -1706,16 +1708,17 @@ function renderSpike(f, stage, P) {
     );
   const topY = stage === 2 ? 52 : 55;
   const bR = stage === 2 ? Math.ceil(rows * 0.65) : rows;
-  let blobs = "";
+  const blobParts = [];
   for (let r = 0; r < bR; r++) {
     const y = topY - r * 4.5;
     const xs = cols === 2 ? (r % 2 === 0 ? [27, 33] : [30]) : [30];
     const fill = r === bR - 1 ? pd : p;
     const op = Math.min(0.93, 0.65 + r * 0.03).toFixed(2);
     xs.forEach((x) => {
-      blobs += `<ellipse cx="${x}" cy="${y.toFixed(1)}" rx="3" ry="4" fill="${fill}" opacity="${op}"/>`;
+      blobParts.push(`<ellipse cx="${x}" cy="${y.toFixed(1)}" rx="3" ry="4" fill="${fill}" opacity="${op}"/>`);
     });
   }
+  const blobs = blobParts.join("");
   if (stage === 2)
     return _svg(
       _sh +
@@ -1747,12 +1750,12 @@ function renderStar(f, stage, P) {
         `<path d="M25 62 Q24 52 30 47 Q36 52 35 62 Q32 65 30 66 Q28 65 25 62Z" fill="${p}" opacity=".85"/>`,
     );
   const petals = (sc) => {
-    let s = "";
+    const parts = [];
     for (let i = 0; i < n; i++) {
       const a = ((360 / n) * i).toFixed(1);
-      s += `<ellipse cx="30" cy="${(cy - ry * sc).toFixed(1)}" rx="${(rx * sc).toFixed(1)}" ry="${(ry * sc).toFixed(1)}" fill="${i % 2 ? pl : p}" transform="rotate(${a},30,${cy})"/>`;
+      parts.push(`<ellipse cx="30" cy="${(cy - ry * sc).toFixed(1)}" rx="${(rx * sc).toFixed(1)}" ry="${(ry * sc).toFixed(1)}" fill="${i % 2 ? pl : p}" transform="rotate(${a},30,${cy})"/>`);
     }
-    return s;
+    return parts.join("");
   };
   if (stage === 2)
     return _svg(
@@ -2048,8 +2051,8 @@ const SHAPE_PARAMS = {
   violet: {
     fn: "radial",
     n: 5,
-    rx: 6,
-    ry: 9,
+    rx: 7.5,
+    ry: 8,
     cy: 38,
     cR: 6,
     cFill: "#fdd835",
@@ -2072,30 +2075,30 @@ const SHAPE_PARAMS = {
   pansy: {
     fn: "radial",
     n: 5,
-    rx: 7,
+    rx: 9,
     ry: 9,
-    cy: 39,
-    cR: 5,
+    cy: 38,
+    cR: 6,
     cFill: "#f9a825",
     leaves: true,
   },
   jasmine: {
     fn: "radial",
     n: 5,
-    rx: 4.5,
-    ry: 8,
+    rx: 3,
+    ry: 9,
     cy: 40,
-    cR: 5,
+    cR: 4,
     cFill: "#f9a825",
     leaves: false,
   },
   geranium: {
     fn: "radial",
     n: 5,
-    rx: 5,
-    ry: 8,
+    rx: 7,
+    ry: 7,
     cy: 40,
-    cR: 6,
+    cR: 7,
     cFill: "#fdd835",
     leaves: true,
   },
@@ -2103,8 +2106,8 @@ const SHAPE_PARAMS = {
     fn: "radial",
     n: 5,
     rx: 5,
-    ry: 8,
-    cy: 40,
+    ry: 10,
+    cy: 38,
     cR: 6,
     cFill: "#fdd835",
     c2R: 4,
@@ -2114,18 +2117,18 @@ const SHAPE_PARAMS = {
   phlox: {
     fn: "radial",
     n: 5,
-    rx: 5,
-    ry: 8,
-    cy: 41,
-    cR: 5,
+    rx: 5.5,
+    ry: 7,
+    cy: 40,
+    cR: 4,
     cFill: "#fdd835",
     leaves: false,
   },
   impatiens: {
     fn: "radial",
     n: 5,
-    rx: 5.5,
-    ry: 8,
+    rx: 7,
+    ry: 6,
     cy: 40,
     cR: 5,
     cFill: "#fdd835",
@@ -2134,20 +2137,20 @@ const SHAPE_PARAMS = {
   nasturtium: {
     fn: "radial",
     n: 5,
-    rx: 6,
-    ry: 9,
-    cy: 40,
-    cR: 5,
+    rx: 8.5,
+    ry: 8,
+    cy: 39,
+    cR: 4,
     cFill: "#f9a825",
     leaves: true,
   },
   sweetpea: {
     fn: "radial",
     n: 5,
-    rx: 5,
-    ry: 8,
-    cy: 40,
-    cR: 4,
+    rx: 3.5,
+    ry: 7,
+    cy: 42,
+    cR: 3,
     cFill: "#fce4ec",
     leaves: false,
   },
@@ -2164,8 +2167,8 @@ const SHAPE_PARAMS = {
   clematis: {
     fn: "radial",
     n: 6,
-    rx: 6,
-    ry: 10,
+    rx: 7.5,
+    ry: 9,
     cy: 39,
     cR: 6,
     cFill: "#fdd835",
@@ -2176,9 +2179,9 @@ const SHAPE_PARAMS = {
   alstroemeria: {
     fn: "radial",
     n: 6,
-    rx: 5,
-    ry: 9,
-    cy: 40,
+    rx: 3.5,
+    ry: 11,
+    cy: 38,
     cR: 5,
     cFill: "#f9a825",
     leaves: true,
@@ -2186,10 +2189,10 @@ const SHAPE_PARAMS = {
   verbena: {
     fn: "radial",
     n: 5,
-    rx: 4.5,
-    ry: 7,
-    cy: 40,
-    cR: 5,
+    rx: 3,
+    ry: 5,
+    cy: 42,
+    cR: 3,
     cFill: "#fdd835",
     leaves: false,
   },
@@ -2208,9 +2211,9 @@ const SHAPE_PARAMS = {
   plumeria: {
     fn: "radial",
     n: 5,
-    rx: 6,
-    ry: 10,
-    cy: 39,
+    rx: 4,
+    ry: 13,
+    cy: 37,
     cR: 6,
     cFill: "#fdd835",
     leaves: false,
@@ -2240,10 +2243,10 @@ const SHAPE_PARAMS = {
   hellebore: {
     fn: "radial",
     n: 5,
-    rx: 6,
-    ry: 9,
+    rx: 8,
+    ry: 7,
     cy: 39,
-    cR: 6,
+    cR: 7,
     cFill: "#fdd835",
     leaves: true,
   },
@@ -2259,16 +2262,16 @@ const SHAPE_PARAMS = {
   // ── SPIKE (cols:1=single|2=paired; rows:blob count) ───────────
   lavender: { fn: "spike", cols: 2, rows: 8 },
   hyacinth: { fn: "spike", cols: 2, rows: 9 },
-  foxglove: { fn: "spike", cols: 1, rows: 7 },
-  gladiolus: { fn: "spike", cols: 1, rows: 7 },
+  foxglove: { fn: "spike", cols: 1, rows: 9 },
+  gladiolus: { fn: "spike", cols: 1, rows: 4 },
   snapdragon: { fn: "spike", cols: 1, rows: 6 },
-  salvia: { fn: "spike", cols: 1, rows: 6 },
+  salvia: { fn: "spike", cols: 2, rows: 10 },
   veronica: { fn: "spike", cols: 1, rows: 7 },
-  buddleia: { fn: "spike", cols: 2, rows: 8 },
+  buddleia: { fn: "spike", cols: 2, rows: 11 },
   stock: { fn: "spike", cols: 2, rows: 7 },
   statice: { fn: "spike", cols: 2, rows: 6 },
   freesia: { fn: "spike", cols: 1, rows: 5 },
-  heather: { fn: "spike", cols: 2, rows: 6 },
+  heather: { fn: "spike", cols: 2, rows: 5 },
   // ── STAR (wide flat petals: lily/iris/orchid type) ────────────
   lily: { fn: "star", n: 6, rx: 5, ry: 12, cy: 38, cR: 0, cFill: "" },
   iris: { fn: "star", n: 6, rx: 5.5, ry: 11, cy: 38, cR: 6, cFill: "#fdd835" },
@@ -2313,14 +2316,14 @@ const SHAPE_PARAMS = {
   // ── ROSETTE (layered concentric petal circles) ─────────────────
   rose: { fn: "rosette", cy: 35, r0: 18, tight: 0.5 },
   peony: { fn: "rosette", cy: 33, r0: 19, tight: 0.45, yellowCenter: true },
-  carnation: { fn: "rosette", cy: 36, r0: 16, tight: 0.55 },
-  dahlia: { fn: "rosette", cy: 36, r0: 16, tight: 0.5 },
+  carnation: { fn: "rosette", cy: 36, r0: 14, tight: 0.59 },
+  dahlia: { fn: "rosette", cy: 33, r0: 20, tight: 0.43 },
   chrysanthemum: { fn: "rosette", cy: 37, r0: 15, tight: 0.5 },
-  ranunculus: { fn: "rosette", cy: 37, r0: 15, tight: 0.5 },
-  begonia: { fn: "rosette", cy: 37, r0: 15, tight: 0.55 },
-  hydrangea: { fn: "rosette", cy: 38, r0: 13, tight: 0.6 },
-  gardenia: { fn: "rosette", cy: 36, r0: 16, tight: 0.5 },
-  camellia: { fn: "rosette", cy: 36, r0: 16, tight: 0.5 },
+  ranunculus: { fn: "rosette", cy: 37, r0: 17, tight: 0.44 },
+  begonia: { fn: "rosette", cy: 38, r0: 13, tight: 0.52 },
+  hydrangea: { fn: "rosette", cy: 39, r0: 11, tight: 0.65 },
+  gardenia: { fn: "rosette", cy: 36, r0: 18, tight: 0.42 },
+  camellia: { fn: "rosette", cy: 36, r0: 15, tight: 0.54 },
 };
 
 function flowerSVG(key, stage) {
@@ -2392,6 +2395,12 @@ function renderGarden() {
   grid.innerHTML = "";
   G.plots.forEach((p, i) => grid.appendChild(buildPlotCard(p, i)));
 }
+function updatePlotCard(i) {
+  const grid = document.getElementById("gardenGrid");
+  if (grid.children[i]) {
+    grid.replaceChild(buildPlotCard(G.plots[i], i), grid.children[i]);
+  }
+}
 function potCardSVG(p) {
   // Terra cotta colours
   const rH = "#e8724e",
@@ -2427,8 +2436,6 @@ function potCardSVG(p) {
     barEl = `<rect x="15" y="93.5" width="50" height="3" rx="1.5" fill="rgba(0,0,0,.2)"/>
       <rect x="15" y="93.5" width="${barW}" height="3" rx="1.5" fill="#81c784"/>`;
   }
-
-  const labelEl = "";
 
   // Pips (watering progress dots)
   let pipEls = "";
@@ -2497,7 +2504,6 @@ function potCardSVG(p) {
     <circle cx="44" cy="62" r="1.2" fill="${sl}" opacity=".5"/>
     <circle cx="30" cy="64" r="1"   fill="${sl}" opacity=".4"/>
     ${barEl}
-    ${labelEl}
   </svg>`;
 }
 
@@ -2543,13 +2549,11 @@ function waterPlot(i) {
   G.water--;
   G.plots[i].waters++;
   renderDrops();
-  const tiles = document.querySelectorAll(".plot");
-  if (tiles[i]) {
-    tiles[i].classList.add("watered");
-    setTimeout(() => tiles[i].classList.remove("watered"), 380);
-  }
-  if (tiles[i]) {
-    const r = tiles[i].getBoundingClientRect();
+  // Capture splash position and trigger animation before any DOM replacement
+  const grid = document.getElementById("gardenGrid");
+  const oldTile = grid.children[i];
+  if (oldTile) {
+    const r = oldTile.getBoundingClientRect();
     spawnSplash(r.left + r.width / 2, r.top + r.height / 3);
   }
   if (G.plots[i].waters >= STAGE_WATERS) {
@@ -2564,19 +2568,34 @@ function waterPlot(i) {
         updateHUD();
       }
       saveG();
+      // Animate old tile while bloom delay plays out
+      if (oldTile) {
+        oldTile.classList.add("watered");
+        setTimeout(() => oldTile.classList.remove("watered"), 380);
+      }
       setTimeout(() => {
-        renderGarden();
+        updatePlotCard(i);
         confettiBurst();
         openBloomModal(i);
       }, 350);
     } else {
-      renderGarden();
+      updatePlotCard(i);
       saveG();
       toast(`${STAGE_NAMES[G.plots[i].stage]} — keep watering! 🌿`, 1500);
+      // Apply watered animation to the new tile
+      if (grid.children[i]) {
+        grid.children[i].classList.add("watered");
+        setTimeout(() => { if (grid.children[i]) grid.children[i].classList.remove("watered"); }, 380);
+      }
     }
   } else {
-    renderGarden();
+    updatePlotCard(i);
     saveG();
+    // Apply watered animation to the new tile
+    if (grid.children[i]) {
+      grid.children[i].classList.add("watered");
+      setTimeout(() => { if (grid.children[i]) grid.children[i].classList.remove("watered"); }, 380);
+    }
   }
 }
 
@@ -2635,6 +2654,10 @@ function selectPktType(type) {
   if (!G.pkt[type] || G.opening) return;
   G.pendingPktType = type;
   G.opening = true;
+  // Decrement and save immediately so rapid taps can't double-spend
+  G.pkt[type]--;
+  updateHUD();
+  saveG();
   document.getElementById("pktSelector").style.display = "none";
   document.getElementById("pktTitle").textContent =
     `${PKT_ICON[type]} Open a ${PKT_LABEL[type]} Packet`;
@@ -2646,9 +2669,6 @@ function selectPktType(type) {
   setTimeout(() => {
     card.classList.add("shaking");
     setTimeout(() => {
-      G.pkt[type]--;
-      updateHUD();
-      saveG();
       G.openedKey = weightedRandom(type);
       const f = FLOWERS[G.openedKey];
       document.getElementById("pktOpenWrap").style.display = "none";
@@ -2717,6 +2737,7 @@ function openPlantModal(plotIdx) {
 function plantSeed(key, plotIdx) {
   const idx = G.seeds.findIndex((s) => s.key === key);
   if (idx === -1) return;
+  if (plotIdx < 0 || plotIdx >= G.plots.length) return;
   if (!G.discovered.includes(key)) G.discovered.push(key);
   G.seeds.splice(idx, 1);
   G.plots[plotIdx] = {
@@ -3050,7 +3071,7 @@ function closeModal(id) {
 // Backdrop dismiss — handles both click (desktop) and touchstart (mobile)
 function _backdropDismiss(o, e) {
   if (e.target !== o) return;
-  if (Date.now() - _modalOpenTime < 900) return;
+  if (Date.now() - _modalOpenTime < 300) return;
   e.preventDefault();
   o.classList.remove("on");
   if (o.id === "pktOverlay") G.opening = false;
@@ -3132,8 +3153,6 @@ const PKT_POOLS = {
     pinkRose: 3,
     redPoppy: 3,
     cherryBlossom: 2,
-    blueRose: 1,
-    blueTulip: 1,
   },
   uncommon: {
     // uncommon flowers
@@ -3235,29 +3254,23 @@ const PKT_POOLS = {
     whiteLily: 1,
   },
   legendary: {
-    // legendary flowers
-    blueRose: 25,
-    blueTulip: 25,
-    goldenRose: 20,
-    blackRose: 12,
-    whitePeony: 10,
-    pinkOrchid: 8,
-    blueOrchid: 6,
-    blackTulip: 15,
-    silverRose: 12,
-    crystalDaisy: 10,
-    violetPoppy: 10,
-    goldenCherry: 8,
-    midnightRose: 6,
-    whiteLotus: 8,
-    saffron: 6,
-    whitePlumeria: 6,
-    greenHydrangea: 5,
-    whiteWisteria: 5,
-    redAmaryllis: 5,
-    orangeBromeliad: 4,
-    darkHellebore: 3,
-    whiteLily: 2,
+    // legendary flowers only
+    blueRose: 35,
+    blueTulip: 35,
+    goldenRose: 25,
+    blackRose: 15,
+    whitePeony: 12,
+    pinkOrchid: 10,
+    blueOrchid: 8,
+    whiteLotus: 10,
+    saffron: 8,
+    whitePlumeria: 8,
+    greenHydrangea: 6,
+    whiteWisteria: 6,
+    redAmaryllis: 6,
+    orangeBromeliad: 5,
+    darkHellebore: 4,
+    whiteLily: 3,
   },
 };
 function weightedRandom(type = "common") {

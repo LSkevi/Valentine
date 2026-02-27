@@ -110,10 +110,6 @@ body {
   background: linear-gradient(135deg, #ce93d8, #ab47bc);
   color: #fff;
 }
-.tbtn-house {
-  background: linear-gradient(135deg, #a5d6a7, #43a047);
-  color: #fff;
-}
 .tbtn-shop {
   background: linear-gradient(135deg, #ffe082, #ffa000);
   color: #fff;
@@ -301,79 +297,10 @@ body {
   border-radius: 3px;
   transition: width 0.18s;
 }
-.pump-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
-  touch-action: manipulation;
-  user-select: none;
-  -webkit-user-select: none;
-  flex-shrink: 0;
-}
-.pump-svg {
-  width: 68px;
-  height: 84px;
-  filter: drop-shadow(0 3px 7px rgba(0, 0, 0, 0.2));
-  transition: transform 0.1s;
-}
-.pump-wrap:active .pump-svg {
-  transform: scale(0.93);
-}
-.pump-handle {
-  transition: transform 0.14s ease;
-  transform-origin: 45px 43px;
-}
-.pump-handle.pumping {
-  animation: pumpAnim 0.25s ease;
-}
-@keyframes pumpAnim {
-  0% {
-    transform: rotate(0);
-  }
-  45% {
-    transform: rotate(22deg);
-  }
-  100% {
-    transform: rotate(0);
-  }
-}
-.pump-label {
-  font-size: 0.6em;
-  color: #78909c;
-  font-weight: bold;
-  margin-top: 2px;
-  white-space: nowrap;
-}
 .water-info {
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-.pump-prog-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.pump-prog-bg {
-  width: 86px;
-  height: 7px;
-  background: #e0e0e0;
-  border-radius: 4px;
-  overflow: hidden;
-}
-.pump-prog-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #90caf9, #1e88e5);
-  border-radius: 4px;
-  transition: width 0.18s ease;
-}
-.pump-prog-lbl {
-  font-size: 0.68em;
-  color: #1e88e5;
-  font-weight: bold;
-  white-space: nowrap;
-  min-width: 36px;
 }
 /* coin badge (replaces broken 🪙 emoji) */
 .ic {
