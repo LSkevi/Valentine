@@ -142,7 +142,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 5px;
-  background: #fff;
+  background: #f3eff8;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   position: relative;
 }

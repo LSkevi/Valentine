@@ -1621,7 +1621,11 @@ function _svg(body) {
   return `<svg viewBox="0 0 60 100" fill="none" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
 }
 function _stem(S, sw, y2) {
-  return `<line x1="30" y1="92" x2="30" y2="${y2}" stroke="${S}" stroke-width="${sw}" stroke-linecap="round"/>`;
+  // thin line for full height + thick trunk rect visible below the leaf shapes
+  return (
+    `<line x1="30" y1="92" x2="30" y2="${y2}" stroke="${S}" stroke-width="${sw}" stroke-linecap="round"/>` +
+    `<rect x="26.5" y="75" width="7" height="17" rx="3.5" fill="${S}"/>`
+  );
 }
 function _leaf(S) {
   return `<path d="M30 76 Q12 64 10 50 Q23 57 30 70" fill="${S}"/><path d="M30 76 Q48 64 50 50 Q37 57 30 70" fill="${S}"/>`;
