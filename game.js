@@ -1763,6 +1763,7 @@ let G = {
   sfxVolume: 1.0,
   breedDiscovered: [],
   mutations: [],
+  contextTips: {},
 };
 
 const SAVE_KEY = "yurieGarden_v1";
@@ -1805,6 +1806,7 @@ function saveG() {
     sfxVolume: G.sfxVolume,
     breedDiscovered: G.breedDiscovered,
     mutations: G.mutations,
+    contextTips: G.contextTips,
   };
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify(s));
@@ -1855,6 +1857,7 @@ function loadG() {
       sfxVolume: s.sfxVolume ?? 1.0,
       breedDiscovered: s.breedDiscovered ?? [],
       mutations: s.mutations ?? [],
+      contextTips: s.contextTips ?? {},
     });
     // Rebuild dynamic hybrid FLOWERS entries from save data
     // Check seeds, inventory, plots, discovered for dyn_ keys
@@ -3089,7 +3092,7 @@ function initGame() {
         getAudioCtx(); // unlock audio on first interaction
         // Start ambient music if enabled
         _musicEnabled = G.musicEnabled;
-        if (_musicEnabled) startAmbientMusic();
+        if (_musicEnabled) { startAmbientMusic(); showContextTip("firstMusic"); }
         playSound("bloom");
         haptic(50);
         titleScreen.classList.add("hidden");
@@ -3280,11 +3283,10 @@ function buildPlotCard(p, i) {
       : p.state === "bloomed"
         ? "\u2728 " + FLOWERS[p.key].name
         : STAGE_NAMES[p.stage];
-  var hybBadge = (p.state === "bloomed" && canHybridize(i))
-    ? '<div class="hybridize-badge">\ud83e\uddec Fuse!</div>'
-    : "";
-  div.innerHTML =
-    potCardSVG(p) + (lbl ? `<div class="pot-lbl">${lbl}</div>` : "") + hybBadge;
+  var canFuse = p.state === "bloomed" && canHybridize(i);
+  var hybBadge = canFuse ? '<div class="hybridize-badge">\ud83e\uddec Fuse!</div>' : "";
+  if (canFuse) showContextTip("firstFusion");
+  div.insertAdjacentHTML("beforeend", potCardSVG(p) + (lbl ? '<div class="pot-lbl">' + lbl + '</div>' : "") + hybBadge);
   return div;
 }
 function clickPlot(i) {
@@ -3345,6 +3347,7 @@ function waterPlot(i) {
         playSound("bloom");
         haptic(80);
         toast(FLOWERS[G.plots[i].key].name + " bloomed! Tap it! \ud83c\udf38", 2500);
+        setTimeout(function() { showContextTip("firstBloom"); }, 3000);
       }, 350);
     } else {
       updatePlotCard(i);
@@ -3945,6 +3948,7 @@ function openJournalModal() {
 function openShopModal() {
   updateShopWater();
   updateShopPot();
+  showContextTip("firstShop");
   openModal("shopOverlay");
 }
 function buyPacket(type) {
@@ -4667,6 +4671,11 @@ function createNPC() {
   G.npcs.push(npc);
   saveG();
   renderNPCs();
+  // Contextual tips for customer types
+  showContextTip("firstCustomer");
+  if (isVip) showContextTip("firstVip");
+  if (isMystery) showContextTip("firstMystery");
+  if (isWildcard) showContextTip("firstWildcard");
 }
 
 function renderNPCs() {
@@ -4905,6 +4914,7 @@ function tickWeather() {
     } else {
       toast("Weather changed: " + WEATHER_LABELS[G.weather], 2000);
     }
+    setTimeout(function() { showContextTip("firstWeather"); }, 2500);
     checkAchievements();
   }
   renderWeather();
@@ -6110,84 +6120,193 @@ var PENTA_HIGH = [523.3, 587.3, 659.3, 784, 880];       // C5-A5
 
 // ── 5 MUSIC MOODS — rotate every 5 minutes ──────────────
 // Each mood has its own chords, progressions, melody patterns, and tempo feel
-// ── 10 NAMED SONGS — each has chords, progressions, melodies, tempo ──
-// Songs rotate their internal progs/melodies every 30s for 2+ min variety
+// ── 10 NAMED SONGS — each has unique character via synthesis params ──
+// padWave/melWave: oscillator type. melOctave: 0=mid,1=high,2=mix. restPct: 0-0.5
+// padAttack: seconds to fade in. melLen: note length. bassWave: bass timbre
+// filterHz: per-song warmth filter override
 var SONGS = [
-  { id: 0, name: "Groovy Garden", weather: "sunny", chords: [
-    { pad: [98,146.8,196,246.9], bass: 49 },       // G
-    { pad: [130.8,196,261.6,329.6], bass: 65.4 },  // C
-    { pad: [73.4,110,146.8,220], bass: 73.4 },     // D
-    { pad: [82.4,123.5,164.8,196], bass: 82.4 },   // Em
-  ], progs:[[0,1,2,3],[0,3,2,1],[2,0,1,3],[1,2,0,3]], melodies:[[0,2,4,2,3,4,2],[2,4,3,1,0,2,4],[0,1,2,4,3,2,1,0],[4,2,0,1,3,4,2]], beatMs: 700 },
+  { id:0, name:"Groovy Garden", weather:"sunny", beatMs:167, filterHz:1200,
+    sequencer: true, seqSteps: 128,
+    seq: [
+      // ═══ BAR 1: Intro — just pad + bass, gentle start ═══
+      [{t:"pad",f:[130.8,196,261.6]},{t:"bass",f:65.4}],
+      [],[],[],
+      [{t:"bass",f:65.4}],
+      [],[],[],
+      [{t:"pad",f:[87.3,130.8,174.6]},{t:"bass",f:87.3}],
+      [],[],[],
+      [{t:"bass",f:87.3}],
+      [],[],[],
 
-  { id: 1, name: "Morning Dew", weather: "sunny", chords: [
-    { pad: [130.8,196,261.6,329.6], bass: 65.4 },  // C
-    { pad: [98,146.8,196,293.7], bass: 49 },       // G
-    { pad: [110,164.8,220,329.6], bass: 55 },      // Am
-    { pad: [87.3,130.8,174.6,261.6], bass: 87.3 }, // F
-  ], progs:[[0,1,2,3],[0,2,3,1],[2,0,1,3],[3,2,1,0]], melodies:[[4,3,4,2,3,1,0],[0,1,3,4,3,2,0],[2,3,4,3,2,0,1],[0,4,2,3,1,2,4]], beatMs: 720 },
+      // ═══ BAR 2: Intro + melody enters ═══
+      [{t:"pad",f:[130.8,196,261.6]},{t:"mel",f:392},{t:"bass",f:65.4}],
+      [],
+      [{t:"mel",f:440}],
+      [],
+      [{t:"mel",f:523.3}],
+      [],[],[],
+      [{t:"pad",f:[87.3,130.8,174.6]},{t:"mel",f:440},{t:"bass",f:87.3}],
+      [],
+      [{t:"mel",f:523.3}],
+      [],
+      [{t:"mel",f:392}],
+      [],[],[],
 
-  { id: 2, name: "Sunflower Waltz", weather: "sunny", chords: [
-    { pad: [73.4,110,146.8,220], bass: 73.4 },     // D
-    { pad: [98,146.8,196,246.9], bass: 49 },       // G
-    { pad: [130.8,164.8,196,261.6], bass: 65.4 },  // C
-    { pad: [82.4,123.5,164.8,246.9], bass: 82.4 }, // Em
-  ], progs:[[0,1,2,3],[2,0,1,3],[1,3,0,2]], melodies:[[2,3,4,3,2,0,1],[0,4,2,3,4,2,1],[1,0,2,4,3,2,0,1]], beatMs: 750 },
+      // ═══ BAR 3: Verse 1 — full groove (original preset) ═══
+      [{t:"pad",f:[130.8,196,261.6]},{t:"mel",f:392},{t:"bass",f:65.4},{t:"kick"}],
+      [],
+      [{t:"mel",f:440},{t:"hat"}],
+      [],
+      [{t:"mel",f:523.3},{t:"kick"},{t:"snap"}],
+      [],
+      [{t:"mel",f:392},{t:"hat"}],
+      [],
+      [{t:"pad",f:[87.3,130.8,174.6]},{t:"mel",f:440},{t:"bass",f:87.3},{t:"kick"}],
+      [],
+      [{t:"mel",f:523.3},{t:"hat"}],
+      [],
+      [{t:"mel",f:329.6},{t:"kick"},{t:"snap"}],
+      [],
+      [{t:"mel",f:293.7},{t:"hat"}],
+      [],
 
-  { id: 3, name: "Yurie's Garden", weather: "any", chords: [
-    { pad: [130.8,196,261.6,329.6], bass: 65.4 },  // C
-    { pad: [110,164.8,220,329.6], bass: 55 },      // Am
-    { pad: [87.3,130.8,174.6,261.6], bass: 87.3 }, // F
-    { pad: [98,146.8,196,293.7], bass: 49 },       // G
-  ], progs:[[0,2,1,3],[0,3,1,2],[0,1,2,3],[2,0,3,1]], melodies:[[0,2,4,3,2],[0,1,3,2,4],[2,0,3,1,4],[4,3,2,0,1,3]], beatMs: 780 },
+      // ═══ BAR 4: Verse 1 variation — higher melody ═══
+      [{t:"pad",f:[130.8,196,261.6]},{t:"mel",f:523.3},{t:"bass",f:65.4},{t:"kick"}],
+      [],
+      [{t:"mel",f:587.3},{t:"hat"}],
+      [],
+      [{t:"mel",f:659.3},{t:"kick"},{t:"snap"}],
+      [],
+      [{t:"mel",f:523.3},{t:"hat"}],
+      [],
+      [{t:"pad",f:[87.3,130.8,174.6]},{t:"mel",f:587.3},{t:"bass",f:87.3},{t:"kick"}],
+      [],
+      [{t:"mel",f:440},{t:"hat"}],
+      [],
+      [{t:"mel",f:392},{t:"kick"},{t:"snap"}],
+      [],
+      [{t:"mel",f:329.6},{t:"hat"}],
+      [],
 
-  { id: 4, name: "Rainy Lullaby", weather: "rainy", chords: [
-    { pad: [87.3,130.8,174.6,220], bass: 87.3 },   // F
-    { pad: [130.8,164.8,196,261.6], bass: 65.4 },  // C
-    { pad: [73.4,110,146.8,220], bass: 73.4 },     // Dm
-    { pad: [87.3,116.5,174.6,220], bass: 58.3 },   // Bb
-  ], progs:[[0,1,2,3],[0,2,1,0],[2,0,3,1],[1,3,0,2]], melodies:[[0,1,0,2,1,0],[2,1,3,2,0],[0,2,1,0,1,2,3],[3,2,1,0,2,1]], beatMs: 900 },
+      // ═══ BAR 5: Chorus — G + Em chords, busier rhythm ═══
+      [{t:"pad",f:[98,146.8,196]},{t:"mel",f:392},{t:"bass",f:49},{t:"kick"}],
+      [{t:"hat"}],
+      [{t:"mel",f:523.3},{t:"hat"}],
+      [],
+      [{t:"mel",f:659.3},{t:"kick"},{t:"snap"}],
+      [{t:"hat"}],
+      [{t:"mel",f:523.3},{t:"hat"}],
+      [],
+      [{t:"pad",f:[82.4,123.5,164.8]},{t:"mel",f:440},{t:"bass",f:82.4},{t:"kick"}],
+      [{t:"hat"}],
+      [{t:"mel",f:392},{t:"hat"}],
+      [],
+      [{t:"mel",f:329.6},{t:"kick"},{t:"snap"}],
+      [{t:"hat"}],
+      [{t:"mel",f:293.7},{t:"hat"}],
+      [],
 
-  { id: 5, name: "Twilight Walk", weather: "any", chords: [
-    { pad: [110,164.8,220,261.6], bass: 55 },      // Am
-    { pad: [87.3,130.8,174.6,220], bass: 87.3 },   // F
-    { pad: [130.8,164.8,196,261.6], bass: 65.4 },  // C
-    { pad: [82.4,123.5,164.8,246.9], bass: 82.4 }, // Em
-  ], progs:[[0,1,2,3],[0,3,1,2],[2,0,1,3],[3,1,2,0]], melodies:[[4,3,4,2,1,0],[0,1,0,2,3,2],[3,2,0,1,2,4],[0,2,4,3,1,0]], beatMs: 850 },
+      // ═══ BAR 6: Bridge — Am + Dm, darker, sparser ═══
+      [{t:"pad",f:[110,164.8,220]},{t:"bass",f:55},{t:"kick"}],
+      [],
+      [{t:"mel",f:329.6},{t:"hat"}],
+      [],
+      [{t:"mel",f:293.7},{t:"kick"}],
+      [],
+      [{t:"hat"}],
+      [],
+      [{t:"pad",f:[73.4,110,146.8]},{t:"mel",f:261.6},{t:"bass",f:73.4},{t:"kick"}],
+      [],
+      [{t:"mel",f:293.7},{t:"hat"}],
+      [],
+      [{t:"mel",f:329.6},{t:"kick"},{t:"snap"}],
+      [],
+      [{t:"hat"}],
+      [],
 
-  { id: 6, name: "Starlight Sonata", weather: "any", chords: [
-    { pad: [82.4,123.5,164.8,246.9], bass: 82.4 }, // Em
-    { pad: [130.8,164.8,196,261.6], bass: 65.4 },  // C
-    { pad: [98,123.5,164.8,196], bass: 49 },       // G/B
-    { pad: [73.4,110,146.8,220], bass: 73.4 },     // D
-  ], progs:[[0,1,2,3],[0,2,3,1],[2,0,1,3],[3,2,0,1]], melodies:[[4,3,2,4,3,1,0],[0,2,4,2,0],[3,4,2,1,0,2],[1,3,4,2,0,1,3]], beatMs: 820 },
+      // ═══ BAR 7: Chorus 2 — back to G+C, full energy ═══
+      [{t:"pad",f:[98,146.8,196]},{t:"mel",f:523.3},{t:"bass",f:49},{t:"kick"}],
+      [{t:"hat"}],
+      [{t:"mel",f:440},{t:"hat"}],
+      [{t:"mel",f:392}],
+      [{t:"mel",f:523.3},{t:"kick"},{t:"snap"}],
+      [{t:"hat"}],
+      [{t:"mel",f:659.3},{t:"hat"}],
+      [],
+      [{t:"pad",f:[130.8,196,261.6]},{t:"mel",f:587.3},{t:"bass",f:65.4},{t:"kick"}],
+      [{t:"hat"}],
+      [{t:"mel",f:523.3},{t:"hat"}],
+      [{t:"mel",f:440}],
+      [{t:"mel",f:392},{t:"kick"},{t:"snap"}],
+      [{t:"hat"}],
+      [{t:"mel",f:329.6},{t:"hat"}],
+      [],
 
-  { id: 7, name: "Drought Blues", weather: "drought", chords: [
-    { pad: [110,164.8,220,261.6], bass: 55 },      // Am
-    { pad: [73.4,110,146.8,220], bass: 73.4 },     // Dm
-    { pad: [82.4,123.5,164.8,246.9], bass: 82.4 }, // Em
-    { pad: [110,130.8,164.8,196], bass: 55 },      // Am7
-  ], progs:[[0,1,2,3],[0,2,1,0],[3,1,0,2]], melodies:[[0,1,0,2,0,1],[2,1,0,2,3,2,1],[0,0,2,1,0,3,2],[4,3,2,1,0,1,2]], beatMs: 880 },
+      // ═══ BAR 8: Outro — winding down, back to basics ═══
+      [{t:"pad",f:[130.8,196,261.6]},{t:"mel",f:392},{t:"bass",f:65.4},{t:"kick"}],
+      [],
+      [{t:"mel",f:329.6},{t:"hat"}],
+      [],
+      [{t:"kick"}],
+      [],
+      [{t:"mel",f:293.7},{t:"hat"}],
+      [],
+      [{t:"pad",f:[87.3,130.8,174.6]},{t:"mel",f:261.6},{t:"bass",f:87.3}],
+      [],
+      [{t:"hat"}],
+      [],
+      [{t:"mel",f:293.7}],
+      [],
+      [{t:"mel",f:261.6}],
+      [],
+    ],
+    padWave:"sine", melWave:"sine", bassWave:"sine", melOctave:1, restPct:0, padAttack:0.3, melLen:0.2,
+    chords:[{pad:[130.8,196,261.6],bass:65.4}], progs:[[0]], melodies:[[0,2,4,3]] },
 
-  { id: 8, name: "Snowfall Waltz", weather: "snowy", chords: [
-    { pad: [130.8,164.8,196,261.6], bass: 65.4 },  // C
-    { pad: [98,146.8,196,246.9], bass: 49 },       // G
-    { pad: [87.3,130.8,174.6,261.6], bass: 87.3 }, // F
-    { pad: [110,164.8,220,329.6], bass: 55 },      // Am
-  ], progs:[[0,1,2,3],[0,2,3,1],[3,0,1,2],[2,3,0,1]], melodies:[[0,2,4,2,0],[4,3,2,3,4],[0,1,2,0,4,3,2],[2,4,3,2,0,1]], beatMs: 860 },
+  { id:1, name:"Morning Dew", weather:"sunny", beatMs:700,
+    padWave:"sine", melWave:"triangle", bassWave:"sine", melOctave:2, restPct:0.15, padAttack:1.0, melLen:0.35, filterHz:900,
+    chords:[{pad:[130.8,196,261.6,329.6],bass:65.4},{pad:[98,146.8,196,293.7],bass:49},{pad:[110,164.8,220,329.6],bass:55},{pad:[87.3,130.8,174.6,261.6],bass:87.3}],
+    progs:[[0,1,2,3],[0,2,3,1],[3,2,1,0]], melodies:[[4,3,4,2,3,1,0],[0,1,3,4,3,2,0],[2,3,4,3,2,0,1]] },
 
-  { id: 9, name: "Winter Night", weather: "snowy", chords: [
-    // Inspired by cozy winter RPG music — G major, gentle and nostalgic
-    { pad: [98,146.8,196,293.7], bass: 49 },       // G
-    { pad: [82.4,123.5,164.8,246.9], bass: 82.4 }, // Em
-    { pad: [130.8,196,261.6,329.6], bass: 65.4 },  // C
-    { pad: [73.4,110,146.8,220], bass: 73.4 },     // D
-  ], progs:[[0,1,2,3],[0,2,1,3],[2,0,3,1],[3,2,1,0]], melodies:[
-    // Main theme — gentle descending then rising, Stardew-style
-    [4,3,2,0,1,0,2,4],[2,3,4,3,2,1,0,1],[0,0,2,3,4,4,3,2],[4,2,0,1,2,4,3,2],
-    // Bridge — wider intervals, spacious
-    [0,4,2,0,3,4,2],[2,0,4,3,1,0,2],[4,3,1,0,2,3,4,0]
-  ], beatMs: 900 },
+  { id:2, name:"Sunflower Waltz", weather:"sunny", beatMs:550,
+    padWave:"sine", melWave:"sine", bassWave:"triangle", melOctave:1, restPct:0.05, padAttack:0.5, melLen:0.25, filterHz:1000,
+    chords:[{pad:[73.4,110,146.8,220],bass:73.4},{pad:[98,146.8,196,246.9],bass:49},{pad:[130.8,164.8,196,261.6],bass:65.4},{pad:[82.4,123.5,164.8,246.9],bass:82.4}],
+    progs:[[0,1,2,3],[2,0,1,3],[1,3,0,2]], melodies:[[2,3,4,3,2,0,1],[0,4,2,3,4,2,1],[1,0,2,4,3,2,0,1]] },
+
+  { id:3, name:"Yurie's Garden", weather:"any", beatMs:780,
+    padWave:"sine", melWave:"triangle", bassWave:"sine", melOctave:0, restPct:0.2, padAttack:1.2, melLen:0.4, filterHz:700,
+    chords:[{pad:[130.8,196,261.6,329.6],bass:65.4},{pad:[110,164.8,220,329.6],bass:55},{pad:[87.3,130.8,174.6,261.6],bass:87.3},{pad:[98,146.8,196,293.7],bass:49}],
+    progs:[[0,2,1,3],[0,3,1,2],[0,1,2,3]], melodies:[[0,2,4,3,2],[0,1,3,2,4],[2,0,3,1,4],[4,3,2,0,1,3]] },
+
+  { id:4, name:"Rainy Lullaby", weather:"rainy", beatMs:950,
+    padWave:"sine", melWave:"sine", bassWave:"sine", melOctave:0, restPct:0.35, padAttack:2.0, melLen:0.6, filterHz:500,
+    chords:[{pad:[87.3,130.8,174.6,220],bass:87.3},{pad:[130.8,164.8,196,261.6],bass:65.4},{pad:[73.4,110,146.8,220],bass:73.4},{pad:[87.3,116.5,174.6,220],bass:58.3}],
+    progs:[[0,1,2,3],[0,2,1,0],[2,0,3,1]], melodies:[[0,1,0,2,1,0],[2,1,3,2,0],[0,2,1,0,1,2,3]] },
+
+  { id:5, name:"Twilight Walk", weather:"any", beatMs:850,
+    padWave:"triangle", melWave:"triangle", bassWave:"sine", melOctave:2, restPct:0.25, padAttack:1.5, melLen:0.45, filterHz:650,
+    chords:[{pad:[110,164.8,220,261.6],bass:55},{pad:[87.3,130.8,174.6,220],bass:87.3},{pad:[130.8,164.8,196,261.6],bass:65.4},{pad:[82.4,123.5,164.8,246.9],bass:82.4}],
+    progs:[[0,1,2,3],[0,3,1,2],[2,0,1,3]], melodies:[[4,3,4,2,1,0],[0,1,0,2,3,2],[3,2,0,1,2,4]] },
+
+  { id:6, name:"Starlight Sonata", weather:"any", beatMs:900,
+    padWave:"sine", melWave:"sine", bassWave:"sine", melOctave:1, restPct:0.3, padAttack:2.0, melLen:0.5, filterHz:550,
+    chords:[{pad:[82.4,123.5,164.8,246.9],bass:82.4},{pad:[130.8,164.8,196,261.6],bass:65.4},{pad:[98,123.5,164.8,196],bass:49},{pad:[73.4,110,146.8,220],bass:73.4}],
+    progs:[[0,1,2,3],[0,2,3,1],[2,0,1,3]], melodies:[[4,3,2,4,3,1,0],[0,2,4,2,0],[3,4,2,1,0,2]] },
+
+  { id:7, name:"Drought Blues", weather:"drought", beatMs:800,
+    padWave:"triangle", melWave:"sawtooth", bassWave:"triangle", melOctave:0, restPct:0.4, padAttack:0.8, melLen:0.3, filterHz:600,
+    chords:[{pad:[110,164.8,220,261.6],bass:55},{pad:[73.4,110,146.8,220],bass:73.4},{pad:[82.4,123.5,164.8,246.9],bass:82.4},{pad:[110,130.8,164.8,196],bass:55}],
+    progs:[[0,1,2,3],[0,2,1,0],[3,1,0,2]], melodies:[[0,1,0,2,0,1],[2,1,0,2,3,2,1],[0,0,2,1,0,3,2]] },
+
+  { id:8, name:"Snowfall Waltz", weather:"snowy", beatMs:880,
+    padWave:"sine", melWave:"triangle", bassWave:"sine", melOctave:2, restPct:0.25, padAttack:1.8, melLen:0.5, filterHz:600,
+    chords:[{pad:[130.8,164.8,196,261.6],bass:65.4},{pad:[98,146.8,196,246.9],bass:49},{pad:[87.3,130.8,174.6,261.6],bass:87.3},{pad:[110,164.8,220,329.6],bass:55}],
+    progs:[[0,1,2,3],[0,2,3,1],[3,0,1,2]], melodies:[[0,2,4,2,0],[4,3,2,3,4],[0,1,2,0,4,3,2]] },
+
+  { id:9, name:"Winter Night", weather:"snowy", beatMs:1000,
+    padWave:"sine", melWave:"sine", bassWave:"sine", melOctave:1, restPct:0.3, padAttack:2.5, melLen:0.7, filterHz:450,
+    chords:[{pad:[98,146.8,196,293.7],bass:49},{pad:[82.4,123.5,164.8,246.9],bass:82.4},{pad:[130.8,196,261.6,329.6],bass:65.4},{pad:[73.4,110,146.8,220],bass:73.4}],
+    progs:[[0,1,2,3],[0,2,1,3],[2,0,3,1]], melodies:[[4,3,2,0,1,0,2,4],[2,3,4,3,2,1,0,1],[0,0,2,3,4,4,3,2],[0,4,2,0,3,4,2]] },
 ];
 
 var _currentSongIdx = 0;
@@ -6208,10 +6327,10 @@ function startAmbientMusic() {
   masterGain.gain.value = G.musicVolume || 0.045;
   masterGain.connect(ctx.destination);
 
-  // Lo-fi warmth filter
+  // Lo-fi warmth filter — initial value from song, updated per-song
   var warmFilter = ctx.createBiquadFilter();
   warmFilter.type = "lowpass";
-  warmFilter.frequency.value = 700;
+  warmFilter.frequency.value = getSong().filterHz || 700;
   warmFilter.Q.value = 0.7;
   warmFilter.connect(masterGain);
 
@@ -6256,16 +6375,18 @@ function startAmbientMusic() {
     });
     state.padOscs = [];
 
-    // Play new chord — 2 detuned oscillators per note for warmth
+    // Play new chord — use song-specific wave and attack
+    var songNow = getSong();
+    var pAtk = songNow.padAttack || 1.2;
     chord.pad.forEach(function(freq) {
       for (var d = 0; d < 2; d++) {
         var o = ctx.createOscillator();
         var g = ctx.createGain();
-        o.type = d === 0 ? "sine" : "triangle";
+        o.type = d === 0 ? (songNow.padWave || "sine") : "triangle";
         o.frequency.value = freq + (d === 0 ? -1.5 : 1.5) + (Math.random() - 0.5);
         g.gain.setValueAtTime(0, now);
-        g.gain.linearRampToValueAtTime(d === 0 ? 0.6 : 0.15, now + 1.2);
-        g.gain.linearRampToValueAtTime(d === 0 ? 0.4 : 0.1, now + 5);
+        g.gain.linearRampToValueAtTime(d === 0 ? 0.6 : 0.15, now + pAtk);
+        g.gain.linearRampToValueAtTime(d === 0 ? 0.4 : 0.1, now + pAtk + 3);
         o.connect(g).connect(padGain);
         o.start(now);
         state.padOscs.push({ o: o, g: g });
@@ -6287,16 +6408,20 @@ function startAmbientMusic() {
     var pattern = mood.melodies[state.melodyPatIdx % mood.melodies.length];
     var degree = pattern[state.melodyNoteIdx % pattern.length];
 
-    // Choose octave — mostly mid, sometimes high for sparkle
-    var scale = state.useHighOctave ? PENTA_HIGH : PENTA_MID;
-    var freq = scale[degree];
+    // Choose octave based on song setting
+    var songM = getSong();
+    var melOct = songM.melOctave || 0;
+    var scale;
+    if (melOct === 1) scale = PENTA_HIGH;
+    else if (melOct === 2) scale = (state.useHighOctave ? PENTA_HIGH : PENTA_MID);
+    else scale = PENTA_MID;
+    var freq = scale[degree % scale.length];
 
-    // Slight humanization — timing swing + frequency wobble
     var swing = (Math.random() - 0.5) * 0.05;
-    var noteLen = 0.3 + Math.random() * 0.4;
+    var noteLen = (songM.melLen || 0.35) + Math.random() * 0.1;
 
-    // Sometimes rest (skip a note) for breathing room
-    if (Math.random() < 0.2) {
+    // Rest based on song's rest percentage
+    if (Math.random() < (songM.restPct || 0.2)) {
       state.melodyNoteIdx++;
       return;
     }
@@ -6305,9 +6430,9 @@ function startAmbientMusic() {
     var g = ctx.createGain();
     var mFilter = ctx.createBiquadFilter();
     mFilter.type = "lowpass";
-    mFilter.frequency.value = 1200;
+    mFilter.frequency.value = (songM.filterHz || 700) + 400;
 
-    o.type = Math.random() < 0.6 ? "sine" : "triangle";
+    o.type = songM.melWave || "sine";
     o.frequency.value = freq + (Math.random() - 0.5) * 3;
 
     g.gain.setValueAtTime(0, now + swing);
@@ -6342,9 +6467,10 @@ function startAmbientMusic() {
       try { state.bassOsc.g.gain.linearRampToValueAtTime(0, now + 0.3); state.bassOsc.o.stop(now + 0.4); } catch(e) {}
     }
 
+    var songB = getSong();
     var o = ctx.createOscillator();
     var g = ctx.createGain();
-    o.type = "sine";
+    o.type = songB.bassWave || "sine";
     o.frequency.value = chord.bass;
 
     // Sometimes play the 5th instead of root for movement
@@ -6352,25 +6478,123 @@ function startAmbientMusic() {
       o.frequency.value = chord.bass * 1.5;
     }
 
+    var bLen = songB.beatMs ? (songB.beatMs * 3.5 / 1000) : 2.8;
     g.gain.setValueAtTime(0, now);
     g.gain.linearRampToValueAtTime(0.6, now + 0.15);
-    g.gain.linearRampToValueAtTime(0.25, now + 1.2);
-    g.gain.linearRampToValueAtTime(0, now + 2.8);
+    g.gain.linearRampToValueAtTime(0.25, now + bLen * 0.5);
+    g.gain.linearRampToValueAtTime(0, now + bLen);
     o.connect(g).connect(bassGain);
     o.start(now);
-    o.stop(now + 3);
+    o.stop(now + bLen + 0.1);
     state.bassOsc = { o: o, g: g };
     state.beat++;
   }
 
+  // ── Sequencer tick — exact same synthesis as music maker ──
+  var _seqStep = 0;
+  function seqTick() {
+    var song = getSong();
+    if (!song.sequencer) return;
+    var events = song.seq[_seqStep % song.seqSteps];
+    var now = ctx.currentTime;
+    events.forEach(function(evt) {
+      if (evt.t === "pad") {
+        // Identical to music maker: sine + triangle detuned, through filter
+        evt.f.forEach(function(freq) {
+          for (var d = 0; d < 2; d++) {
+            var o = ctx.createOscillator();
+            var g = ctx.createGain();
+            o.type = d === 0 ? "sine" : "triangle";
+            o.frequency.value = freq + (d === 0 ? -1.5 : 1.5);
+            g.gain.setValueAtTime(0, now);
+            g.gain.linearRampToValueAtTime(d === 0 ? 0.25 : 0.06, now + 0.08);
+            g.gain.linearRampToValueAtTime(0, now + 0.5);
+            o.connect(g).connect(warmFilter); // through filter like music maker
+            o.start(now); o.stop(now + 0.55);
+          }
+        });
+      } else if (evt.t === "mel") {
+        // Identical to music maker: random sine/triangle 60/40, through filter
+        var o = ctx.createOscillator();
+        var g = ctx.createGain();
+        o.type = Math.random() < 0.6 ? "sine" : "triangle";
+        o.frequency.value = evt.f + (Math.random() - 0.5) * 2;
+        g.gain.setValueAtTime(0, now);
+        g.gain.linearRampToValueAtTime(0.35, now + 0.03);
+        g.gain.linearRampToValueAtTime(0, now + 0.35);
+        o.connect(g).connect(warmFilter); // through filter like music maker
+        o.start(now); o.stop(now + 0.4);
+      } else if (evt.t === "bass") {
+        // Identical to music maker: sine, through filter
+        var o = ctx.createOscillator();
+        var g = ctx.createGain();
+        o.type = "sine";
+        o.frequency.value = evt.f;
+        g.gain.setValueAtTime(0, now);
+        g.gain.linearRampToValueAtTime(0.45, now + 0.04);
+        g.gain.linearRampToValueAtTime(0, now + 0.4);
+        o.connect(g).connect(warmFilter); // through filter like music maker
+        o.start(now); o.stop(now + 0.45);
+      } else if (evt.t === "kick") {
+        // Identical to music maker: bypasses filter, goes to masterGain
+        var o = ctx.createOscillator();
+        var g = ctx.createGain();
+        o.type = "sine";
+        o.frequency.setValueAtTime(160, now);
+        o.frequency.exponentialRampToValueAtTime(40, now + 0.12);
+        g.gain.setValueAtTime(0.5, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        o.connect(g).connect(masterGain); // bypass filter like music maker
+        o.start(now); o.stop(now + 0.25);
+      } else if (evt.t === "hat") {
+        // Identical to music maker: noise buffer 0.05s, highpass 7000, bypasses filter
+        var bufSz = ctx.sampleRate * 0.05;
+        var buf = ctx.createBuffer(1, bufSz, ctx.sampleRate);
+        var dd = buf.getChannelData(0);
+        for (var ii = 0; ii < bufSz; ii++) dd[ii] = (Math.random() * 2 - 1) * 0.3;
+        var src = ctx.createBufferSource();
+        src.buffer = buf;
+        var hp = ctx.createBiquadFilter();
+        hp.type = "highpass"; hp.frequency.value = 7000;
+        var g = ctx.createGain();
+        g.gain.setValueAtTime(0.25, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        src.connect(hp).connect(g).connect(masterGain); // bypass filter
+        src.start(now); src.stop(now + 0.06);
+      } else if (evt.t === "snap") {
+        // Identical to music maker: square 1800Hz, bypasses filter
+        var o = ctx.createOscillator();
+        var g = ctx.createGain();
+        o.type = "square";
+        o.frequency.value = 1800;
+        g.gain.setValueAtTime(0.15, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        o.connect(g).connect(masterGain); // bypass filter
+        o.start(now); o.stop(now + 0.05);
+      }
+    });
+    _seqStep = (_seqStep + 1) % song.seqSteps;
+  }
+
   // ── Timing — uses current mood's BPM ──
   function startTimers() {
-    var bms = getSong().beatMs;
-    playPad();
-    playBass();
-    _musicInterval = setInterval(function() { playPad(); playBass(); }, bms * 4);
-    _melodyInterval = setInterval(function() { playMelody(); }, bms);
-    _bassInterval = setInterval(function() { playBass(); }, bms * 2);
+    var song = getSong();
+    var bms = song.beatMs;
+    if (song.sequencer) {
+      // Step sequencer mode — exact same as music maker
+      _seqStep = 0;
+      warmFilter.frequency.value = 1200;
+      warmFilter.Q.value = 0.6;
+      _musicInterval = setInterval(seqTick, bms);
+    } else {
+      // Procedural mode — pad/melody/bass voices
+      warmFilter.frequency.value = song.filterHz || 700;
+      playPad();
+      playBass();
+      _musicInterval = setInterval(function() { playPad(); playBass(); }, bms * 4);
+      _melodyInterval = setInterval(function() { playMelody(); }, bms);
+      _bassInterval = setInterval(function() { playBass(); }, bms * 2);
+    }
   }
 
   function clearTimers() {
@@ -6388,6 +6612,8 @@ function startAmbientMusic() {
     state.melodyNoteIdx = 0;
     state.progIdx = (state.progIdx + 1) % song.progs.length;
     state.melodyPatIdx = (state.melodyPatIdx + 1) % song.melodies.length;
+    // Update filter to match song character
+    warmFilter.frequency.value = song.filterHz || 700;
     // Restart timers with new tempo
     clearTimers();
     startTimers();
@@ -6964,18 +7190,35 @@ function openCustomizeModal() {
 // ══════════════════════════════════════════════════════════
 // TUTORIAL SYSTEM
 // ══════════════════════════════════════════════════════════
+// ── Short intro tutorial (3 pages) — details shown as contextual tips later ──
 var TUTORIAL_STEPS = [
-  { icon: "\ud83c\udf3a", title: "Welcome to Yurie's Flower Shop!", desc: "Grow flowers, serve customers, and build your dream garden. Your pots react to weather, flowers sway in the breeze, and every bloom bursts with petals!" },
-  { icon: "\ud83d\udca7", title: "Getting Water", desc: "Water trickles in over time. Tap the bucket button to swipe and fill it fast! Catch drifting clouds for bonus drops." },
-  { icon: "\ud83c\udf31", title: "Growing Flowers", desc: "Open packets for seeds, plant them in pots, then water to grow. Each flower takes 3 stages to bloom. Watch for petal particles when it blooms!" },
-  { icon: "\ud83d\udc64", title: "Serving Customers", desc: "Customers ask for flowers you've discovered. Some show a '?' mystery request, and wildcards accept any flower of a rarity! VIP customers (purple) pay 8x. This is your main income!" },
-  { icon: "\ud83e\uddec", title: "Flower Fusion", desc: "Leave two bloomed flowers in adjacent pots, then tap one to fuse them! Open the Fusion Guide from the Journal to see 20 recipe combos. 5% chance of a unique color mutation!" },
-  { icon: "\u2600\ufe0f", title: "Weather Effects", desc: "Weather changes your whole garden! Sunny \u2600\ufe0f speeds growth and gives pots a golden glow. Rainy \ud83c\udf27\ufe0f gives free water and drips on your pots. Snowy \u2744\ufe0f frosts pot rims and can nip growing flowers! Drought \ud83c\udf35 dries out your pots and needs extra water." },
-  { icon: "\ud83c\udfb5", title: "Music & Sound", desc: "Tap \ud83c\udfb5 (top-right) for music with volume slider. Two soundtracks: 'Groovy Garden' plays on sunny days, 'Yurie's Garden' plays on rain/snow/drought. Rain drops are a sound effect controlled by \ud83d\udd0a. Both have volume sliders!" },
-  { icon: "\ud83c\udfc6", title: "Achievements & Style", desc: "Earn 40 achievements for coins. Complete your flower Journal to unlock pot styles, backgrounds, and garden decorations in the Style menu!" },
-  { icon: "\ud83d\uded2", title: "The Shop", desc: "Buy seed packets (common to legendary), new pots (up to 12!), and water upgrades. Expand your garden and grow rarer flowers for bigger profits!" },
-  { icon: "\ud83c\udf1f", title: "Daily Gifts & Tips", desc: "Come back every day for streak rewards \u2014 7 days earns a Rare packet! Pro tip: fuse during snow for a frosty challenge, or save rare flowers for VIP customers who pay top coin!" },
+  { icon: "\ud83c\udf3a", title: "Welcome!", desc: "Grow flowers, sell to customers, and build your dream garden. Open packets for seeds, plant in pots, water to bloom!" },
+  { icon: "\ud83d\udcb0", title: "Earn Coins", desc: "Customers are your main income! Store bloomed flowers in the Garden House, then tap a customer to sell. Tap the ? button (top-right) anytime for a full guide." },
+  { icon: "\ud83d\udcf1", title: "Install as App", desc: "Play full-screen without the browser bar! On iPhone: tap Share \u2192 'Add to Home Screen'. On Android: tap the Install popup or menu \u2192 'Install app'." },
 ];
+
+// ── Contextual tips — shown ONCE when player first encounters each feature ──
+var CONTEXT_TIPS = {
+  firstBloom:    "Your first bloom! Tap it to store, fuse, or leave. Customers pay well for flowers!",
+  firstCustomer: "A customer! Store bloomed flowers in the Garden House, then tap a customer to sell.",
+  firstWeather:  "Weather changed! Each type affects growth differently. Tap ? for details.",
+  firstFusion:   "Two bloomed flowers next to each other! Tap one to fuse \u2014 check the Fusion Guide in the Journal.",
+  firstVip:      "VIP customer (purple glow)! They pay 8x. Save your best flowers for them!",
+  firstMystery:  "Mystery customer (?) \u2014 they want an undiscovered flower. Discover more to fill their order!",
+  firstWildcard: "Wildcard customer \u2014 accepts ANY flower of that rarity!",
+  firstShop:     "The shop! Buy packets for seeds, new pots to expand, and water upgrades.",
+  firstMusic:    "Music is on! Tap \ud83c\udfb5 to adjust volume or switch between 10 songs.",
+};
+
+function showContextTip(key) {
+  if (!G.contextTips) G.contextTips = {};
+  if (G.contextTips[key]) return;
+  var msg = CONTEXT_TIPS[key];
+  if (!msg) return;
+  G.contextTips[key] = true;
+  saveG();
+  toast("\ud83d\udca1 " + msg, 5000);
+}
 var _tutStep = 0;
 
 function showTutorial() {
