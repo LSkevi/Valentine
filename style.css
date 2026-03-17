@@ -605,6 +605,7 @@ body {
   max-width: 480px;
   margin: 0 auto;
   width: 100%;
+  position: relative;
 }
 .plot {
   aspect-ratio: 80/106;
@@ -860,6 +861,7 @@ body {
   color: var(--primary-dark);
   text-align: center;
   margin-bottom: 14px;
+  padding: 0 48px;
 }
 .sh-close {
   position: absolute;
@@ -1729,9 +1731,10 @@ body {
   border-radius: var(--radius-pill);
   display: inline-block;
 }
-.weather-sunny { background: linear-gradient(135deg, #fff8e1, #ffe082); color: #a07828; }
-.weather-rainy { background: linear-gradient(135deg, #e3f2fd, #90caf9); color: #1565c0; }
-.weather-drought { background: linear-gradient(135deg, #fff3e0, #ffcc80); color: #e65100; }
+.weather-bar.weather-sunny { background: linear-gradient(135deg, #fff8e1, #ffe082); color: #a07828; }
+.weather-bar.weather-rainy { background: linear-gradient(135deg, #e3f2fd, #90caf9); color: #1565c0; }
+.weather-bar.weather-drought { background: linear-gradient(135deg, #fff3e0, #ffcc80); color: #e65100; }
+.weather-bar.weather-snowy { background: linear-gradient(135deg, #e8eaf6, #b0bec5); color: #37474f; }
 
 /* ── NPC section ──────────────────────────────────────── */
 .npc-section {
@@ -2163,77 +2166,117 @@ body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
   overflow: hidden;
 }
 .rain-drop {
   position: absolute;
-  width: 2px;
-  background: linear-gradient(to bottom, transparent, rgba(100, 181, 246, 0.6));
+  width: 2.5px;
+  background: linear-gradient(to bottom, transparent, rgba(100, 181, 246, 0.85));
   border-radius: 0 0 2px 2px;
   animation: rainFall linear infinite;
 }
 @keyframes rainFall {
   0% { transform: translateY(-20px); opacity: 0; }
-  10% { opacity: 0.7; }
-  90% { opacity: 0.5; }
+  10% { opacity: 0.9; }
+  90% { opacity: 0.7; }
   100% { transform: translateY(105vh); opacity: 0; }
 }
 .sun-glow {
   position: absolute;
-  top: -60px;
-  right: -40px;
-  width: 200px;
-  height: 200px;
+  top: -80px;
+  right: -60px;
+  width: 300px;
+  height: 300px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 236, 179, 0.5) 0%, rgba(255, 183, 77, 0.2) 40%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 236, 179, 0.7) 0%, rgba(255, 183, 77, 0.35) 40%, transparent 70%);
   animation: sunPulse 4s ease-in-out infinite alternate;
 }
 .sun-flare {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 241, 118, 0.25);
+  background: rgba(255, 241, 118, 0.4);
   mix-blend-mode: screen;
   animation: sunPulse 3s ease-in-out infinite alternate;
 }
 @keyframes sunPulse {
-  from { opacity: 0.6; transform: scale(1); }
-  to { opacity: 1; transform: scale(1.08); }
+  from { opacity: 0.7; transform: scale(1); }
+  to { opacity: 1; transform: scale(1.12); }
 }
-.drought-overlay {
+/* Sun rays — faint diagonal yellow beams */
+.sun-ray {
   position: absolute;
-  inset: 0;
-  background: rgba(180, 120, 50, 0.06);
-  animation: heatShimmer 3s ease-in-out infinite;
+  top: -20%;
+  width: 3px;
+  height: 140%;
+  background: linear-gradient(to bottom, rgba(255, 220, 80, 0.18), rgba(255, 220, 80, 0.05) 60%, transparent);
+  transform-origin: top center;
+  pointer-events: none;
+  animation: rayPulse 5s ease-in-out infinite alternate;
 }
-@keyframes heatShimmer {
-  0%, 100% { opacity: 0.4; }
+@keyframes rayPulse {
+  0% { opacity: 0.4; }
   50% { opacity: 0.8; }
+  100% { opacity: 0.5; }
 }
 .snowflake {
   position: absolute;
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   background: #fff;
   border-radius: 50%;
   opacity: 0;
   animation: snowFall linear infinite;
-  box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.5);
 }
 @keyframes snowFall {
   0% { transform: translateY(-10px) translateX(0); opacity: 0; }
-  10% { opacity: 0.8; }
-  50% { transform: translateY(50vh) translateX(var(--snow-drift, 15px)); opacity: 0.6; }
+  10% { opacity: 0.9; }
+  50% { transform: translateY(50vh) translateX(var(--snow-drift, 15px)); opacity: 0.7; }
   100% { transform: translateY(105vh) translateX(var(--snow-drift, -10px)); opacity: 0; }
 }
 .frost-tint {
   position: absolute;
   inset: 0;
-  background: rgba(130, 180, 230, 0.08);
+  background: rgba(130, 180, 230, 0.15);
   pointer-events: none;
 }
 .weather-fx-fade {
   transition: opacity 0.5s ease;
+}
+
+/* ── Weather effects on pots — subtle, no background tinting ── */
+/* Rainy: small puddles under pots only */
+.garden-grid.weather-rainy .plot::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 18%;
+  right: 18%;
+  height: 5px;
+  background: radial-gradient(ellipse, rgba(100, 181, 246, 0.3) 0%, transparent 80%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  animation: puddleRipple 3s ease-in-out infinite;
+}
+@keyframes puddleRipple {
+  0%, 100% { transform: scaleX(1); opacity: 0.5; }
+  50% { transform: scaleX(1.1); opacity: 0.8; }
+}
+
+/* Snowy: thin frost line on pot rim */
+.garden-grid.weather-snowy .plot::after {
+  content: "";
+  position: absolute;
+  top: 54%;
+  left: 18%;
+  right: 18%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(220, 240, 255, 0.5) 30%, rgba(255, 255, 255, 0.6) 50%, rgba(220, 240, 255, 0.5) 70%, transparent);
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 5;
 }
 
 /* ── Breeding guide ─────────────────────────────────── */
@@ -2309,27 +2352,26 @@ body {
   margin-top: 8px;
 }
 
-/* ── Music toggle ───────────────────────────────────── */
-.music-toggle {
-  position: fixed;
-  bottom: 16px;
-  left: 16px;
-  width: 36px;
-  height: 36px;
+/* ── Inline audio buttons in top bar ─────────────────── */
+.stat-spacer { flex: 1; }
+.audio-btn {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9em;
+  font-size: 0.85em;
   cursor: pointer;
   touch-action: manipulation;
-  z-index: 50;
-  box-shadow: var(--shadow-clay-sm);
-  transition: transform 0.12s;
+  opacity: 0.5;
+  transition: opacity 0.15s, transform 0.12s;
+  flex-shrink: 0;
 }
-.music-toggle:active { transform: scale(0.9); }
+.audio-btn.active { opacity: 1; }
+.audio-btn:active { transform: scale(0.88); }
 
 /* ── Night mode ───────────────────────────────────────── */
 body.night-mode {
@@ -2617,25 +2659,84 @@ body.night-mode .npc-card.vip {
 }
 
 /* ── Sound toggle ─────────────────────────────────────── */
-.sound-toggle {
-  position: fixed;
-  top: calc(8px + env(safe-area-inset-top));
-  right: 8px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--surface-alt);
-  border: 1px solid var(--border);
+/* ── Help guide ──────────────────────────────────────── */
+.help-nav {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 12px;
   justify-content: center;
-  font-size: 0.75em;
+}
+.help-nav-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-strong);
   cursor: pointer;
   touch-action: manipulation;
-  z-index: 21;
-  opacity: 0.7;
+  transition: background 0.15s, transform 0.15s;
 }
-.sound-toggle:active { opacity: 1; }
+.help-nav-dot.active {
+  background: var(--primary);
+  transform: scale(1.3);
+}
+.help-content {
+  font-size: 0.85em;
+  line-height: 1.6;
+  color: var(--text);
+  min-height: 180px;
+}
+.help-content h3 {
+  font-size: 1.05em;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0 0 8px;
+}
+.help-content p {
+  margin: 0 0 8px;
+  color: var(--text-secondary);
+}
+.help-content .help-tip {
+  background: var(--surface-alt);
+  border-left: 3px solid var(--accent);
+  padding: 8px 10px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.92em;
+  margin: 8px 0;
+  color: var(--text);
+}
+.help-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.help-prev, .help-next {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 8px 16px;
+  font-size: 0.82em;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+  font-family: inherit;
+  color: var(--text);
+  transition: background 0.12s;
+}
+.help-prev:active, .help-next:active { background: var(--surface-hover); }
+.help-prev:disabled, .help-next:disabled { opacity: 0.3; }
+.help-page-num {
+  font-size: 0.75em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+#helpBtn {
+  font-weight: 700;
+  font-size: 0.9em;
+}
 
 /* ── Reduced motion ───────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {

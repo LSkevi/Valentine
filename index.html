@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>🌸 Yurie's Flower Shop</title>
+  <title>Yurie's Flower Shop</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='14' r='5' fill='%23f06292'/%3E%3Ccircle cx='11' cy='11' r='4.5' fill='%23f48fb1'/%3E%3Ccircle cx='21' cy='11' r='4.5' fill='%23f48fb1'/%3E%3Ccircle cx='13' cy='17' r='4.5' fill='%23f48fb1'/%3E%3Ccircle cx='19' cy='17' r='4.5' fill='%23f48fb1'/%3E%3Ccircle cx='16' cy='14' r='3' fill='%23fff176'/%3E%3Crect x='15' y='19' width='2' height='10' rx='1' fill='%2366bb6a'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -29,6 +30,10 @@
       <div class="stat-pill"><span class="ic">C</span><span id="coinDisp">10</span></div>
       <div class="stat-pill">&#x1F4E6; <span id="pktDisp">3</span></div>
       <div class="stat-pill">&#x1F33C; <span id="invDisp">0</span></div>
+      <div class="stat-spacer"></div>
+      <div class="audio-btn" id="helpBtn" onclick="openHelpGuide()">?</div>
+      <div class="audio-btn" id="musicBtn"></div>
+      <div class="audio-btn" id="soundBtn"></div>
     </div>
     <div class="top-row-btns">
       <button class="tbtn tbtn-open"    id="btnOpenPkt"><span class="tbtn-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M8 8c0-2 1-4 4-4s4 2 4 4"/></svg></span>Packets</button>
@@ -41,7 +46,7 @@
   </div>
   <div class="garden-header">
     <div class="weather-bar" id="weatherBar">☀️ Sunny</div>
-    <h2>🌸 Yurie's Flower Shop</h2>
+    <h2>Yurie's Flower Shop</h2>
     <p>Grow flowers · Serve customers!</p>
   </div>
   <div class="npc-section" id="npcSection"></div>
@@ -150,7 +155,7 @@
       <div class="bloom-title" id="bloomTitle"></div>
       <div class="bloom-badge" id="bloomBadge"></div>
       <div class="bloom-sub"   id="bloomSub"></div>
-      <div class="bloom-reward">🎁 +1 Packet! Leave in pot to hybridize with neighbors!</div>
+      <div class="bloom-reward">&#x1F33A; Store it for customers, or leave in pot to hybridize!</div>
     </div>
     <div class="bloom-actions">
       <button class="btn-sell"  id="btnSell">🧬 Hybridize</button>
@@ -185,27 +190,27 @@
           <div class="shop-detail">Tulips, daisies, violets &amp; more — great for starting out</div>
         </div>
       </div>
-      <button class="btn-buy" onclick="buyPacket('common')"><span class="ic">C</span> 8</button>
+      <button class="btn-buy" onclick="buyPacket('common')"><span class="ic">C</span> 12</button>
     </div>
     <div class="shop-item pkt-uncommon">
       <div class="shop-left">
         <span class="shop-icon">🌹</span>
         <div>
           <div class="shop-name">Uncommon Packet</div>
-          <div class="shop-detail">Roses, poppies, cherries &amp; more — better flowers, better NPC prices</div>
+          <div class="shop-detail">Roses, poppies, cherries &amp; more — customers pay more for these</div>
         </div>
       </div>
-      <button class="btn-buy" onclick="buyPacket('uncommon')"><span class="ic">C</span> 25</button>
+      <button class="btn-buy" onclick="buyPacket('uncommon')"><span class="ic">C</span> 35</button>
     </div>
     <div class="shop-item pkt-rare">
       <div class="shop-left">
         <span class="shop-icon">💎</span>
         <div>
           <div class="shop-name">Rare Packet</div>
-          <div class="shop-detail">Orchids, golden iris &amp; more — NPCs pay top coin for these</div>
+          <div class="shop-detail">Orchids, golden iris &amp; more — customers pay top coin for these</div>
         </div>
       </div>
-      <button class="btn-buy" onclick="buyPacket('rare')"><span class="ic">C</span> 60</button>
+      <button class="btn-buy" onclick="buyPacket('rare')"><span class="ic">C</span> 80</button>
     </div>
     <div class="shop-item pkt-legendary">
       <div class="shop-left">
@@ -215,7 +220,7 @@
           <div class="shop-detail">Blue Rose, Golden Rose &amp; more — the rarest blooms for VIP customers ✦</div>
         </div>
       </div>
-      <button class="btn-buy" onclick="buyPacket('legendary')"><span class="ic">C</span> 120</button>
+      <button class="btn-buy" onclick="buyPacket('legendary')"><span class="ic">C</span> 160</button>
     </div>
     <div class="shop-divider"></div>
     <div class="shop-item shop-water" id="shopWaterItem">
@@ -303,6 +308,22 @@
     <div class="sh-handle"></div>
     <div class="sh-title">&#x1F3A8; Style Your Garden</div>
     <div id="customContent"></div>
+  </div>
+</div>
+
+<!-- HELP GUIDE MODAL -->
+<div class="overlay" id="helpOverlay">
+  <div class="sheet">
+    <button class="sh-close" onclick="closeModal('helpOverlay')">&#x2715;</button>
+    <div class="sh-handle"></div>
+    <div class="sh-title" id="helpTitle">How to Play</div>
+    <div class="help-nav" id="helpNav"></div>
+    <div class="help-content" id="helpContent"></div>
+    <div class="help-footer">
+      <button class="help-prev" id="helpPrev" onclick="helpPage(-1)">&#x2190; Back</button>
+      <span class="help-page-num" id="helpPageNum">1/8</span>
+      <button class="help-next" id="helpNext" onclick="helpPage(1)">Next &#x2192;</button>
+    </div>
   </div>
 </div>
 
