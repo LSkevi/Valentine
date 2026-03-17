@@ -4,71 +4,97 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>🌸 Yurie's Flower Garden</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="bg-canvas"></div>
+
+<!-- TITLE SCREEN -->
+<div class="title-screen" id="titleScreen">
+  <div class="title-content">
+    <div class="title-flower">&#x1F338;</div>
+    <h1 class="title-name">Yurie's<br>Flower Shop</h1>
+    <p class="title-sub">Grow &middot; Bloom &middot; Sell</p>
+    <button class="title-enter" id="titleEnter">Enter Garden</button>
+  </div>
+</div>
 
 <!-- GAME SCREEN -->
 <div id="gameScreen">
   <div class="top-bar">
     <div class="top-row-stats">
       <div class="stat-pill"><span class="ic">C</span><span id="coinDisp">10</span></div>
-      <div class="stat-pill">📦 <span id="pktDisp">3</span></div>
-      <div class="stat-pill">� <span id="invDisp">0</span></div>
+      <div class="stat-pill">&#x1F4E6; <span id="pktDisp">3</span></div>
+      <div class="stat-pill">&#x1F33C; <span id="invDisp">0</span></div>
     </div>
-    <div class="top-row-btns" style="grid-template-columns:repeat(4,1fr)">
-      <button class="tbtn tbtn-open"    id="btnOpenPkt">🎁 Open Packet</button>
-      <button class="tbtn tbtn-journal" id="btnJournal">📖 Journal</button>
-      <button class="tbtn tbtn-shop"    id="btnShop">🛒 Shop</button>
-      <button class="tbtn tbtn-inv"     id="btnInv">🏡 Garden House</button>
+    <div class="top-row-btns">
+      <button class="tbtn tbtn-open"    id="btnOpenPkt"><span class="tbtn-ico">&#x1F381;</span>Packets</button>
+      <button class="tbtn tbtn-shop"    id="btnShop"><span class="tbtn-ico">&#x1F6D2;</span>Shop</button>
+      <button class="tbtn tbtn-journal" id="btnJournal"><span class="tbtn-ico">&#x1F4D6;</span>Journal</button>
+      <button class="tbtn tbtn-inv"     id="btnInv"><span class="tbtn-ico">&#x1F3E1;</span>House</button>
+      <button class="tbtn tbtn-achieve" id="btnAchieve"><span class="tbtn-ico">&#x1F3C6;</span>Awards</button>
+      <button class="tbtn tbtn-custom"  id="btnCustom"><span class="tbtn-ico">&#x1F3A8;</span>Style</button>
     </div>
   </div>
   <div class="garden-header">
-    <h2>🌸 Yurie's Flower Garden</h2>
-    <p>Tap a pot to plant · Tap a plant to water it!</p>
+    <div class="weather-bar" id="weatherBar">☀️ Sunny</div>
+    <h2>🌸 Yurie's Flower Shop</h2>
+    <p>Grow flowers · Serve customers!</p>
   </div>
-  <div class="pump-section">
-    <!-- VALVE WHEEL -->
-    <div class="valve-wrap" id="valveWrap">
-      <svg class="valve-svg" id="valveSvg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- outer ring -->
-        <circle cx="50" cy="50" r="39" stroke="#c62828" stroke-width="8" fill="none"/>
-        <!-- inner ring -->
-        <circle cx="50" cy="50" r="22" stroke="#c62828" stroke-width="6" fill="none"/>
-        <!-- 8 spokes -->
-        <line x1="50" y1="28" x2="50" y2="11" stroke="#c62828" stroke-width="5" stroke-linecap="round"/>
-        <line x1="50" y1="72" x2="50" y2="89" stroke="#c62828" stroke-width="5" stroke-linecap="round"/>
-        <line x1="28" y1="50" x2="11" y2="50" stroke="#c62828" stroke-width="5" stroke-linecap="round"/>
-        <line x1="72" y1="50" x2="89" y2="50" stroke="#c62828" stroke-width="5" stroke-linecap="round"/>
-        <line x1="34" y1="34" x2="22" y2="22" stroke="#c62828" stroke-width="5" stroke-linecap="round"/>
-        <line x1="66" y1="66" x2="78" y2="78" stroke="#c62828" stroke-width="5" stroke-linecap="round"/>
-        <line x1="66" y1="34" x2="78" y2="22" stroke="#c62828" stroke-width="5" stroke-linecap="round"/>
-        <line x1="34" y1="66" x2="22" y2="78" stroke="#c62828" stroke-width="5" stroke-linecap="round"/>
-        <!-- 8 handle bumps -->
-        <ellipse cx="50" cy="7"  rx="7" ry="5" fill="#e53935" transform="rotate(0,50,50)"/>
-        <ellipse cx="50" cy="7"  rx="7" ry="5" fill="#e53935" transform="rotate(45,50,50)"/>
-        <ellipse cx="50" cy="7"  rx="7" ry="5" fill="#e53935" transform="rotate(90,50,50)"/>
-        <ellipse cx="50" cy="7"  rx="7" ry="5" fill="#e53935" transform="rotate(135,50,50)"/>
-        <ellipse cx="50" cy="7"  rx="7" ry="5" fill="#e53935" transform="rotate(180,50,50)"/>
-        <ellipse cx="50" cy="7"  rx="7" ry="5" fill="#e53935" transform="rotate(225,50,50)"/>
-        <ellipse cx="50" cy="7"  rx="7" ry="5" fill="#e53935" transform="rotate(270,50,50)"/>
-        <ellipse cx="50" cy="7"  rx="7" ry="5" fill="#e53935" transform="rotate(315,50,50)"/>
-        <!-- center hub -->
-        <circle cx="50" cy="50" r="11" fill="#c62828"/>
-        <circle cx="50" cy="50" r="8"  fill="#b71c1c"/>
-        <rect   x="46" y="46" width="8" height="8" rx="1.5" fill="#7f0000"/>
-        <!-- shine -->
-        <ellipse cx="38" cy="20" rx="5" ry="3" fill="rgba(255,255,255,.18)" transform="rotate(-30,38,20)"/>
-      </svg>
-      <div class="valve-label" id="valveLabel">Spin for water! 💧</div>
-      <div class="valve-prog-bg"><div class="valve-prog-fill" id="valveProgFill" style="width:0%"></div></div>
+  <div class="npc-section" id="npcSection"></div>
+  <div class="water-section">
+    <div class="whirl-wrap">
+      <button class="whirl-btn" id="whirlBtn" disabled>
+        <span class="whirl-icon" id="whirlIcon">&#x1F4A7;</span>
+        <span class="whirl-label" id="whirlLabel">Ready!</span>
+      </button>
+      <div class="whirl-cd-bg"><div class="whirl-cd-fill" id="whirlCdFill" style="width:100%"></div></div>
     </div>
     <div class="water-info">
       <div class="wdrops" id="dropRow"></div>
+      <div class="water-trickle-label" id="trickleLabel">+1 in 45s</div>
     </div>
   </div>
-  <div class="garden-grid" id="gardenGrid"></div>
+  <!-- BUCKET FILL OVERLAY -->
+  <div class="bucket-overlay" id="bucketOverlay">
+    <div class="bucket-scene">
+      <div class="bucket-hint" id="bucketHint">Swipe left &amp; right to fill!</div>
+      <div class="bucket-container">
+        <svg class="bucket-svg" viewBox="0 0 160 200" fill="none">
+          <!-- bucket body -->
+          <path d="M20 60 L10 170 Q10 190 30 190 L130 190 Q150 190 150 170 L140 60Z" fill="#8d6e4e" stroke="#6d4c3a" stroke-width="2"/>
+          <!-- bucket rim -->
+          <ellipse cx="80" cy="60" rx="62" ry="12" fill="#a0845c" stroke="#6d4c3a" stroke-width="2"/>
+          <!-- bucket handle -->
+          <path d="M35 55 Q80 10 125 55" stroke="#6d4c3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <!-- water fill (clipped to bucket shape) -->
+          <clipPath id="bucketClip">
+            <path d="M20 60 L10 170 Q10 190 30 190 L130 190 Q150 190 150 170 L140 60Z"/>
+          </clipPath>
+          <rect id="bucketWater" x="5" y="190" width="155" height="0" fill="url(#waterGrad)" clip-path="url(#bucketClip)"/>
+          <defs>
+            <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#64b5f6"/>
+              <stop offset="100%" stop-color="#1e88e5"/>
+            </linearGradient>
+          </defs>
+          <!-- shine -->
+          <ellipse cx="50" cy="120" rx="8" ry="30" fill="rgba(255,255,255,.12)" transform="rotate(-8,50,120)"/>
+        </svg>
+        <div class="bucket-pct" id="bucketPct">0%</div>
+      </div>
+      <div class="bucket-swipe-indicator" id="bucketSwipeInd">
+        <span class="swipe-arrow">&larr; &rarr;</span>
+      </div>
+    </div>
+  </div>
+  <div class="cloud-zone" id="cloudZone"></div>
+  <div class="garden-decor-wrap" id="gardenWrap">
+    <div class="garden-grid" id="gardenGrid"></div>
+  </div>
   <div class="seed-tray">
     <div class="tray-handle"></div>
     <div class="tray-title">🌱 Your Seeds — tap a pot to plant</div>
@@ -156,7 +182,7 @@
           <div class="shop-detail">Tulips, daisies, violets, lilies &amp; more — tiny legendary chance</div>
         </div>
       </div>
-      <button class="btn-buy" onclick="buyPacket('common')"><span class="ic">C</span> 10</button>
+      <button class="btn-buy" onclick="buyPacket('common')"><span class="ic">C</span> 8</button>
     </div>
     <div class="shop-item pkt-uncommon">
       <div class="shop-left">
@@ -166,7 +192,7 @@
           <div class="shop-detail">Roses, poppies, cherries, irises &amp; more — no rarities below uncommon</div>
         </div>
       </div>
-      <button class="btn-buy" onclick="buyPacket('uncommon')"><span class="ic">C</span> 30</button>
+      <button class="btn-buy" onclick="buyPacket('uncommon')"><span class="ic">C</span> 25</button>
     </div>
     <div class="shop-item pkt-rare">
       <div class="shop-left">
@@ -176,7 +202,7 @@
           <div class="shop-detail">Tiger lilies, orchids, golden iris &amp; more — chance at legendary ✦</div>
         </div>
       </div>
-      <button class="btn-buy" onclick="buyPacket('rare')"><span class="ic">C</span> 55</button>
+      <button class="btn-buy" onclick="buyPacket('rare')"><span class="ic">C</span> 60</button>
     </div>
     <div class="shop-item pkt-legendary">
       <div class="shop-left">
@@ -186,7 +212,28 @@
           <div class="shop-detail">Blue Rose, Blue Tulip, White Peony, Pink Orchid, Black Rose &amp; more ✦</div>
         </div>
       </div>
-      <button class="btn-buy" onclick="buyPacket('legendary')"><span class="ic">C</span> 85</button>
+      <button class="btn-buy" onclick="buyPacket('legendary')"><span class="ic">C</span> 120</button>
+    </div>
+    <div class="shop-divider"></div>
+    <div class="shop-item shop-water" id="shopWaterItem">
+      <div class="shop-left">
+        <span class="shop-icon">💧</span>
+        <div>
+          <div class="shop-name" id="shopWaterName">Water Can Upgrade</div>
+          <div class="shop-detail" id="shopWaterDetail">Increase water capacity</div>
+        </div>
+      </div>
+      <button class="btn-buy" id="btnBuyWater" onclick="buyWaterUpgrade()"><span class="ic">C</span> <span id="waterUpPrice">75</span></button>
+    </div>
+    <div class="shop-item shop-pot" id="shopPotItem">
+      <div class="shop-left">
+        <span class="shop-icon">&#x1F33F;</span>
+        <div>
+          <div class="shop-name" id="shopPotName">New Garden Pot</div>
+          <div class="shop-detail" id="shopPotDetail">Expand your garden with another pot</div>
+        </div>
+      </div>
+      <button class="btn-buy" id="btnBuyPot" onclick="buyPot()"><span class="ic">C</span> <span id="potPrice">50</span></button>
     </div>
   </div>
 </div>
@@ -198,8 +245,64 @@
     <button class="sh-close" onclick="closeModal('invOverlay')">✕</button>
     <div class="sh-handle"></div>
     <div class="sh-title">🌼Garden House</div>
-    <p class="inv-header" id="invHeader" style="text-align:center;font-size:.78em;color:#008000;margin-bottom:12px;"></p>
+    <p class="inv-header" id="invHeader" style="text-align:center;font-size:.78em;color:var(--primary);margin-bottom:12px;"></p>
+    <div id="milestoneSection"></div>
     <div class="inv-grid" id="invGrid"></div>
+  </div>
+</div>
+
+<!-- ACHIEVEMENT MODAL -->
+<div class="overlay" id="achieveOverlay">
+  <div class="sheet">
+    <button class="sh-close" onclick="closeModal('achieveOverlay')">✕</button>
+    <div class="sh-handle"></div>
+    <div class="sh-title">🏆 Achievements</div>
+    <div class="achieve-prog" id="achieveProg"></div>
+    <div class="achieve-grid" id="achieveGrid"></div>
+  </div>
+</div>
+
+<!-- NPC SELL MODAL -->
+<div class="overlay" id="npcSellOverlay">
+  <div class="sheet">
+    <button class="sh-close" onclick="closeModal('npcSellOverlay')">✕</button>
+    <div class="sh-handle"></div>
+    <div class="sh-title" id="npcSellTitle">Fulfill Order</div>
+    <div class="plant-list" id="npcSellList"></div>
+  </div>
+</div>
+
+<!-- HYBRIDIZE MODAL -->
+<div class="overlay" id="hybridOverlay">
+  <div class="sheet">
+    <button class="sh-close" onclick="closeModal('hybridOverlay')">✕</button>
+    <div class="sh-handle"></div>
+    <div class="sh-title">🧬 Hybridize</div>
+    <div id="hybridContent"></div>
+  </div>
+</div>
+
+<!-- CUSTOMIZE MODAL -->
+<div class="overlay" id="customOverlay">
+  <div class="sheet">
+    <button class="sh-close" onclick="closeModal('customOverlay')">✕</button>
+    <div class="sh-handle"></div>
+    <div class="sh-title">&#x1F3A8; Style Your Garden</div>
+    <div id="customContent"></div>
+  </div>
+</div>
+
+<!-- TUTORIAL OVERLAY -->
+<div class="overlay tutorial-overlay" id="tutorialOverlay">
+  <div class="tutorial-card" id="tutorialCard">
+    <div class="tutorial-step" id="tutorialStep">1/6</div>
+    <div class="tutorial-icon" id="tutorialIcon"></div>
+    <div class="tutorial-title" id="tutorialTitle"></div>
+    <div class="tutorial-desc" id="tutorialDesc"></div>
+    <div class="tutorial-btns">
+      <button class="btn-tutorial-skip" id="tutorialSkip">Skip</button>
+      <button class="btn-tutorial-next" id="tutorialNext">Next</button>
+    </div>
   </div>
 </div>
 

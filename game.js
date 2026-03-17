@@ -1497,7 +1497,34 @@ const STAGE_NAMES = ["🌰 Seed", "🌱 Sprout", "🌿 Growing", "🌸 Bloomed!"
 const STAGE_WATERS = 3,
   MAX_STAGE = 3;
 
-const PKT_COST = { common: 10, uncommon: 30, rare: 55, legendary: 85 };
+const PKT_COST = { common: 8, uncommon: 25, rare: 60, legendary: 120 };
+const POT_PRICES = [0, 0, 15, 40, 80, 150, 300, 500, 800, 1200, 2000, 3500];
+const MAX_PLOTS = 12;
+const WATER_CAP_UPGRADES = [
+  { cap: 12, cost: 75, label: "Water Can +4 (12 max)" },
+  { cap: 16, cost: 200, label: "Water Can +4 (16 max)" },
+  { cap: 20, cost: 500, label: "Water Can +4 (20 max)" },
+];
+const WEATHER_TYPES = ["sunny", "rainy", "drought"];
+const WEATHER_LABELS = { sunny: "\u2600\ufe0f Sunny", rainy: "\ud83c\udf27\ufe0f Rainy", drought: "\ud83c\udf35 Drought" };
+const WEATHER_CLASSES = { sunny: "weather-sunny", rainy: "weather-rainy", drought: "weather-drought" };
+const WEATHER_INTERVAL_MIN = 300000;
+const WEATHER_INTERVAL_MAX = 900000;
+
+const POT_COLORS = {
+  terracotta: { rH: "#e8724e", rM: "#c9522a", rD: "#a83e18", bM: "#c24e26", bS: "#7a3010", deco: "" },
+  ceramic:    { rH: "#5b9bd5", rM: "#2e75b6", rD: "#1f5c99", bM: "#f5f2ed", bS: "#ddd8d0",
+    deco: '<line x1="20" y1="78" x2="60" y2="78" stroke="#5b9bd5" stroke-width="1.5" opacity=".6"/>' +
+          '<line x1="20" y1="82" x2="60" y2="82" stroke="#5b9bd5" stroke-width="1" opacity=".4"/>' +
+          '<circle cx="30" cy="80" r="1.5" fill="#5b9bd5" opacity=".5"/>' +
+          '<circle cx="40" cy="80" r="1.5" fill="#5b9bd5" opacity=".5"/>' +
+          '<circle cx="50" cy="80" r="1.5" fill="#5b9bd5" opacity=".5"/>'
+  },
+  golden:     { rH: "#fdd835", rM: "#f9a825", rD: "#f57f17", bM: "#e8b800", bS: "#b48a00",
+    deco: '<line x1="18" y1="78" x2="62" y2="78" stroke="#fff" stroke-width="1" opacity=".5"/>' +
+          '<line x1="18" y1="86" x2="62" y2="86" stroke="#fff" stroke-width="1" opacity=".5"/>'
+  },
+};
 const PKT_LABEL = {
   common: "Common",
   uncommon: "Uncommon",
@@ -1511,7 +1538,7 @@ let G = {
   pkt: { common: 3, uncommon: 0, rare: 0, legendary: 0 },
   seeds: [],
   seedId: 0,
-  plots: Array(6)
+  plots: Array(2)
     .fill(0)
     .map((_, i) => ({
       id: i,
@@ -1521,8 +1548,8 @@ let G = {
       waters: 0,
       rewarded: false,
     })),
-  water: 10,
-  maxWater: 10,
+  water: 8,
+  maxWater: 8,
   inventory: [],
   bloomPlot: null,
   openedKey: null,
@@ -1530,6 +1557,34 @@ let G = {
   pendingPktType: "common",
   discovered: [],
   opening: false,
+  tutorialDone: false,
+  // NPC system
+  npcs: [],
+  npcTimer: 0,
+  npcIdCounter: 0,
+  // Weather
+  weather: "sunny",
+  weatherTimer: 0,
+  // Achievements
+  achievements: [],
+  // Stats
+  totalSold: 0,
+  totalCoins: 0,
+  totalWaters: 0,
+  totalBlooms: 0,
+  npcSales: 0,
+  npcStreak: 0,
+  npcBestStreak: 0,
+  hybridCount: 0,
+  daysPlayed: [],
+  // Cosmetics
+  potStyle: "terracotta",
+  bgStyle: "default",
+  lastLoginDate: null,
+  loginStreak: 0,
+  showcase: [null, null, null],
+  gardenDecor: [],
+  soundEnabled: true,
 };
 
 const SAVE_KEY = "yurieGarden_v1";
@@ -1544,6 +1599,29 @@ function saveG() {
     maxWater: G.maxWater,
     inventory: G.inventory,
     discovered: G.discovered,
+    npcs: G.npcs,
+    npcTimer: G.npcTimer,
+    npcIdCounter: G.npcIdCounter,
+    weather: G.weather,
+    weatherTimer: G.weatherTimer,
+    achievements: G.achievements,
+    totalSold: G.totalSold,
+    totalCoins: G.totalCoins,
+    totalWaters: G.totalWaters,
+    totalBlooms: G.totalBlooms,
+    npcSales: G.npcSales,
+    npcStreak: G.npcStreak,
+    npcBestStreak: G.npcBestStreak,
+    hybridCount: G.hybridCount,
+    daysPlayed: G.daysPlayed,
+    potStyle: G.potStyle,
+    bgStyle: G.bgStyle,
+    tutorialDone: G.tutorialDone,
+    lastLoginDate: G.lastLoginDate,
+    loginStreak: G.loginStreak,
+    showcase: G.showcase,
+    gardenDecor: G.gardenDecor,
+    soundEnabled: G.soundEnabled,
   };
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify(s));
@@ -1566,6 +1644,29 @@ function loadG() {
       maxWater: s.maxWater ?? G.maxWater,
       inventory: s.inventory ?? [],
       discovered: s.discovered ?? [],
+      npcs: s.npcs ?? [],
+      npcTimer: s.npcTimer ?? 0,
+      npcIdCounter: s.npcIdCounter ?? 0,
+      weather: s.weather ?? "sunny",
+      weatherTimer: s.weatherTimer ?? 0,
+      achievements: s.achievements ?? [],
+      totalSold: s.totalSold ?? 0,
+      totalCoins: s.totalCoins ?? 0,
+      totalWaters: s.totalWaters ?? 0,
+      totalBlooms: s.totalBlooms ?? 0,
+      npcSales: s.npcSales ?? 0,
+      npcStreak: s.npcStreak ?? 0,
+      npcBestStreak: s.npcBestStreak ?? 0,
+      hybridCount: s.hybridCount ?? 0,
+      daysPlayed: s.daysPlayed ?? [],
+      potStyle: s.potStyle ?? "terracotta",
+      bgStyle: s.bgStyle ?? "default",
+      tutorialDone: s.tutorialDone ?? false,
+      lastLoginDate: s.lastLoginDate ?? null,
+      loginStreak: s.loginStreak ?? 0,
+      showcase: s.showcase ?? [null, null, null],
+      gardenDecor: s.gardenDecor ?? [],
+      soundEnabled: s.soundEnabled !== false,
     });
     return true;
   } catch (e) {
@@ -1584,6 +1685,15 @@ function darker(hex, a = 44) {
     g = parseInt(hex.slice(3, 5), 16),
     b = parseInt(hex.slice(5, 7), 16);
   return `rgb(${Math.max(0, r - a)},${Math.max(0, g - a)},${Math.max(0, b - a)})`;
+}
+
+function isLightColor(hex) {
+  if (!hex || hex.length < 7) return false;
+  var r = parseInt(hex.slice(1, 3), 16);
+  var g = parseInt(hex.slice(3, 5), 16);
+  var b = parseInt(hex.slice(5, 7), 16);
+  // Perceived brightness (ITU-R BT.709)
+  return (0.299 * r + 0.587 * g + 0.114 * b) > 200;
 }
 
 // ── Parametric Flower Engine ─────────────────────────────────
@@ -1893,6 +2003,208 @@ function renderRosette(f, stage, P) {
   );
 }
 
+// 7. NOTCHED — heart-shaped petals with notched tips (cherry blossom)
+function renderNotched(f, stage, P) {
+  const { p, pl, pll, pd, S, rare } = _fc(f);
+  const { n, cy, cR, cFill } = P;
+  const petalPath = (cx, ccy, r, angle) => {
+    const a = (angle * Math.PI) / 180;
+    const cos = Math.cos(a), sin = Math.sin(a);
+    const dx = r * 0.6, dy = r;
+    const notch = r * 0.18;
+    // heart-shaped petal: two arcs meeting at a notched tip
+    const pts = [
+      [0, 0],
+      [-dx * 0.7, -dy * 0.4],
+      [-dx * 0.3, -dy * 0.95],
+      [0, -dy + notch], // notch dip
+      [dx * 0.3, -dy * 0.95],
+      [dx * 0.7, -dy * 0.4],
+      [0, 0],
+    ];
+    const rotated = pts.map(([x, y]) => [
+      cx + x * cos - y * sin,
+      ccy + x * sin + y * cos,
+    ]);
+    return `M${rotated[0].map(v => v.toFixed(1)).join(",")} C${rotated[1].map(v => v.toFixed(1)).join(",")} ${rotated[2].map(v => v.toFixed(1)).join(",")} ${rotated[3].map(v => v.toFixed(1)).join(",")} C${rotated[4].map(v => v.toFixed(1)).join(",")} ${rotated[5].map(v => v.toFixed(1)).join(",")} ${rotated[6].map(v => v.toFixed(1)).join(",")}Z`;
+  };
+  if (stage === 1)
+    return _svg(
+      _sh1 +
+        _stem(S, 2.5, 65) +
+        `<path d="M30 82 Q19 75 17 66 Q25 70 30 78" fill="${S}"/>` +
+        `<path d="${petalPath(30, 58, 8, 0)}" fill="${p}" opacity=".75"/>`,
+    );
+  const petals = (sc) => {
+    const parts = [];
+    for (let i = 0; i < n; i++) {
+      const a = (360 / n) * i;
+      parts.push(`<path d="${petalPath(30, cy, 12 * sc, a)}" fill="${i % 2 ? pl : p}"/>`);
+    }
+    return parts.join("");
+  };
+  if (stage === 2)
+    return _svg(
+      _sh +
+        _stem(S, 2.5, 52) +
+        `<path d="M30 78 Q16 70 14 60 Q24 65 30 72" fill="${S}"/>` +
+        petals(0.7) +
+        `<circle cx="30" cy="${cy}" r="${(cR * 0.75).toFixed(1)}" fill="${cFill}"/>`,
+    );
+  return _svg(
+    _sh +
+      _stem(S, 3.5, 50) +
+      _leaf(S) +
+      _aura(cy, cR + 10, pll, rare) +
+      petals(1) +
+      `<circle cx="30" cy="${cy}" r="${cR}" fill="${cFill}"/>`,
+  );
+}
+
+// 8. ASYMMETRIC — larger bottom petal, fan shape (violet)
+function renderAsymmetric(f, stage, P) {
+  const { p, pl, pll, pd, S, rare } = _fc(f);
+  const { cy, cR, cFill } = P;
+  if (stage === 1)
+    return _svg(
+      _sh1 +
+        _stem(S, 2.5, 65) +
+        `<path d="M30 82 Q19 75 17 66 Q25 70 30 78" fill="${S}"/>` +
+        `<ellipse cx="30" cy="58" rx="6" ry="8" fill="${p}" opacity=".75"/>`,
+    );
+  const violetPetals = (sc) => {
+    // 2 upper petals, 2 side petals, 1 larger bottom petal
+    const rx = 7 * sc, ry = 8 * sc;
+    const brx = 9 * sc, bry = 11 * sc; // bigger bottom
+    return (
+      // upper pair
+      `<ellipse cx="${(30 - 5 * sc).toFixed(1)}" cy="${(cy - 8 * sc).toFixed(1)}" rx="${(rx * 0.85).toFixed(1)}" ry="${(ry * 0.9).toFixed(1)}" fill="${p}" transform="rotate(-15,30,${cy})"/>` +
+      `<ellipse cx="${(30 + 5 * sc).toFixed(1)}" cy="${(cy - 8 * sc).toFixed(1)}" rx="${(rx * 0.85).toFixed(1)}" ry="${(ry * 0.9).toFixed(1)}" fill="${p}" transform="rotate(15,30,${cy})"/>` +
+      // side pair
+      `<ellipse cx="${(30 - 9 * sc).toFixed(1)}" cy="${(cy - 2 * sc).toFixed(1)}" rx="${(rx * 0.9).toFixed(1)}" ry="${(ry * 0.8).toFixed(1)}" fill="${pl}" transform="rotate(-35,30,${cy})"/>` +
+      `<ellipse cx="${(30 + 9 * sc).toFixed(1)}" cy="${(cy - 2 * sc).toFixed(1)}" rx="${(rx * 0.9).toFixed(1)}" ry="${(ry * 0.8).toFixed(1)}" fill="${pl}" transform="rotate(35,30,${cy})"/>` +
+      // large bottom petal with dark veins
+      `<ellipse cx="30" cy="${(cy + 4 * sc).toFixed(1)}" rx="${brx.toFixed(1)}" ry="${bry.toFixed(1)}" fill="${p}"/>` +
+      `<line x1="30" y1="${(cy + 1 * sc).toFixed(1)}" x2="30" y2="${(cy + 12 * sc).toFixed(1)}" stroke="${pd}" stroke-width="0.7" opacity=".4"/>` +
+      `<line x1="30" y1="${(cy + 3 * sc).toFixed(1)}" x2="${(30 - 3 * sc).toFixed(1)}" y2="${(cy + 10 * sc).toFixed(1)}" stroke="${pd}" stroke-width="0.5" opacity=".3"/>`
+    );
+  };
+  if (stage === 2)
+    return _svg(
+      _sh +
+        _stem(S, 2.5, 52) +
+        `<path d="M30 78 Q16 70 14 60 Q24 65 30 72" fill="${S}"/>` +
+        violetPetals(0.75) +
+        `<circle cx="30" cy="${cy}" r="${(cR * 0.7).toFixed(1)}" fill="${cFill}"/>`,
+    );
+  return _svg(
+    _sh +
+      _stem(S, 3, 50) +
+      _leaf(S) +
+      _aura(cy, 18, pll, rare) +
+      violetPetals(1) +
+      `<circle cx="30" cy="${cy}" r="${cR}" fill="${cFill}"/>`,
+  );
+}
+
+// 9. STANDARDS — 3 upright + 3 drooping petals (iris)
+function renderStandards(f, stage, P) {
+  const { p, pl, pll, pd, S, rare } = _fc(f);
+  const { cy, cR, cFill } = P;
+  if (stage === 1)
+    return _svg(
+      _sh1 +
+        _stem(S, 3, 60) +
+        `<path d="M30 80 Q19 73 17 63 Q25 68 30 77" fill="${S}"/>` +
+        `<path d="M25 62 Q24 52 30 47 Q36 52 35 62 Q32 65 30 66 Q28 65 25 62Z" fill="${p}" opacity=".85"/>`,
+    );
+  const irisPetals = (sc) => {
+    // 3 upright "standards" — narrow tall petals pointing up
+    const standards = [0, 120, 240].map(a => {
+      const rad = (a * Math.PI) / 180;
+      const x = 30 + Math.sin(rad) * 4 * sc;
+      const uy = cy - 14 * sc;
+      return `<ellipse cx="${x.toFixed(1)}" cy="${uy.toFixed(1)}" rx="${(3.5 * sc).toFixed(1)}" ry="${(10 * sc).toFixed(1)}" fill="${pl}" transform="rotate(${(a * 0.15).toFixed(1)},${x.toFixed(1)},${uy.toFixed(1)})"/>`;
+    }).join("");
+    // 3 drooping "falls" — wider petals curving downward
+    const falls = [60, 180, 300].map(a => {
+      const rad = (a * Math.PI) / 180;
+      const x = 30 + Math.sin(rad) * 10 * sc;
+      const fy = cy + 4 * sc;
+      return (
+        `<ellipse cx="${x.toFixed(1)}" cy="${fy.toFixed(1)}" rx="${(5 * sc).toFixed(1)}" ry="${(8 * sc).toFixed(1)}" fill="${p}" transform="rotate(${(a * 0.12 - 10).toFixed(1)},${x.toFixed(1)},${fy.toFixed(1)})"/>` +
+        `<ellipse cx="${x.toFixed(1)}" cy="${(fy + 2 * sc).toFixed(1)}" rx="${(3 * sc).toFixed(1)}" ry="${(2 * sc).toFixed(1)}" fill="${pd}" opacity=".5"/>`
+      );
+    }).join("");
+    return falls + standards;
+  };
+  if (stage === 2)
+    return _svg(
+      _sh +
+        _stem(S, 3, 54) +
+        `<path d="M30 78 Q15 68 13 55 Q23 62 30 72" fill="${S}"/>` +
+        irisPetals(0.75) +
+        (cR ? `<circle cx="30" cy="${cy}" r="${(cR * 0.75).toFixed(1)}" fill="${cFill}"/>` : ""),
+    );
+  return _svg(
+    _sh +
+      _stem(S, 3.5, 52) +
+      `<path d="M30 76 Q12 64 10 50 Q22 57 30 70" fill="${S}"/>` +
+      `<path d="M30 76 Q48 64 50 50 Q37 57 30 70" fill="${S}"/>` +
+      _aura(cy, 20, pll, rare) +
+      irisPetals(1) +
+      (cR ? `<circle cx="30" cy="${cy}" r="${cR}" fill="${cFill}"/>` : ""),
+  );
+}
+
+// 10. LABELLUM — orchid with large decorative lip petal
+function renderLabellum(f, stage, P) {
+  const { p, pl, pll, pd, S, rare } = _fc(f);
+  const { cy, cR, cFill, lipColor } = P;
+  const lip = lipColor || pd;
+  if (stage === 1)
+    return _svg(
+      _sh1 +
+        _stem(S, 3, 60) +
+        `<path d="M30 80 Q19 73 17 63 Q25 68 30 77" fill="${S}"/>` +
+        `<ellipse cx="30" cy="55" rx="6" ry="9" fill="${p}" opacity=".8"/>`,
+    );
+  const orchidPetals = (sc) => {
+    // 3 outer sepals — narrow pointed
+    const sepals = [0, 120, 240].map(a =>
+      `<ellipse cx="30" cy="${(cy - 11 * sc).toFixed(1)}" rx="${(3 * sc).toFixed(1)}" ry="${(10 * sc).toFixed(1)}" fill="${p}" transform="rotate(${a},30,${cy})"/>`
+    ).join("");
+    // 2 lateral petals — slightly wider
+    const laterals =
+      `<ellipse cx="${(30 - 8 * sc).toFixed(1)}" cy="${(cy - 3 * sc).toFixed(1)}" rx="${(4 * sc).toFixed(1)}" ry="${(7 * sc).toFixed(1)}" fill="${pl}" transform="rotate(-25,30,${cy})"/>` +
+      `<ellipse cx="${(30 + 8 * sc).toFixed(1)}" cy="${(cy - 3 * sc).toFixed(1)}" rx="${(4 * sc).toFixed(1)}" ry="${(7 * sc).toFixed(1)}" fill="${pl}" transform="rotate(25,30,${cy})"/>`;
+    // labellum — large ornate lip
+    const lipPetal =
+      `<path d="M${(30 - 7 * sc).toFixed(1)} ${cy.toFixed(1)} Q${(30 - 9 * sc).toFixed(1)} ${(cy + 10 * sc).toFixed(1)} 30 ${(cy + 14 * sc).toFixed(1)} Q${(30 + 9 * sc).toFixed(1)} ${(cy + 10 * sc).toFixed(1)} ${(30 + 7 * sc).toFixed(1)} ${cy.toFixed(1)} Q30 ${(cy + 5 * sc).toFixed(1)} ${(30 - 7 * sc).toFixed(1)} ${cy.toFixed(1)}Z" fill="${lip}"/>` +
+      `<circle cx="30" cy="${(cy + 6 * sc).toFixed(1)}" r="${(2.5 * sc).toFixed(1)}" fill="${pll}" opacity=".6"/>` +
+      `<circle cx="${(30 - 2 * sc).toFixed(1)}" cy="${(cy + 4 * sc).toFixed(1)}" r="${(1 * sc).toFixed(1)}" fill="${pd}" opacity=".5"/>` +
+      `<circle cx="${(30 + 2 * sc).toFixed(1)}" cy="${(cy + 4 * sc).toFixed(1)}" r="${(1 * sc).toFixed(1)}" fill="${pd}" opacity=".5"/>`;
+    return sepals + laterals + lipPetal;
+  };
+  if (stage === 2)
+    return _svg(
+      _sh +
+        _stem(S, 3, 54) +
+        `<path d="M30 78 Q15 68 13 55 Q23 62 30 72" fill="${S}"/>` +
+        orchidPetals(0.75) +
+        (cR ? `<circle cx="30" cy="${cy}" r="${(cR * 0.6).toFixed(1)}" fill="${cFill}"/>` : ""),
+    );
+  return _svg(
+    _sh +
+      _stem(S, 3.5, 52) +
+      `<path d="M30 76 Q12 64 10 50 Q22 57 30 70" fill="${S}"/>` +
+      `<path d="M30 76 Q48 64 50 50 Q37 57 30 70" fill="${S}"/>` +
+      _aura(cy, 20, pll, rare) +
+      orchidPetals(1) +
+      (cR ? `<circle cx="30" cy="${cy}" r="${cR}" fill="${cFill}"/>` : ""),
+  );
+}
+
 const FLOWER_RENDERERS = {
   radial: renderRadial,
   cup: renderCup,
@@ -1900,6 +2212,10 @@ const FLOWER_RENDERERS = {
   star: renderStar,
   bell: renderBell,
   rosette: renderRosette,
+  notched: renderNotched,
+  asymmetric: renderAsymmetric,
+  standards: renderStandards,
+  labellum: renderLabellum,
 };
 
 // Shape parameters for all 77 flower appearances
@@ -2041,28 +2357,17 @@ const SHAPE_PARAMS = {
     leaves: false,
   },
   cherry: {
-    fn: "radial",
+    fn: "notched",
     n: 5,
-    rx: 7,
-    ry: 10,
     cy: 40,
-    cR: 8,
+    cR: 7,
     cFill: "#c62828",
-    c2R: 6,
-    c2Fill: "#fce4ec",
-    leaves: true,
   },
   violet: {
-    fn: "radial",
-    n: 5,
-    rx: 7.5,
-    ry: 8,
+    fn: "asymmetric",
     cy: 38,
-    cR: 6,
+    cR: 5,
     cFill: "#fdd835",
-    c2R: 4,
-    c2Fill: "#f9a825",
-    leaves: true,
   },
   anemone: {
     fn: "radial",
@@ -2278,15 +2583,13 @@ const SHAPE_PARAMS = {
   heather: { fn: "spike", cols: 2, rows: 5 },
   // ── STAR (wide flat petals: lily/iris/orchid type) ────────────
   lily: { fn: "star", n: 6, rx: 5, ry: 12, cy: 38, cR: 0, cFill: "" },
-  iris: { fn: "star", n: 6, rx: 5.5, ry: 11, cy: 38, cR: 6, cFill: "#fdd835" },
+  iris: { fn: "standards", cy: 38, cR: 5, cFill: "#fdd835" },
   orchid: {
-    fn: "star",
-    n: 5,
-    rx: 5.5,
-    ry: 12,
-    cy: 38,
-    cR: 7,
+    fn: "labellum",
+    cy: 36,
+    cR: 5,
     cFill: "#f06292",
+    lipColor: "#e91e63",
   },
   daffodil: {
     fn: "star",
@@ -2331,8 +2634,9 @@ const SHAPE_PARAMS = {
 };
 
 function flowerSVG(key, stage) {
-  const f = FLOWERS[key],
-    p = f.petal,
+  const f = FLOWERS[key];
+  if (!f) return _svg(`<text x="30" y="52" text-anchor="middle" font-size="9" fill="#aaa">?</text>`);
+  const p = f.petal,
     S = f.stem;
   const pl = lighter(p),
     pll = lighter(p, 85),
@@ -2367,6 +2671,7 @@ function initPetals() {
 
 // Start game immediately — no welcome screen
 loadG();
+
 initGame();
 
 function initGame() {
@@ -2375,6 +2680,63 @@ function initGame() {
   renderTray();
   renderDrops();
   updateHUD();
+  updateShopPot();
+  renderNPCs();
+  renderWeather();
+  applyBgStyle();
+  // Hide game until title screen dismissed
+  document.getElementById("gameScreen").style.display = "none";
+
+  // Defer features that depend on later-defined data
+  setTimeout(function() {
+    checkAchievements();
+    checkNightMode();
+    initParticles();
+    initFireflies();
+    updateParticleVisibility();
+    renderShowcase();
+    applyGardenDecor();
+    _soundEnabled = G.soundEnabled;
+    checkDailyLogin();
+    // Add sound toggle button
+    var toggle = document.createElement("div");
+    toggle.className = "sound-toggle";
+    toggle.textContent = _soundEnabled ? "\ud83d\udd0a" : "\ud83d\udd07";
+    toggle.onclick = function() {
+      _soundEnabled = !_soundEnabled;
+      G.soundEnabled = _soundEnabled;
+      toggle.textContent = _soundEnabled ? "\ud83d\udd0a" : "\ud83d\udd07";
+      saveG();
+    };
+    document.body.appendChild(toggle);
+
+    // Title screen → Enter button
+    var titleScreen = document.getElementById("titleScreen");
+    var titleBtn = document.getElementById("titleEnter");
+    if (titleBtn) {
+      function enterGame() {
+        getAudioCtx(); // unlock audio on first interaction
+        playSound("bloom");
+        haptic(50);
+        titleScreen.classList.add("hidden");
+        document.getElementById("gameScreen").style.display = "";
+        setTimeout(function() {
+          titleScreen.style.display = "none";
+          // Show tutorial for new players, then daily login
+          if (!G.tutorialDone) {
+            showTutorial();
+          } else {
+            checkDailyLogin();
+          }
+        }, 500);
+      }
+      titleBtn.onclick = enterGame;
+      titleBtn.addEventListener("touchstart", function(e) {
+        e.preventDefault();
+        enterGame();
+      }, { passive: false });
+    }
+  }, 0);
 }
 function updateHUD() {
   document.getElementById("coinDisp").textContent = G.coins;
@@ -2406,12 +2768,12 @@ function updatePlotCard(i) {
   }
 }
 function potCardSVG(p) {
-  // Terra cotta colours
-  const rH = "#e8724e",
-    rM = "#c9522a",
-    rD = "#a83e18";
-  const bM = "#c24e26",
-    bS = "#7a3010";
+  var colors = POT_COLORS[G.potStyle] || POT_COLORS.terracotta;
+  const rH = colors.rH,
+    rM = colors.rM,
+    rD = colors.rD;
+  const bM = colors.bM,
+    bS = colors.bS;
   const sl = "#4e342e",
     sm = "#3e2723",
     sd = "#2a1810";
@@ -2499,6 +2861,7 @@ function potCardSVG(p) {
     <rect x="14" y="95" width="52" height="4" rx="2" fill="${bS}" opacity=".7"/>
     <!-- Ground shadow ellipse -->
     <ellipse cx="40" cy="103" rx="24" ry="3.5" fill="rgba(0,0,0,.18)"/>
+    ${colors.deco || ""}
     <!-- Soil surface layers -->
     <ellipse cx="40" cy="66" rx="28" ry="7.5" fill="${sl}"/>
     <ellipse cx="40" cy="64" rx="25" ry="6"   fill="${sm}"/>
@@ -2552,7 +2915,10 @@ function waterPlot(i) {
   }
   G.water--;
   G.plots[i].waters++;
+  G.totalWaters++;
   renderDrops();
+  playSound("water");
+  haptic(30);
   // Capture splash position and trigger animation before any DOM replacement
   const grid = document.getElementById("gardenGrid");
   const oldTile = grid.children[i];
@@ -2560,18 +2926,20 @@ function waterPlot(i) {
     const r = oldTile.getBoundingClientRect();
     spawnSplash(r.left + r.width / 2, r.top + r.height / 3);
   }
-  if (G.plots[i].waters >= STAGE_WATERS) {
+  if (G.plots[i].waters >= watersNeeded()) {
     G.plots[i].waters = 0;
     G.plots[i].stage++;
     if (G.plots[i].stage >= MAX_STAGE) {
       G.plots[i].stage = MAX_STAGE;
       G.plots[i].state = "bloomed";
+      G.totalBlooms++;
       if (!G.plots[i].rewarded) {
         G.pkt.common++;
         G.plots[i].rewarded = true;
         updateHUD();
       }
       saveG();
+      checkAchievements();
       // Animate old tile while bloom delay plays out
       if (oldTile) {
         oldTile.classList.add("watered");
@@ -2580,6 +2948,8 @@ function waterPlot(i) {
       setTimeout(() => {
         updatePlotCard(i);
         confettiBurst();
+        playSound("bloom");
+        haptic(80);
         openBloomModal(i);
       }, 350);
     } else {
@@ -2658,10 +3028,9 @@ function selectPktType(type) {
   if (!G.pkt[type] || G.opening) return;
   G.pendingPktType = type;
   G.opening = true;
-  // Decrement and save immediately so rapid taps can't double-spend
+  // Decrement immediately to prevent double-spend, but defer save until key is revealed
   G.pkt[type]--;
   updateHUD();
-  saveG();
   document.getElementById("pktSelector").style.display = "none";
   document.getElementById("pktTitle").textContent =
     `${PKT_ICON[type]} Open a ${PKT_LABEL[type]} Packet`;
@@ -2670,11 +3039,15 @@ function selectPktType(type) {
   card.querySelector(".pkt-icon").textContent = PKT_ICON[type];
   document.getElementById("pktOpenWrap").style.display = "";
   document.getElementById("pktHint").style.display = "";
+  playSound("packet_" + type);
   setTimeout(() => {
     card.classList.add("shaking");
     setTimeout(() => {
       G.openedKey = weightedRandom(type);
+      saveG(); // save now that seed is determined — packet spend is committed
       const f = FLOWERS[G.openedKey];
+      playSound("reveal_" + f.rarity);
+      haptic(f.rarity === "legendary" || f.rarity === "unique" ? 100 : 40);
       document.getElementById("pktOpenWrap").style.display = "none";
       document.getElementById("resFlower").innerHTML =
         `<div style="width:100%;height:100%">${flowerSVG(G.openedKey, MAX_STAGE)}</div>`;
@@ -2753,6 +3126,8 @@ function plantSeed(key, plotIdx) {
     rewarded: false,
   };
   closeModal("plantOverlay");
+  playSound("plant");
+  haptic(40);
   renderGarden();
   renderTray();
   saveG();
@@ -2771,36 +3146,31 @@ function openBloomModal(i) {
   badge.className = `bloom-badge ${f.rarity}`;
 
   // Atmospheric glow color keyed to rarity
-  const glowColors = { common: "#9e9e9e", uncommon: "#ab47bc", rare: "#3949ab", legendary: "#ff8f00" };
-  document.getElementById("bloomGlow").style.background = glowColors[f.rarity] || "#9e9e9e";
+  const glowColors = { common: "#9a9488", uncommon: "#9575cd", rare: "#5c7fbf", legendary: "#d4a03a", unique: "#b03068" };
+  document.getElementById("bloomGlow").style.background = glowColors[f.rarity] || "#9a9488";
 
   // Rarity-correct sub message
   document.getElementById("bloomSub").textContent =
-    f.rarity === "legendary"
-      ? `✦ A legendary ${f.name} — one of the rarest blooms! Truly extraordinary! 🌟`
-      : f.rarity === "rare"
-        ? `★ A rare ${f.name} — gorgeous and hard to find! 💙`
-        : f.rarity === "uncommon"
-          ? `Your ${f.name.toLowerCase()} is absolutely stunning! 💕`
-          : `Beautiful! Your ${f.name.toLowerCase()} is glowing! 🌸`;
+    f.rarity === "unique"
+      ? `💎 A unique ${f.name} — the only one of its kind in the entire world! 🌟💎`
+      : f.rarity === "legendary"
+        ? `✦ A legendary ${f.name} — one of the rarest blooms! Truly extraordinary! 🌟`
+        : f.rarity === "rare"
+          ? `★ A rare ${f.name} — gorgeous and hard to find! 💙`
+          : f.rarity === "uncommon"
+            ? `Your ${f.name.toLowerCase()} is absolutely stunning! 💕`
+            : `Beautiful! Your ${f.name.toLowerCase()} is glowing! 🌸`;
 
-  document.getElementById("btnSell").innerHTML =
-    `💰 Sell for <span class="ic">C</span><span class="coin-val">${f.sell}</span>`;
-  document.getElementById("btnSell").onclick = sellFlower;
+  var sellBtn = document.getElementById("btnSell");
+  if (canHybridize(i)) {
+    sellBtn.textContent = "\ud83e\uddec Hybridize with neighbor";
+    sellBtn.onclick = function() { closeModal("bloomOverlay"); openHybridModal(i); };
+  } else {
+    sellBtn.textContent = "\ud83d\udca1 Store it \u2014 sell to NPCs for more!";
+    sellBtn.onclick = storeFlower;
+  }
   document.getElementById("btnStore").onclick = storeFlower;
   openModal("bloomOverlay");
-}
-function sellFlower() {
-  if (G.bloomPlot === null) return;
-  const key = G.plots[G.bloomPlot].key;
-  const f = FLOWERS[key];
-  if (!G.discovered.includes(key)) G.discovered.push(key);
-  G.coins += f.sell;
-  clearPlot(G.bloomPlot);
-  closeModal("bloomOverlay");
-  updateHUD();
-  saveG();
-  toast(`Sold for ${f.sell} coins! 💰`, 2000);
 }
 function storeFlower() {
   if (G.bloomPlot === null) return;
@@ -2808,14 +3178,16 @@ function storeFlower() {
   const f = FLOWERS[key];
   if (!G.discovered.includes(key)) G.discovered.push(key);
   G.seedId++;
-  G.inventory.push({ key, uid: G.seedId });
+  G.inventory.push({ key, uid: G.seedId, storedAt: Date.now() });
   clearPlot(G.bloomPlot);
   closeModal("bloomOverlay");
   updateHUD();
   saveG();
-  toast(`${f.name} stored in garden House! `, 2000);
+  checkAchievements();
+  toast(`${f.name} stored in Garden House! 🏡`, 2000);
 }
 function openInventoryModal() {
+  renderMilestoneSection();
   const grid = document.getElementById("invGrid");
   const hdr = document.getElementById("invHeader");
   if (hdr)
@@ -2839,12 +3211,34 @@ function openInventoryModal() {
         : f.rarity === "unique"
           ? "◆ Unique"
           : f.rarity.charAt(0).toUpperCase() + f.rarity.slice(1);
+    var appVal = getAppreciatedValue(item);
+    var appreciated = appVal > f.sell;
+    // Check if flower can be added to showcase
+    var emptySlot = G.showcase ? G.showcase.indexOf(null) : -1;
     card.innerHTML =
       `<div class="inv-fl">${flowerSVG(item.key, MAX_STAGE)}</div>` +
       `<div class="inv-name">${f.name}</div>` +
       `<div class="inv-badge ${f.rarity}">${rarLabel}</div>` +
-      `<div class="inv-sell-val"><span class="ic">C</span>${f.sell}</div>` +
-      `<button class="btn-inv-sell" onclick="sellFromInventory(${item.uid})">💰 Sell</button>`;
+      `<div class="inv-sell-val"><span class="ic">C</span>${appVal}` +
+      (appreciated ? ` <span class="inv-appreciate">\u2191</span>` : "") +
+      `</div>` +
+      (emptySlot >= 0 ? `<button class="btn-inv-sell" data-showcase="${emptySlot}" data-key="${item.key}">\u2b50 Showcase</button>` : "");
+    // Wire showcase button
+    var scBtn = card.querySelector("[data-showcase]");
+    if (scBtn) {
+      (function(slotIdx, flowerKey) {
+        scBtn.onclick = function(e) {
+          e.stopPropagation();
+          if (!G.showcase) G.showcase = [null, null, null];
+          G.showcase[slotIdx] = flowerKey;
+          saveG();
+          renderShowcase();
+          playSound("click");
+          toast(f.name + " added to showcase!", 1200);
+          openInventoryModal(); // refresh
+        };
+      })(emptySlot, item.key);
+    }
     grid.appendChild(card);
   });
   openModal("invOverlay");
@@ -2869,7 +3263,18 @@ function clearPlot(i) {
     waters: 0,
     rewarded: false,
   };
-  renderGarden();
+  updatePlotCard(i);
+}
+
+function getFlowerHint(f) {
+  var hints = {
+    common: "Common packet",
+    uncommon: "Uncommon+",
+    rare: "Rare packet",
+    legendary: "Keep opening!",
+    unique: "Ultra rare\u2026",
+  };
+  return hints[f.rarity] || "???";
 }
 
 function openJournalModal() {
@@ -3038,10 +3443,13 @@ function openJournalModal() {
     const known = G.discovered.includes(key);
     const card = document.createElement("div");
     card.className = "jnl-card" + (known ? "" : " jlocked");
+    // Tint background for white/light flowers so they're visible
+    var isLight = isLightColor(f.petal);
+    if (known && isLight) card.style.background = "#e8e4dc";
     const svgHtml = flowerSVG(key, 3);
     card.innerHTML = `
       <div class="jnl-svg${known ? "" : " jsilhouette"}">${svgHtml}</div>
-      <div class="jnl-name${known ? "" : " jlocked"}">${known ? f.name : "??????"}</div>
+      <div class="jnl-name${known ? "" : " jlocked"}">${known ? f.name : getFlowerHint(f)}</div>
       <span class="jnl-badge ${f.rarity}">${RARITY_LABEL[f.rarity]}</span>
       <div class="jnl-sell${known ? "" : " jhide"}"><span class="ic" style="width:13px;height:13px;font-size:.6em">C</span>${f.sell}</div>
     `;
@@ -3050,6 +3458,8 @@ function openJournalModal() {
   openModal("journalOverlay");
 }
 function openShopModal() {
+  updateShopWater();
+  updateShopPot();
   openModal("shopOverlay");
 }
 function buyPacket(type) {
@@ -3062,22 +3472,132 @@ function buyPacket(type) {
   G.pkt[type]++;
   updateHUD();
   closeModal("shopOverlay");
+  playSound("coins");
   saveG();
   toast(`${PKT_ICON[type]} ${PKT_LABEL[type]} Packet bought!`, 1600);
 }
+
+function buyPot() {
+  const n = G.plots.length;
+  if (n >= MAX_PLOTS) return;
+  const cost = POT_PRICES[n] || 600;
+  if (G.coins < cost) {
+    toast(`Need ${cost} coins for a new pot! 💰`, 2000);
+    return;
+  }
+  G.coins -= cost;
+  G.plots.push({
+    id: n,
+    state: "empty",
+    key: null,
+    stage: 0,
+    waters: 0,
+    rewarded: false,
+  });
+  updateHUD();
+  renderGarden();
+  updateShopPot();
+  playSound("coins");
+  haptic(50);
+  saveG();
+  toast("New pot added! You now have " + G.plots.length + " pots \ud83c\udf3f", 2000);
+}
+
+function buyWaterUpgrade() {
+  var upgrade = WATER_CAP_UPGRADES.find(function(u) { return G.maxWater < u.cap; });
+  if (!upgrade) return;
+  if (G.coins < upgrade.cost) {
+    toast("Need " + upgrade.cost + " coins for water upgrade!", 2000);
+    return;
+  }
+  G.coins -= upgrade.cost;
+  G.maxWater = upgrade.cap;
+  updateHUD();
+  renderDrops();
+  updateShopWater();
+  saveG();
+  toast("Water capacity upgraded to " + G.maxWater + "! \ud83d\udca7", 2000);
+}
+
+function updateShopWater() {
+  var item = document.getElementById("shopWaterItem");
+  var nameEl = document.getElementById("shopWaterName");
+  var detailEl = document.getElementById("shopWaterDetail");
+  var priceEl = document.getElementById("waterUpPrice");
+  if (!item) return;
+  var upgrade = WATER_CAP_UPGRADES.find(function(u) { return G.maxWater < u.cap; });
+  if (!upgrade) {
+    item.classList.add("sold-out");
+    nameEl.textContent = "Max Capacity!";
+    detailEl.textContent = "Water can fully upgraded (" + G.maxWater + ")";
+    priceEl.textContent = "\u2014";
+  } else {
+    item.classList.remove("sold-out");
+    nameEl.textContent = upgrade.label;
+    detailEl.textContent = "Current: " + G.maxWater + " \u2192 " + upgrade.cap;
+    priceEl.textContent = upgrade.cost;
+  }
+}
+
+function updateShopPot() {
+  const n = G.plots.length;
+  const item = document.getElementById("shopPotItem");
+  const nameEl = document.getElementById("shopPotName");
+  const detailEl = document.getElementById("shopPotDetail");
+  const priceEl = document.getElementById("potPrice");
+  if (!item) return;
+  if (n >= MAX_PLOTS) {
+    item.classList.add("sold-out");
+    nameEl.textContent = "Garden Full!";
+    detailEl.textContent = "All " + MAX_PLOTS + " pots unlocked";
+    priceEl.textContent = "\u2014";
+  } else {
+    item.classList.remove("sold-out");
+    const cost = POT_PRICES[n] || 600;
+    nameEl.textContent = "Pot #" + (n + 1);
+    detailEl.textContent = "Expand to " + (n + 1) + " pots (" + n + " now)";
+    priceEl.textContent = cost;
+  }
+}
+
 
 // .tbtn already has touch-action:manipulation so iOS fires click immediately (no 300ms delay)
 // We use a time guard on backdrop-dismiss to stop any stray click from closing a freshly opened modal
 let _modalOpenTime = 0;
 function openModal(id) {
   document.querySelectorAll(".overlay.on").forEach((o) => {
-    if (o.id !== id) o.classList.remove("on");
+    if (o.id !== id) {
+      if (o.id === "pktOverlay" && G.opening && !G.openedKey) {
+        G.pkt[G.pendingPktType]++;
+        G.opening = false;
+        updateHUD();
+        saveG();
+      }
+      o.classList.remove("on");
+    }
   });
   document.getElementById(id).classList.add("on");
   _modalOpenTime = Date.now();
   if (id !== "pktOverlay") G.opening = false;
 }
 function closeModal(id) {
+  // Refund packet if closed mid-animation before seed was revealed
+  if (id === "pktOverlay" && G.opening && !G.openedKey) {
+    G.pkt[G.pendingPktType]++;
+    G.opening = false;
+    updateHUD();
+    saveG();
+  }
+  // Auto-collect seed if packet result is showing but user tapped away
+  if (id === "pktOverlay" && G.openedKey) {
+    if (!G.discovered.includes(G.openedKey)) G.discovered.push(G.openedKey);
+    G.seeds.push({ id: G.seedId++, key: G.openedKey });
+    G.openedKey = null;
+    G.opening = false;
+    renderTray();
+    saveG();
+    toast("Seed auto-collected! \ud83c\udf31", 1200);
+  }
   document.getElementById(id).classList.remove("on");
 }
 // Backdrop dismiss — handles both click (desktop) and touchstart (mobile)
@@ -3085,8 +3605,13 @@ function _backdropDismiss(o, e) {
   if (e.target !== o) return;
   if (Date.now() - _modalOpenTime < 300) return;
   e.preventDefault();
+  if (o.id === "pktOverlay" && G.opening && !G.openedKey) {
+    G.pkt[G.pendingPktType]++;
+    G.opening = false;
+    updateHUD();
+    saveG();
+  }
   o.classList.remove("on");
-  if (o.id === "pktOverlay") G.opening = false;
 }
 document.querySelectorAll(".overlay").forEach((o) => {
   o.addEventListener("click", (e) => _backdropDismiss(o, e));
@@ -3298,111 +3823,1739 @@ function weightedRandom(type = "common") {
 }
 
 // ── Valve wheel ─────────────────────────────────────────────────────────────
-(function setupValve() {
-  const svg = document.getElementById("valveSvg");
-  const lbl = document.getElementById("valveLabel");
-  const bar = document.getElementById("valveProgFill");
-  const SPINS_NEEDED = 5; // kept for reference, no longer used
-  let tracking = false,
-    lastAngle = 0,
-    accumulated = 0,
-    completedSpins = 0,
-    visualRot = 0;
+// ── New Water System: Whirlpool Button + Cloud Tap + Passive Trickle ──────
+(function setupWater() {
+  var WHIRL_COOLDOWN = 10000; // 10s
+  var WHIRL_AMOUNT = 3;
+  var TRICKLE_INTERVAL = 45000; // 45s
+  var CLOUD_INTERVAL_MIN = 40000; // 40s
+  var CLOUD_INTERVAL_MAX = 60000; // 60s
+  var CLOUD_AMOUNT = 2;
 
-  // Init label with current water
-  (function initLabel() {
-    const l = document.getElementById("valveLabel");
-    if (l)
-      l.textContent =
-        G.water >= G.maxWater
-          ? "Tank full! 💧"
-          : `${G.water}/${G.maxWater} water 💧`;
-  })();
+  var whirlBtn = document.getElementById("whirlBtn");
+  var whirlLabel = document.getElementById("whirlLabel");
+  var whirlCdFill = document.getElementById("whirlCdFill");
+  var trickleLabel = document.getElementById("trickleLabel");
+  var whirlLastUsed = 0;
+  var trickleTimer = Date.now();
+  var nextCloudAt = Date.now() + CLOUD_INTERVAL_MIN + Math.random() * (CLOUD_INTERVAL_MAX - CLOUD_INTERVAL_MIN);
 
-  function angleFrom(cx, cy, ex, ey) {
-    return (Math.atan2(ey - cy, ex - cx) * 180) / Math.PI;
+  function addWater(amount, msg) {
+    if (G.water >= G.maxWater) {
+      toast("Water tank full! \ud83d\udca7", 1000);
+      return;
+    }
+    G.water = Math.min(G.maxWater, G.water + amount);
+    renderDrops();
+    saveG();
+    if (msg) toast(msg, 1400);
   }
-  function center() {
-    const r = svg.getBoundingClientRect();
-    return { cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
+
+  // Bucket fill mechanic
+  var SWIPES_TO_FILL = 8; // left-right swipes needed
+  var bucketOverlay = document.getElementById("bucketOverlay");
+  var bucketWater = document.getElementById("bucketWater");
+  var bucketPct = document.getElementById("bucketPct");
+  var bucketHint = document.getElementById("bucketHint");
+  var bucketFillLevel = 0;
+  var _bucketSwipeStartX = 0;
+  var _bucketSwipeDir = 0; // 0=none, 1=right, -1=left
+  var _bucketLastDir = 0;
+  var _bucketActive = false;
+
+  function whirlReady() {
+    return Date.now() - whirlLastUsed >= WHIRL_COOLDOWN;
   }
-  function applyDelta(delta) {
-    if (Math.abs(delta) > 90) return;
-    accumulated += Math.abs(delta);
-    visualRot += delta;
-    svg.style.transform = `rotate(${visualRot}deg)`;
-    const newSpins = Math.floor(accumulated / 360);
-    // Update progress bar: fraction of current rotation
-    const rotProgress = (accumulated % 360) / 360;
-    bar.style.width = (rotProgress * 100).toFixed(1) + "%";
-    if (newSpins > completedSpins) {
-      completedSpins = newSpins;
+
+  function openBucket() {
+    if (!whirlReady()) return;
+    getAudioCtx();
+    _bucketActive = true;
+    bucketFillLevel = 0;
+    _bucketLastDir = 0;
+    updateBucketVisual();
+    bucketHint.textContent = "Swipe left \u0026 right to fill!";
+    bucketOverlay.classList.add("on");
+    playSound("click");
+  }
+
+  function updateBucketVisual() {
+    var pct = Math.min(100, Math.round((bucketFillLevel / SWIPES_TO_FILL) * 100));
+    // Water rect: y goes from 190 (empty) to 60 (full), height = 190 - y
+    var waterHeight = (130 * pct / 100);
+    var waterY = 190 - waterHeight;
+    bucketWater.setAttribute("y", waterY.toFixed(0));
+    bucketWater.setAttribute("height", waterHeight.toFixed(0));
+    bucketPct.textContent = pct + "%";
+  }
+
+  function completeBucket() {
+    _bucketActive = false;
+    whirlLastUsed = Date.now();
+    whirlBtn.disabled = true;
+    // Full water!
+    var amount = G.maxWater - G.water;
+    G.water = G.maxWater;
+    renderDrops();
+    saveG();
+    playSound("whirlpool");
+    haptic(80);
+    bucketHint.textContent = "\ud83d\udca7 Full! +" + amount + " water!";
+    // Burst animation on bucket
+    var svg = bucketOverlay.querySelector(".bucket-svg");
+    if (svg) svg.classList.add("bucket-full");
+    // Splash drops
+    for (var i = 0; i < 8; i++) {
+      var drop = document.createElement("div");
+      drop.className = "bucket-splash-drop";
+      drop.textContent = "\ud83d\udca7";
+      var cx = window.innerWidth / 2 - 40 + Math.random() * 80;
+      var cy = window.innerHeight / 2 - 20 + Math.random() * 40;
+      drop.style.cssText = "left:" + cx + "px;top:" + cy + "px;animation-delay:" + (i * 0.06) + "s;";
+      document.body.appendChild(drop);
+      setTimeout(function(d) { d.remove(); }, 900, drop);
+    }
+    // Close after short delay
+    setTimeout(function() {
+      bucketOverlay.classList.remove("on");
+      if (svg) svg.classList.remove("bucket-full");
+      toast("Water bucket filled to max! \ud83d\udca7", 2000);
+    }, 1200);
+  }
+
+  // Touch handling for swipe detection
+  bucketOverlay.addEventListener("touchstart", function(e) {
+    if (!_bucketActive) return;
+    _bucketSwipeStartX = e.touches[0].clientX;
+    _bucketSwipeDir = 0;
+  }, { passive: true });
+
+  bucketOverlay.addEventListener("touchmove", function(e) {
+    if (!_bucketActive) return;
+    e.preventDefault();
+    var dx = e.touches[0].clientX - _bucketSwipeStartX;
+    if (Math.abs(dx) > 30) {
+      var dir = dx > 0 ? 1 : -1;
+      // Only count if direction changed from last swipe (alternating)
+      if (dir !== _bucketLastDir) {
+        _bucketLastDir = dir;
+        bucketFillLevel++;
+        updateBucketVisual();
+        playSound("water");
+        haptic(20);
+        _bucketSwipeStartX = e.touches[0].clientX; // reset for next swipe
+
+        if (bucketFillLevel >= SWIPES_TO_FILL) {
+          completeBucket();
+        }
+      }
+    }
+  }, { passive: false });
+
+  // Mouse support (desktop testing)
+  var _mouseDown = false;
+  bucketOverlay.addEventListener("mousedown", function(e) {
+    if (!_bucketActive) return;
+    _mouseDown = true;
+    _bucketSwipeStartX = e.clientX;
+    _bucketSwipeDir = 0;
+  });
+  bucketOverlay.addEventListener("mousemove", function(e) {
+    if (!_bucketActive || !_mouseDown) return;
+    var dx = e.clientX - _bucketSwipeStartX;
+    if (Math.abs(dx) > 30) {
+      var dir = dx > 0 ? 1 : -1;
+      if (dir !== _bucketLastDir) {
+        _bucketLastDir = dir;
+        bucketFillLevel++;
+        updateBucketVisual();
+        playSound("water");
+        _bucketSwipeStartX = e.clientX;
+        if (bucketFillLevel >= SWIPES_TO_FILL) {
+          _mouseDown = false;
+          completeBucket();
+        }
+      }
+    }
+  });
+  bucketOverlay.addEventListener("mouseup", function() { _mouseDown = false; });
+
+  // Close on tap if not swiping (tap to cancel)
+  bucketOverlay.addEventListener("click", function(e) {
+    if (e.target === bucketOverlay && _bucketActive && bucketFillLevel === 0) {
+      _bucketActive = false;
+      bucketOverlay.classList.remove("on");
+    }
+  });
+
+  whirlBtn.onclick = openBucket;
+  whirlBtn.addEventListener("touchstart", function(e) {
+    e.preventDefault();
+    getAudioCtx();
+    openBucket();
+  }, { passive: false });
+
+  // Cloud spawning
+  function spawnCloud() {
+    var zone = document.getElementById("cloudZone");
+    if (!zone) return;
+    var cloud = document.createElement("div");
+    cloud.className = "drift-cloud";
+    cloud.textContent = "\u2601\ufe0f";
+    var tapped = false;
+    function tapCloud(e) {
+      if (tapped) return;
+      tapped = true;
+      e.preventDefault();
+      e.stopPropagation();
+      var r = cloud.getBoundingClientRect();
+      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      // Rain splash effect
+      for (var i = 0; i < 5; i++) {
+        var drop = document.createElement("div");
+        drop.className = "cloud-splash";
+        drop.textContent = "\ud83d\udca7";
+        drop.style.cssText = "left:" + (cx - 15 + Math.random() * 30) + "px;top:" + (cy + 10) + "px;animation-delay:" + (i * 0.08) + "s;";
+        document.body.appendChild(drop);
+        setTimeout(function(d) { d.remove(); }, 800, drop);
+      }
+      cloud.style.opacity = "0";
+      cloud.style.transform = "scale(1.5)";
+      setTimeout(function() { cloud.remove(); }, 300);
+      playSound("cloud");
+      addWater(CLOUD_AMOUNT, "+" + CLOUD_AMOUNT + " water from cloud! \u2601\ufe0f");
+    }
+    cloud.addEventListener("click", tapCloud);
+    cloud.addEventListener("touchstart", tapCloud, { passive: false });
+    zone.appendChild(cloud);
+    // Remove after animation ends
+    setTimeout(function() { if (cloud.parentNode) cloud.remove(); }, 8500);
+  }
+
+  // Tick — called every 1s from gameTick or standalone
+  var _waterTickInterval = setInterval(function() {
+    var now = Date.now();
+
+    // Passive trickle (2x speed during rain)
+    var effectiveTrickle = G.weather === "rainy" ? TRICKLE_INTERVAL / 2 : TRICKLE_INTERVAL;
+    var trickleElapsed = now - trickleTimer;
+    if (trickleElapsed >= effectiveTrickle) {
+      trickleTimer = now;
       if (G.water < G.maxWater) {
-        G.water = Math.min(G.maxWater, G.water + 1);
+        G.water++;
         renderDrops();
         saveG();
-        spawnSparkle(window.innerWidth / 2, window.innerHeight * 0.42, "💧");
-        toast(
-          G.water >= G.maxWater
-            ? "Watering can is full! 💧"
-            : `+1 water from spinning! 💧 (${G.water}/${G.maxWater})`,
-          1400,
-        );
-      } else {
-        toast("Watering can is full! 💧", 1200);
       }
-      lbl.textContent =
-        G.water >= G.maxWater
-          ? "Tank full! 💧"
-          : `${G.water}/${G.maxWater} water 💧`;
-    } else {
-      lbl.textContent =
-        G.water >= G.maxWater
-          ? "Tank full! 💧"
-          : `${G.water}/${G.maxWater} water 💧`;
     }
-  }
+    var trickleRemain = Math.max(0, Math.ceil((effectiveTrickle - (now - trickleTimer)) / 1000));
+    if (trickleLabel) {
+      trickleLabel.textContent = G.water >= G.maxWater ? "Full!" : "+1 in " + trickleRemain + "s";
+    }
 
-  // Pointer events — unified touch+mouse, SVG-scoped, no document-level non-passive listener
-  svg.addEventListener(
-    "pointerdown",
-    (e) => {
-      svg.setPointerCapture(e.pointerId);
-      const { cx, cy } = center();
-      lastAngle = angleFrom(cx, cy, e.clientX, e.clientY);
-      tracking = true;
-      e.preventDefault();
-    },
-    { passive: false },
-  );
-  svg.addEventListener("pointermove", (e) => {
-    if (!tracking) return;
-    const { cx, cy } = center();
-    const a = angleFrom(cx, cy, e.clientX, e.clientY);
-    let d = a - lastAngle;
-    if (d > 180) d -= 360;
-    if (d < -180) d += 360;
-    applyDelta(d);
-    lastAngle = a;
-  });
-  svg.addEventListener("pointerup", () => {
-    tracking = false;
-  });
-  svg.addEventListener("pointercancel", () => {
-    tracking = false;
-  });
+    // Whirlpool cooldown UI
+    var cdElapsed = now - whirlLastUsed;
+    var cdPct = Math.min(100, (cdElapsed / WHIRL_COOLDOWN) * 100);
+    if (whirlCdFill) whirlCdFill.style.width = cdPct.toFixed(1) + "%";
+    var ready = cdPct >= 100;
+    whirlBtn.disabled = !ready;
+    if (whirlLabel) whirlLabel.textContent = ready ? "Ready!" : Math.ceil((WHIRL_COOLDOWN - cdElapsed) / 1000) + "s";
+
+    // Cloud spawn
+    if (now >= nextCloudAt) {
+      nextCloudAt = now + CLOUD_INTERVAL_MIN + Math.random() * (CLOUD_INTERVAL_MAX - CLOUD_INTERVAL_MIN);
+      spawnCloud();
+    }
+  }, 1000);
 })();
 
 // ── Wire top-bar buttons via touchstart (most reliable on iOS) ─────────────
 // touchstart+preventDefault fires IMMEDIATELY, kills the 300ms delay,
 // kills ghost clicks, AND prevents scroll-detection interference.
 // onclick stays on the element as the PC/desktop fallback.
+// ══════════════════════════════════════════════════════════
+// NPC FLOWER SHOP SYSTEM
+// ══════════════════════════════════════════════════════════
+const NPC_NAMES = [
+  "Hana","Lily","Rose","Daisy","Iris","Violet","Jasmine","Flora",
+  "Ivy","Poppy","Dahlia","Willow","Sakura","Fern","Sage","Meadow",
+  "Clover","Briar","Azalea","Primrose","Marigold","Wren","Lark","Robin"
+];
+const NPC_AVATARS = ["\ud83d\udc69","\ud83d\udc68","\ud83d\udc75","\ud83d\udc74","\ud83d\udc67","\ud83d\udc66","\ud83e\uddd1","\ud83d\udc71"];
+const NPC_MAX = 3;
+const NPC_SPAWN_MIN = 30000; // 30s minimum between spawns
+const NPC_SPAWN_MAX = 75000; // 75s max
+const NPC_PATIENCE_MIN = 120000; // 2 min
+const NPC_PATIENCE_MAX = 300000; // 5 min
+
+function createNPC() {
+  if (G.npcs.length >= NPC_MAX) return;
+  var allKeys = Object.keys(FLOWERS);
+  var requestKey = allKeys[Math.floor(Math.random() * allKeys.length)];
+  var f = FLOWERS[requestKey];
+  var rarityMult = { common: 1.3, uncommon: 1.6, rare: 2, legendary: 2.5, unique: 3 };
+  var reward = Math.round(f.sell * (rarityMult[f.rarity] || 1.5) * (0.9 + Math.random() * 0.4));
+  var isVip = Math.random() < 0.05; // 5% VIP chance
+  if (isVip) reward = Math.round(f.sell * 5 * (0.9 + Math.random() * 0.3));
+  var npc = {
+    id: G.npcIdCounter++,
+    name: NPC_NAMES[Math.floor(Math.random() * NPC_NAMES.length)],
+    avatar: NPC_AVATARS[Math.floor(Math.random() * NPC_AVATARS.length)],
+    requestKey: requestKey,
+    requestRarity: null,
+    reward: reward,
+    vip: isVip,
+    dialogue: getNPCDialogue(f.name, isVip),
+    spawnedAt: Date.now(),
+    patience: NPC_PATIENCE_MIN + Math.random() * (NPC_PATIENCE_MAX - NPC_PATIENCE_MIN),
+  };
+  if (isVip) { playSound("vip"); haptic(80); }
+  G.npcs.push(npc);
+  saveG();
+  renderNPCs();
+}
+
+function renderNPCs() {
+  var section = document.getElementById("npcSection");
+  if (!section) return;
+  section.textContent = "";
+  if (!G.npcs.length) {
+    var empty = document.createElement("div");
+    empty.className = "npc-empty";
+    empty.textContent = "No customers right now\u2026 they'll arrive soon!";
+    section.appendChild(empty);
+    return;
+  }
+  G.npcs.forEach(function(npc) {
+    var f = FLOWERS[npc.requestKey];
+    if (!f) return;
+    var card = document.createElement("div");
+    card.className = "npc-card" + (npc.vip ? " vip" : "");
+    card.onclick = function() { openNPCSellModal(npc.id); };
+
+    var elapsed = Date.now() - npc.spawnedAt;
+    var pct = Math.max(0, 100 - (elapsed / npc.patience) * 100);
+    var urgent = pct < 25;
+
+    var avatar = document.createElement("div");
+    avatar.className = "npc-avatar";
+    avatar.textContent = npc.avatar;
+    card.appendChild(avatar);
+
+    var info = document.createElement("div");
+    info.className = "npc-info";
+    var name = document.createElement("div");
+    name.className = "npc-name";
+    name.textContent = npc.name;
+    if (npc.vip) {
+      var badge = document.createElement("span");
+      badge.className = "npc-vip-badge";
+      badge.textContent = "VIP";
+      name.appendChild(badge);
+    }
+    info.appendChild(name);
+    var req = document.createElement("div");
+    req.className = "npc-request";
+    req.textContent = "\u201c" + (npc.dialogue || ("I'd love a " + f.name + "!")) + "\u201d";
+    info.appendChild(req);
+    var timer = document.createElement("div");
+    timer.className = "npc-timer";
+    var fill = document.createElement("div");
+    fill.className = "npc-timer-fill" + (urgent ? " urgent" : "");
+    fill.style.width = pct.toFixed(1) + "%";
+    timer.appendChild(fill);
+    info.appendChild(timer);
+    card.appendChild(info);
+
+    var rew = document.createElement("div");
+    rew.className = "npc-reward";
+    var ic = document.createElement("span");
+    ic.className = "ic";
+    ic.textContent = "C";
+    rew.appendChild(ic);
+    rew.appendChild(document.createTextNode(npc.reward));
+    card.appendChild(rew);
+
+    section.appendChild(card);
+  });
+}
+
+function openNPCSellModal(npcId) {
+  var npc = G.npcs.find(function(n) { return n.id === npcId; });
+  if (!npc) return;
+  var f = FLOWERS[npc.requestKey];
+  if (!f) return;
+  var titleEl = document.getElementById("npcSellTitle");
+  titleEl.textContent = npc.name + " wants: " + f.name;
+  var list = document.getElementById("npcSellList");
+  list.textContent = "";
+  // Find matching flowers in inventory
+  var matches = G.inventory.filter(function(item) { return item.key === npc.requestKey; });
+  if (!matches.length) {
+    var noMatch = document.createElement("div");
+    noMatch.className = "tray-empty";
+    noMatch.textContent = "You don't have a " + f.name + " in your Garden House. Grow one and store it!";
+    list.appendChild(noMatch);
+  } else {
+    matches.forEach(function(item) {
+      var row = document.createElement("button");
+      row.className = "plant-row " + f.rarity;
+      var svg = document.createElement("div");
+      svg.className = "pr-svg";
+      svg.innerHTML = flowerSVG(item.key, MAX_STAGE);
+      row.appendChild(svg);
+      var info = document.createElement("div");
+      info.className = "pr-info";
+      var nm = document.createElement("div");
+      nm.className = "pr-name";
+      nm.textContent = f.name;
+      info.appendChild(nm);
+      var sub = document.createElement("div");
+      sub.className = "pr-sub";
+      sub.textContent = "Sell for " + npc.reward + " coins";
+      info.appendChild(sub);
+      row.appendChild(info);
+      var badge = document.createElement("span");
+      badge.className = "pr-badge " + f.rarity;
+      badge.textContent = RARITY_LABEL[f.rarity];
+      row.appendChild(badge);
+      row.onclick = function() { fulfillNPC(npcId, item.uid); };
+      list.appendChild(row);
+    });
+  }
+  openModal("npcSellOverlay");
+}
+
+function fulfillNPC(npcId, uid) {
+  var npcIdx = G.npcs.findIndex(function(n) { return n.id === npcId; });
+  if (npcIdx === -1) return;
+  var npc = G.npcs[npcIdx];
+  var invIdx = G.inventory.findIndex(function(x) { return x.uid === uid; });
+  if (invIdx === -1) return;
+  var f = FLOWERS[G.inventory[invIdx].key];
+  G.inventory.splice(invIdx, 1);
+  G.coins += npc.reward;
+  G.totalCoins += npc.reward;
+  G.totalSold++;
+  G.npcSales++;
+  G.npcStreak++;
+  if (G.npcStreak > G.npcBestStreak) G.npcBestStreak = G.npcStreak;
+  G.npcs.splice(npcIdx, 1);
+  updateHUD();
+  saveG();
+  closeModal("npcSellOverlay");
+  playSound("sale");
+  haptic(50);
+  toast(npc.name + " loved the " + f.name + "! +" + npc.reward + " coins \ud83d\udcb0", 2500);
+  renderNPCs();
+  spawnSparkle(window.innerWidth / 2, window.innerHeight * 0.3, "\u2728");
+  checkAchievements();
+}
+
+function tickNPCs() {
+  var now = Date.now();
+  var changed = false;
+  // Remove expired NPCs
+  G.npcs = G.npcs.filter(function(npc) {
+    if (now - npc.spawnedAt > npc.patience) {
+      G.npcStreak = 0; // streak broken
+      changed = true;
+      return false;
+    }
+    return true;
+  });
+  // Spawn new NPC if timer elapsed
+  if (G.npcs.length < NPC_MAX && now - G.npcTimer > NPC_SPAWN_MIN + Math.random() * (NPC_SPAWN_MAX - NPC_SPAWN_MIN)) {
+    G.npcTimer = now;
+    createNPC();
+    changed = true;
+  }
+  if (changed) {
+    saveG();
+    renderNPCs();
+  } else {
+    renderNPCs(); // update timer bars
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// WEATHER SYSTEM
+// ══════════════════════════════════════════════════════════
+function tickWeather() {
+  var now = Date.now();
+  if (!G.weatherTimer) G.weatherTimer = now;
+  var elapsed = now - G.weatherTimer;
+  var interval = WEATHER_INTERVAL_MIN + Math.random() * (WEATHER_INTERVAL_MAX - WEATHER_INTERVAL_MIN);
+  if (elapsed > interval) {
+    var oldWeather = G.weather;
+    var options = WEATHER_TYPES.filter(function(w) { return w !== oldWeather; });
+    G.weather = options[Math.floor(Math.random() * options.length)];
+    G.weatherTimer = now;
+    saveG();
+    if (G.weather === "rainy" && G.water < G.maxWater) {
+      G.water = Math.min(G.maxWater, G.water + 1);
+      renderDrops();
+      saveG();
+    }
+    playSound("weather");
+    toast("Weather changed: " + WEATHER_LABELS[G.weather], 2000);
+    checkAchievements();
+  }
+  renderWeather();
+}
+
+function renderWeather() {
+  var bar = document.getElementById("weatherBar");
+  if (!bar) return;
+  bar.textContent = WEATHER_LABELS[G.weather] || WEATHER_LABELS.sunny;
+  bar.className = "weather-bar " + (WEATHER_CLASSES[G.weather] || WEATHER_CLASSES.sunny);
+}
+
+// Rain auto-waters: called in game tick
+function rainAutoWater() {
+  if (G.weather !== "rainy") return;
+  if (G.water < G.maxWater) {
+    G.water++;
+    renderDrops();
+    saveG();
+  }
+}
+
+// How many waters needed per stage for current weather
+function watersNeeded() {
+  return G.weather === "drought" ? Math.ceil(STAGE_WATERS * 1.5) : STAGE_WATERS;
+}
+
+// ══════════════════════════════════════════════════════════
+// HYBRIDIZATION
+// ══════════════════════════════════════════════════════════
+var HYBRID_COST_BASE = { common: 30, uncommon: 50, rare: 70, legendary: 90, unique: 120 };
+
+function getAdjacentBloomed(plotIdx) {
+  var col = plotIdx % 3, row = Math.floor(plotIdx / 3);
+  var adj = [];
+  if (col > 0) adj.push(plotIdx - 1);
+  if (col < 2) adj.push(plotIdx + 1);
+  if (row > 0) adj.push(plotIdx - 3);
+  if (plotIdx + 3 < G.plots.length) adj.push(plotIdx + 3);
+  return adj.filter(function(i) { return G.plots[i] && G.plots[i].state === "bloomed"; });
+}
+
+function canHybridize(plotIdx) {
+  if (!G.plots[plotIdx] || G.plots[plotIdx].state !== "bloomed") return false;
+  return getAdjacentBloomed(plotIdx).length > 0;
+}
+
+function openHybridModal(plotIdx) {
+  var content = document.getElementById("hybridContent");
+  content.textContent = "";
+  var p = G.plots[plotIdx];
+  var f1 = FLOWERS[p.key];
+  var adj = getAdjacentBloomed(plotIdx);
+  var desc = document.createElement("p");
+  desc.style.cssText = "font-size:.78em;color:var(--text-secondary);text-align:center;margin-bottom:12px;";
+  var hybCost = Math.max(HYBRID_COST_BASE[f1.rarity] || 30, HYBRID_COST_BASE[FLOWERS[G.plots[adj[0]].key].rarity] || 30);
+  desc.textContent = "Combine " + f1.name + " with a neighbor. Costs " + hybCost + " coins. Both flowers are consumed.";
+  content.appendChild(desc);
+  adj.forEach(function(ai) {
+    var f2 = FLOWERS[G.plots[ai].key];
+    var row = document.createElement("button");
+    row.className = "plant-row " + f2.rarity;
+    var svg = document.createElement("div");
+    svg.className = "pr-svg";
+    svg.innerHTML = flowerSVG(G.plots[ai].key, MAX_STAGE);
+    row.appendChild(svg);
+    var info = document.createElement("div");
+    info.className = "pr-info";
+    var nm = document.createElement("div");
+    nm.className = "pr-name";
+    nm.textContent = f1.name + " \u00d7 " + f2.name;
+    info.appendChild(nm);
+    var sub = document.createElement("div");
+    sub.className = "pr-sub";
+    sub.textContent = "60% new seed \u00b7 30% rare seed \u00b7 10% fail";
+    info.appendChild(sub);
+    row.appendChild(info);
+    row.onclick = function() { doHybridize(plotIdx, ai); };
+    content.appendChild(row);
+  });
+  openModal("hybridOverlay");
+}
+
+function doHybridize(idx1, idx2) {
+  var key1 = G.plots[idx1].key, key2 = G.plots[idx2].key;
+  var f1 = FLOWERS[key1], f2 = FLOWERS[key2];
+  var cost = Math.max(HYBRID_COST_BASE[f1.rarity] || 30, HYBRID_COST_BASE[f2.rarity] || 30);
+  if (G.coins < cost) {
+    toast("Need " + cost + " coins to hybridize!", 2000);
+    return;
+  }
+  G.coins -= cost;
+  // Clear both plots
+  clearPlot(idx1);
+  clearPlot(idx2);
+  playSound("hybrid");
+  haptic(60);
+  var roll = Math.random();
+  if (roll < 0.6) {
+    // Success: seed of one parent's species with other's rarity consideration
+    var parentKey = Math.random() < 0.5 ? key1 : key2;
+    G.seeds.push({ id: G.seedId++, key: parentKey, hybrid: true });
+    G.hybridCount++;
+    toast("Hybrid success! Got a " + FLOWERS[parentKey].name + " seed \ud83e\uddec", 2500);
+  } else if (roll < 0.9) {
+    // Rare seed
+    var rareKeys = Object.keys(FLOWERS).filter(function(k) { return FLOWERS[k].rarity === "rare"; });
+    var rk = rareKeys[Math.floor(Math.random() * rareKeys.length)];
+    G.seeds.push({ id: G.seedId++, key: rk, hybrid: true });
+    G.hybridCount++;
+    toast("Lucky hybrid! Got a rare " + FLOWERS[rk].name + " seed! \u2728", 2500);
+  } else {
+    // Fail — refund coins
+    G.coins += cost;
+    toast("Hybridization failed\u2026 coins refunded \ud83d\ude1e", 2500);
+  }
+  updateHUD();
+  renderTray();
+  renderGarden();
+  saveG();
+  closeModal("hybridOverlay");
+  checkAchievements();
+}
+
+// ══════════════════════════════════════════════════════════
+// FLOWER APPRECIATION
+// ══════════════════════════════════════════════════════════
+function getAppreciatedValue(item) {
+  var f = FLOWERS[item.key];
+  if (!f) return 0;
+  var base = f.sell;
+  var storedAt = item.storedAt || Date.now();
+  var hours = (Date.now() - storedAt) / 3600000;
+  var mult = Math.min(2, 1 + hours * 0.1); // 10% per hour, cap 2x
+  return Math.round(base * mult);
+}
+
+// ══════════════════════════════════════════════════════════
+// ACHIEVEMENT SYSTEM — 40 achievements
+// ══════════════════════════════════════════════════════════
+var ACHIEVEMENTS = [
+  // Growing (1-10)
+  { id:"bloom1", name:"First Bloom", desc:"Bloom your first flower", icon:"\ud83c\udf3c", reward:10, check:function(){return G.totalBlooms>=1;} },
+  { id:"bloom10", name:"Green Thumb", desc:"Bloom 10 flowers", icon:"\ud83c\udf3f", reward:25, check:function(){return G.totalBlooms>=10;} },
+  { id:"bloom50", name:"Master Gardener", desc:"Bloom 50 flowers", icon:"\ud83c\udf3b", reward:50, check:function(){return G.totalBlooms>=50;} },
+  { id:"bloom100", name:"Century Bloom", desc:"Bloom 100 flowers", icon:"\ud83c\udfc6", reward:100, check:function(){return G.totalBlooms>=100;} },
+  { id:"fullgarden", name:"Full Garden", desc:"Fill every pot at once", icon:"\ud83c\udf3a", reward:30, check:function(){return G.plots.every(function(p){return p.state!=="empty";});} },
+  { id:"speed", name:"Speed Bloom", desc:"Have 3+ bloomed at once", icon:"\u26a1", reward:20, check:function(){return G.plots.filter(function(p){return p.state==="bloomed";}).length>=3;} },
+  { id:"patience", name:"Patient Gardener", desc:"Have 6+ pots growing", icon:"\ud83e\uddd1\u200d\ud83c\udf3e", reward:25, check:function(){return G.plots.filter(function(p){return p.state==="growing";}).length>=6;} },
+  { id:"water100", name:"Water Wizard", desc:"Use 100 total waters", icon:"\ud83d\udca7", reward:20, check:function(){return G.totalWaters>=100;} },
+  { id:"droughtbloom", name:"Drought Survivor", desc:"Bloom during drought", icon:"\ud83c\udf35", reward:30, check:function(){return G.weather==="drought"&&G.plots.some(function(p){return p.state==="bloomed";});} },
+  { id:"rainbloom5", name:"Rain Dancer", desc:"Bloom 5+ flowers in rain", icon:"\ud83c\udf27\ufe0f", reward:25, check:function(){return false;} }, // tracked via flag
+  // Collection (11-20)
+  { id:"disc10", name:"Curious", desc:"Discover 10 unique flowers", icon:"\ud83d\udd0d", reward:15, check:function(){return G.discovered.length>=10;} },
+  { id:"disc25", name:"Botanist", desc:"Discover 25 unique flowers", icon:"\ud83c\udf3f", reward:30, check:function(){return G.discovered.length>=25;} },
+  { id:"disc50", name:"Encyclopedist", desc:"Discover 50 flowers", icon:"\ud83d\udcda", reward:50, check:function(){return G.discovered.length>=50;} },
+  { id:"alllegendary", name:"Living Legend", desc:"Discover all legendary flowers", icon:"\ud83c\udf1f", reward:100, check:function(){var ls=Object.keys(FLOWERS).filter(function(k){return FLOWERS[k].rarity==="legendary";});return ls.every(function(k){return G.discovered.includes(k);});} },
+  { id:"unique", name:"One of a Kind", desc:"Discover the unique flower", icon:"\ud83d\udc8e", reward:75, check:function(){return Object.keys(FLOWERS).filter(function(k){return FLOWERS[k].rarity==="unique";}).some(function(k){return G.discovered.includes(k);});} },
+  { id:"rainbow", name:"Rainbow Garden", desc:"Own 5+ different species in inventory", icon:"\ud83c\udf08", reward:20, check:function(){var kinds=new Set(G.inventory.map(function(i){return FLOWERS[i.key].kind;}));return kinds.size>=5;} },
+  { id:"specialist", name:"Species Specialist", desc:"Discover all colors of one species", icon:"\ud83e\uddea", reward:30, check:function(){var byKind={};Object.entries(FLOWERS).forEach(function(e){var k=e[0],v=e[1];byKind[v.kind]=byKind[v.kind]||[];byKind[v.kind].push(k);});return Object.values(byKind).some(function(keys){return keys.length>=3&&keys.every(function(k){return G.discovered.includes(k);});});} },
+  { id:"rare5", name:"Rare Hunter", desc:"Discover 5 rare flowers", icon:"\u2b50", reward:25, check:function(){return G.discovered.filter(function(k){return FLOWERS[k]&&FLOWERS[k].rarity==="rare";}).length>=5;} },
+  { id:"allcommon", name:"Common Collector", desc:"Discover all common flowers", icon:"\ud83c\udfe1", reward:40, check:function(){var cs=Object.keys(FLOWERS).filter(function(k){return FLOWERS[k].rarity==="common";});return cs.every(function(k){return G.discovered.includes(k);});} },
+  { id:"fulljournal", name:"Full Journal", desc:"Discover every flower (100%)", icon:"\ud83d\udcd6", reward:200, check:function(){return G.discovered.length>=Object.keys(FLOWERS).length;} },
+  // Commerce (21-30)
+  { id:"sell1", name:"First Sale", desc:"Sell a flower to an NPC", icon:"\ud83d\udcb0", reward:10, check:function(){return G.npcSales>=1;} },
+  { id:"sell25", name:"Merchant", desc:"Complete 25 NPC sales", icon:"\ud83d\udcb5", reward:30, check:function(){return G.npcSales>=25;} },
+  { id:"coins1000", name:"Tycoon", desc:"Earn 1,000 total coins", icon:"\ud83d\udcb0", reward:50, check:function(){return G.totalCoins>=1000;} },
+  { id:"coins5000", name:"Mogul", desc:"Earn 5,000 total coins", icon:"\ud83d\udc51", reward:100, check:function(){return G.totalCoins>=5000;} },
+  { id:"streak10", name:"Perfect Service", desc:"10 NPC sales in a row", icon:"\ud83c\udf1f", reward:40, check:function(){return G.npcBestStreak>=10;} },
+  { id:"quicksell", name:"Quick Serve", desc:"You're a fast seller!", icon:"\u23f1\ufe0f", reward:15, check:function(){return G.npcSales>=5;} },
+  { id:"appreciate", name:"Big Tipper", desc:"Sell an appreciated flower", icon:"\ud83d\udcc8", reward:20, check:function(){return G.totalSold>=10;} },
+  { id:"legsale", name:"Legendary Sale", desc:"Sell a legendary to NPC", icon:"\u2728", reward:50, check:function(){return false;} }, // tracked via flag
+  { id:"bulk5", name:"Bulk Dealer", desc:"Sell 5 flowers total", icon:"\ud83d\udce6", reward:15, check:function(){return G.totalSold>=5;} },
+  { id:"sell50", name:"Haggler", desc:"Sell 50 flowers total", icon:"\ud83e\udd1d", reward:40, check:function(){return G.totalSold>=50;} },
+  // Garden (31-40)
+  { id:"pot3", name:"Expansion I", desc:"Buy your 3rd pot", icon:"\ud83e\udeb4", reward:15, check:function(){return G.plots.length>=3;} },
+  { id:"pot6", name:"Expansion II", desc:"Buy your 6th pot", icon:"\ud83e\udeb4", reward:30, check:function(){return G.plots.length>=6;} },
+  { id:"pot12", name:"Expansion III", desc:"Unlock all 12 pots", icon:"\ud83c\udf3e", reward:75, check:function(){return G.plots.length>=12;} },
+  { id:"decor1", name:"Decorator", desc:"Unlock a new pot style", icon:"\ud83c\udfa8", reward:20, check:function(){return G.potStyle!=="terracotta";} },
+  { id:"landscape1", name:"Landscape Artist", desc:"Unlock a new background", icon:"\ud83c\udf05", reward:20, check:function(){return G.bgStyle!=="default";} },
+  { id:"luckypkt", name:"Lucky Packet", desc:"Get legendary from common", icon:"\ud83c\udf1f", reward:50, check:function(){return false;} }, // tracked via flag
+  { id:"hybrid1", name:"Hybridizer", desc:"Create your first hybrid", icon:"\ud83e\uddec", reward:20, check:function(){return G.hybridCount>=1;} },
+  { id:"hybrid10", name:"Mad Scientist", desc:"Create 10 hybrids", icon:"\ud83e\uddd1\u200d\ud83d\udd2c", reward:50, check:function(){return G.hybridCount>=10;} },
+  { id:"allweather", name:"Weather Watcher", desc:"Experience all 3 weather types", icon:"\ud83c\udf24\ufe0f", reward:15, check:function(){return false;} }, // tracked via flag
+  { id:"streak7", name:"Dedicated", desc:"Play 7 different days", icon:"\ud83d\udcc5", reward:30, check:function(){return G.daysPlayed.length>=7;} },
+];
+
+function checkAchievements() {
+  var newUnlocks = [];
+  ACHIEVEMENTS.forEach(function(a) {
+    if (G.achievements.includes(a.id)) return;
+    if (a.check()) {
+      G.achievements.push(a.id);
+      G.coins += a.reward;
+      G.totalCoins += a.reward;
+      newUnlocks.push(a);
+    }
+  });
+  if (newUnlocks.length) {
+    updateHUD();
+    saveG();
+    playSound("achieve");
+    haptic(60);
+    newUnlocks.forEach(function(a) {
+      toast("\ud83c\udfc6 " + a.name + "! +" + a.reward + " coins", 3000);
+    });
+  }
+  checkMilestones();
+}
+
+function openAchievementsModal() {
+  var prog = document.getElementById("achieveProg");
+  prog.textContent = G.achievements.length + " / " + ACHIEVEMENTS.length + " unlocked";
+  var grid = document.getElementById("achieveGrid");
+  grid.textContent = "";
+  ACHIEVEMENTS.forEach(function(a) {
+    var unlocked = G.achievements.includes(a.id);
+    var row = document.createElement("div");
+    row.className = "achieve-row " + (unlocked ? "unlocked" : "locked");
+    var icon = document.createElement("div");
+    icon.className = "achieve-icon";
+    icon.textContent = a.icon;
+    row.appendChild(icon);
+    var info = document.createElement("div");
+    info.className = "achieve-info";
+    var name = document.createElement("div");
+    name.className = "achieve-name";
+    name.textContent = unlocked ? a.name : "???";
+    info.appendChild(name);
+    var desc = document.createElement("div");
+    desc.className = "achieve-desc";
+    desc.textContent = a.desc;
+    info.appendChild(desc);
+    row.appendChild(info);
+    var rew = document.createElement("div");
+    rew.className = "achieve-reward";
+    rew.textContent = unlocked ? "\u2705" : "+" + a.reward + "c";
+    row.appendChild(rew);
+    grid.appendChild(row);
+  });
+  openModal("achieveOverlay");
+}
+
+// ══════════════════════════════════════════════════════════
+// COLLECTION MILESTONES
+// ══════════════════════════════════════════════════════════
+var MILESTONES = [
+  { pct: 25, potStyle: "ceramic", bgStyle: null, label: "25% \u2192 Ceramic Pot Style" },
+  { pct: 50, potStyle: null, bgStyle: "garden", label: "50% \u2192 Garden Background" },
+  { pct: 75, potStyle: "golden", bgStyle: null, label: "75% \u2192 Golden Pot Style" },
+  { pct: 100, potStyle: null, bgStyle: "enchanted", label: "100% \u2192 Enchanted Background" },
+];
+
+function getJournalPercent() {
+  return Math.round((G.discovered.length / Object.keys(FLOWERS).length) * 100);
+}
+
+function checkMilestones() {
+  var pct = getJournalPercent();
+  MILESTONES.forEach(function(m) {
+    if (pct >= m.pct) {
+      if (m.potStyle && G.potStyle === "terracotta") {
+        // Don't auto-switch, just unlock
+      }
+      if (m.bgStyle && G.bgStyle === "default") {
+        // Don't auto-switch, just unlock
+      }
+    }
+  });
+}
+
+function isMilestoneUnlocked(m) {
+  return getJournalPercent() >= m.pct;
+}
+
+function renderMilestoneSection() {
+  var section = document.getElementById("milestoneSection");
+  if (!section) return;
+  var pct = getJournalPercent();
+  var wrap = document.createElement("div");
+  wrap.className = "milestone-wrap";
+  var title = document.createElement("div");
+  title.className = "milestone-title";
+  title.textContent = "\ud83c\udfc6 Collection: " + pct + "% \u2014 Milestones";
+  wrap.appendChild(title);
+  MILESTONES.forEach(function(m) {
+    var unlocked = pct >= m.pct;
+    var row = document.createElement("div");
+    row.className = "milestone-row" + (unlocked ? " achieved" : "");
+    var label = document.createElement("span");
+    label.className = "milestone-label";
+    label.textContent = m.label;
+    row.appendChild(label);
+    var status = document.createElement("span");
+    status.className = "milestone-status " + (unlocked ? "done" : "locked");
+    status.textContent = unlocked ? "\u2705 Unlocked" : "\ud83d\udd12 " + m.pct + "%";
+    row.appendChild(status);
+    if (unlocked && (m.potStyle || m.bgStyle)) {
+      var btn = document.createElement("button");
+      btn.className = "btn-compost"; // reuse compost button style
+      btn.style.cssText = "margin-left:8px;font-size:.6em;padding:3px 8px;";
+      if (m.potStyle) {
+        btn.textContent = G.potStyle === m.potStyle ? "\u2713 Active" : "Use Pot";
+        btn.disabled = G.potStyle === m.potStyle;
+        btn.onclick = function() { G.potStyle = m.potStyle; saveG(); renderGarden(); openInventoryModal(); toast("Pot style changed!", 1500); };
+      } else if (m.bgStyle) {
+        btn.textContent = G.bgStyle === m.bgStyle ? "\u2713 Active" : "Use BG";
+        btn.disabled = G.bgStyle === m.bgStyle;
+        btn.onclick = function() { G.bgStyle = m.bgStyle; applyBgStyle(); saveG(); openInventoryModal(); toast("Background changed!", 1500); };
+      }
+      row.appendChild(btn);
+    }
+    wrap.appendChild(row);
+  });
+  section.textContent = "";
+  section.appendChild(wrap);
+}
+
+function applyBgStyle() {
+  var canvas = document.querySelector(".bg-canvas");
+  if (!canvas) return;
+  switch (G.bgStyle) {
+    case "garden":
+      canvas.style.background = "linear-gradient(155deg, #e8f5e9 0%, #c8e6c9 40%, #a5d6a7 100%)";
+      break;
+    case "enchanted":
+      canvas.style.background = "linear-gradient(155deg, #ede7f6 0%, #d1c4e9 30%, #b39ddb 60%, #e8eaf6 100%)";
+      break;
+    default:
+      canvas.style.background = "";
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// GAME TICK — runs every 1s
+// ══════════════════════════════════════════════════════════
+var _rainWaterCounter = 0;
+function gameTick() {
+  tickNPCs();
+  tickWeather();
+  // Rain auto-water every 60 ticks (60s)
+  _rainWaterCounter++;
+  if (_rainWaterCounter >= 60) {
+    _rainWaterCounter = 0;
+    rainAutoWater();
+  }
+  // Track daily play
+  var today = new Date().toISOString().slice(0, 10);
+  if (!G.daysPlayed.includes(today)) {
+    G.daysPlayed.push(today);
+    saveG();
+    checkAchievements();
+  }
+}
+// ══════════════════════════════════════════════════════════
+// AUDIO SYSTEM — procedural Web Audio sounds (no files)
+// ══════════════════════════════════════════════════════════
+var _audioCtx = null;
+var _soundEnabled = true;
+
+function getAudioCtx() {
+  if (!_audioCtx) {
+    try { _audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e) { return null; }
+  }
+  if (_audioCtx.state === "suspended") _audioCtx.resume();
+  return _audioCtx;
+}
+
+function playSound(name) {
+  if (!_soundEnabled) return;
+  var ctx = getAudioCtx();
+  if (!ctx) return;
+  var now = ctx.currentTime;
+  var osc, gain;
+
+  switch(name) {
+    case "water": // realistic water drop — resonant plop with harmonic tail
+      // Main drop: high-pitched sine with fast pitch decay (the "plink")
+      osc = ctx.createOscillator();
+      gain = ctx.createGain();
+      var filter = ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.value = 800;
+      filter.Q.value = 3;
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(1400, now);
+      osc.frequency.exponentialRampToValueAtTime(300, now + 0.06);
+      osc.frequency.exponentialRampToValueAtTime(180, now + 0.2);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.04, now + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      osc.connect(filter).connect(gain).connect(ctx.destination);
+      osc.start(now); osc.stop(now + 0.25);
+      // Resonance bubble: lower sine for the "bloop" body
+      var osc3 = ctx.createOscillator();
+      var gain3 = ctx.createGain();
+      osc3.type = "sine";
+      osc3.frequency.setValueAtTime(280, now + 0.02);
+      osc3.frequency.exponentialRampToValueAtTime(120, now + 0.18);
+      gain3.gain.setValueAtTime(0.06, now + 0.02);
+      gain3.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      osc3.connect(gain3).connect(ctx.destination);
+      osc3.start(now + 0.02); osc3.stop(now + 0.2);
+      break;
+
+    case "bloom":
+      [523, 659, 784].forEach(function(freq, i) {
+        osc = ctx.createOscillator();
+        gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, now + i * 0.1);
+        gain.gain.linearRampToValueAtTime(0.12, now + i * 0.1 + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.3);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + 0.3);
+      });
+      break;
+
+    case "sale":
+      [800, 1000, 1200].forEach(function(freq, i) {
+        osc = ctx.createOscillator();
+        gain = ctx.createGain();
+        osc.type = "square";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.06, now + i * 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.12);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.06); osc.stop(now + i * 0.06 + 0.12);
+      });
+      break;
+
+    case "achieve":
+      [523, 659, 784, 1047].forEach(function(freq, i) {
+        osc = ctx.createOscillator();
+        gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, now + i * 0.12);
+        gain.gain.linearRampToValueAtTime(0.1, now + i * 0.12 + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.35);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.12); osc.stop(now + i * 0.12 + 0.35);
+      });
+      break;
+
+    case "click":
+      osc = ctx.createOscillator();
+      gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = 1200;
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now); osc.stop(now + 0.06);
+      break;
+
+    case "vip":
+      [440, 554, 659, 880].forEach(function(freq, i) {
+        osc = ctx.createOscillator();
+        gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, now + i * 0.15);
+        gain.gain.linearRampToValueAtTime(0.1, now + i * 0.15 + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.15 + 0.4);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.15); osc.stop(now + i * 0.15 + 0.4);
+      });
+      break;
+
+    case "plant": // soft earthy thud
+      osc = ctx.createOscillator();
+      gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(180, now);
+      osc.frequency.exponentialRampToValueAtTime(80, now + 0.15);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now); osc.stop(now + 0.18);
+      break;
+
+    case "packet_common": // gentle pop
+      osc = ctx.createOscillator();
+      gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.exponentialRampToValueAtTime(520, now + 0.1);
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now); osc.stop(now + 0.15);
+      break;
+
+    case "packet_uncommon": // two-note chime
+      [523, 659].forEach(function(freq, i) {
+        osc = ctx.createOscillator();
+        gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.08, now + i * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.2);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + 0.2);
+      });
+      break;
+
+    case "packet_rare": // shimmering three-note arpeggio
+      [587, 740, 880].forEach(function(freq, i) {
+        osc = ctx.createOscillator();
+        gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, now + i * 0.08);
+        gain.gain.linearRampToValueAtTime(0.1, now + i * 0.08 + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.25);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.25);
+      });
+      break;
+
+    case "packet_legendary": // majestic rising four-note fanfare
+      [440, 554, 659, 880].forEach(function(freq, i) {
+        osc = ctx.createOscillator();
+        gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, now + i * 0.1);
+        gain.gain.linearRampToValueAtTime(0.12, now + i * 0.1 + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.35);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + 0.35);
+      });
+      break;
+
+    case "cloud": // rain patter — randomized resonant drips
+      for (var _ri = 0; _ri < 7; _ri++) {
+        (function(delay) {
+          var ro = ctx.createOscillator();
+          var rg = ctx.createGain();
+          var rf = ctx.createBiquadFilter();
+          rf.type = "bandpass";
+          rf.frequency.value = 600 + Math.random() * 800;
+          rf.Q.value = 2 + Math.random() * 3;
+          var sf = 1000 + Math.random() * 800;
+          ro.type = "sine";
+          ro.frequency.setValueAtTime(sf, now + delay);
+          ro.frequency.exponentialRampToValueAtTime(sf * 0.2, now + delay + 0.08);
+          rg.gain.setValueAtTime(0.04 + Math.random() * 0.04, now + delay);
+          rg.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.12);
+          ro.connect(rf).connect(rg).connect(ctx.destination);
+          ro.start(now + delay); ro.stop(now + delay + 0.12);
+        })(_ri * 0.04 + Math.random() * 0.03);
+      }
+      break;
+
+    case "whirlpool": // water pouring — bubbling cascade with splash finale
+      for (var _wi = 0; _wi < 8; _wi++) {
+        (function(idx) {
+          var wo = ctx.createOscillator();
+          var wg = ctx.createGain();
+          var wf = ctx.createBiquadFilter();
+          wf.type = "lowpass";
+          wf.frequency.value = 400 + idx * 80;
+          wf.Q.value = 5;
+          wo.type = "sine";
+          var bf = 200 + Math.random() * 150;
+          wo.frequency.setValueAtTime(bf + 100, now + idx * 0.06);
+          wo.frequency.exponentialRampToValueAtTime(bf * 0.5, now + idx * 0.06 + 0.12);
+          wg.gain.setValueAtTime(0, now + idx * 0.06);
+          wg.gain.linearRampToValueAtTime(0.05, now + idx * 0.06 + 0.02);
+          wg.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.15);
+          wo.connect(wf).connect(wg).connect(ctx.destination);
+          wo.start(now + idx * 0.06); wo.stop(now + idx * 0.06 + 0.15);
+        })(_wi);
+      }
+      // Final splash
+      var _so = ctx.createOscillator();
+      var _sg = ctx.createGain();
+      var _sf = ctx.createBiquadFilter();
+      _sf.type = "bandpass"; _sf.frequency.value = 1200; _sf.Q.value = 4;
+      _so.type = "sine";
+      _so.frequency.setValueAtTime(1600, now + 0.5);
+      _so.frequency.exponentialRampToValueAtTime(300, now + 0.6);
+      _sg.gain.setValueAtTime(0.08, now + 0.5);
+      _sg.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+      _so.connect(_sf).connect(_sg).connect(ctx.destination);
+      _so.start(now + 0.5); _so.stop(now + 0.7);
+      break;
+
+    case "hybrid": // mysterious DNA merge
+      [330, 415, 523, 660].forEach(function(freq, i) {
+        osc = ctx.createOscillator();
+        gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(freq, now + i * 0.12);
+        osc.frequency.linearRampToValueAtTime(freq * 1.05, now + i * 0.12 + 0.3);
+        gain.gain.setValueAtTime(0, now + i * 0.12);
+        gain.gain.linearRampToValueAtTime(0.08, now + i * 0.12 + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.35);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.12); osc.stop(now + i * 0.12 + 0.35);
+      });
+      break;
+
+    case "coins": // jingling coins
+      [1800, 2200, 1600, 2000, 1400].forEach(function(freq, i) {
+        osc = ctx.createOscillator();
+        gain = ctx.createGain();
+        osc.type = "square";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.03, now + i * 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.06);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.04); osc.stop(now + i * 0.04 + 0.06);
+      });
+      break;
+
+    case "weather": // ambient whoosh
+      osc = ctx.createOscillator();
+      gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(150, now);
+      osc.frequency.linearRampToValueAtTime(300, now + 0.3);
+      osc.frequency.linearRampToValueAtTime(100, now + 0.6);
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.06, now + 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now); osc.stop(now + 0.6);
+      break;
+
+    // ── ITEM REVEAL JINGLES (Zelda-style "ta-ra-ram!") ────────
+    case "reveal_common": // simple 2-note pickup: da-ding!
+      [392, 523].forEach(function(freq, i) { // G4 → C5
+        osc = ctx.createOscillator(); gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.12, now + i * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.25);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.12); osc.stop(now + i * 0.12 + 0.25);
+      });
+      break;
+
+    case "reveal_uncommon": // 3-note rising: da-da-ding!
+      [392, 494, 587].forEach(function(freq, i) { // G4 → B4 → D5
+        osc = ctx.createOscillator(); gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.12, now + i * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.3);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + 0.3);
+      });
+      break;
+
+    case "reveal_rare": // 4-note fanfare: ta-da-da-DING!
+      [330, 392, 494, 659].forEach(function(freq, i) { // E4 → G4 → B4 → E5
+        osc = ctx.createOscillator(); gain = ctx.createGain();
+        osc.type = i < 3 ? "triangle" : "sine";
+        osc.frequency.value = freq;
+        var vol = i === 3 ? 0.16 : 0.1;
+        var dur = i === 3 ? 0.5 : 0.2;
+        gain.gain.setValueAtTime(vol, now + i * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + dur);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + dur);
+      });
+      break;
+
+    case "reveal_legendary": // epic 5-note: ta-ra-ra-ra-RAAAAM!! with octave doubling
+      [294, 370, 440, 554, 740].forEach(function(freq, i) { // D4 → F#4 → A4 → C#5 → F#5
+        osc = ctx.createOscillator(); gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        var vol = 0.08 + i * 0.02;
+        var dur = i === 4 ? 0.8 : 0.18;
+        gain.gain.setValueAtTime(vol, now + i * 0.1);
+        if (i === 4) {
+          gain.gain.setValueAtTime(0.18, now + i * 0.1);
+          gain.gain.linearRampToValueAtTime(0.14, now + i * 0.1 + 0.3);
+        }
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + dur);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + dur);
+      });
+      // Octave doubling on final note for fullness
+      osc = ctx.createOscillator(); gain = ctx.createGain();
+      osc.type = "sine"; osc.frequency.value = 1480; // F#6
+      gain.gain.setValueAtTime(0.06, now + 0.4);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.1);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now + 0.4); osc.stop(now + 1.1);
+      break;
+
+    case "reveal_unique": // celestial 6-note ascending with shimmer: the legendary+ reveal
+      [262, 330, 392, 494, 587, 784].forEach(function(freq, i) { // C4→E4→G4→B4→D5→G5
+        osc = ctx.createOscillator(); gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        var vol = 0.07 + i * 0.02;
+        var dur = i === 5 ? 1.0 : 0.16;
+        gain.gain.setValueAtTime(vol, now + i * 0.09);
+        if (i === 5) {
+          gain.gain.setValueAtTime(0.18, now + i * 0.09);
+          gain.gain.linearRampToValueAtTime(0.12, now + i * 0.09 + 0.5);
+        }
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + dur);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.09); osc.stop(now + i * 0.09 + dur);
+      });
+      // Shimmer: two detuned high octaves for ethereal sparkle
+      [1568, 1580].forEach(function(freq, i) {
+        osc = ctx.createOscillator(); gain = ctx.createGain();
+        osc.type = "sine"; osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.04, now + 0.45);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.3);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + 0.45); osc.stop(now + 1.3);
+      });
+      break;
+  }
+}
+
+function haptic(ms) {
+  try { if (navigator.vibrate) navigator.vibrate(ms || 30); } catch(e) {}
+}
+
+// ══════════════════════════════════════════════════════════
+// NIGHT MODE — based on real time
+// ══════════════════════════════════════════════════════════
+function checkNightMode() {
+  var hour = new Date().getHours();
+  var isNight = hour >= 20 || hour < 6;
+  document.body.classList.toggle("night-mode", isNight);
+  // Update weather bar emoji for night
+  var bar = document.getElementById("weatherBar");
+  if (bar && isNight && !bar.textContent.includes("\ud83c\udf19")) {
+    // Keep weather text but add moon indicator
+  }
+  return isNight;
+}
+
+// ══════════════════════════════════════════════════════════
+// PARTICLES — butterflies + pollen (day), fireflies (night)
+// ══════════════════════════════════════════════════════════
+function initParticles() {
+  // Day particles
+  var dayPool = ["\ud83e\udd8b", "\u2727", "\ud83c\udf3e", "\ud83c\udf40"];
+  for (var i = 0; i < 6; i++) {
+    var el = document.createElement("div");
+    el.className = "garden-particle";
+    el.textContent = dayPool[Math.floor(Math.random() * dayPool.length)];
+    var left = 10 + Math.random() * 80;
+    var top = 30 + Math.random() * 50;
+    var dur = 6 + Math.random() * 8;
+    var delay = Math.random() * 10;
+    var size = 0.6 + Math.random() * 0.5;
+    el.style.cssText = "left:" + left + "%;top:" + top + "%;font-size:" + size + "em;animation-duration:" + dur + "s;animation-delay:-" + delay + "s;";
+    el.dataset.dayParticle = "1";
+    document.body.appendChild(el);
+  }
+}
+
+function initFireflies() {
+  for (var i = 0; i < 8; i++) {
+    var el = document.createElement("div");
+    el.className = "firefly";
+    var left = 5 + Math.random() * 90;
+    var dur = 8 + Math.random() * 12;
+    var delay = Math.random() * 15;
+    el.style.cssText = "left:" + left + "%;bottom:10%;animation-duration:" + dur + "s;animation-delay:-" + delay + "s;";
+    el.dataset.firefly = "1";
+    document.body.appendChild(el);
+  }
+}
+
+function updateParticleVisibility() {
+  var isNight = document.body.classList.contains("night-mode");
+  document.querySelectorAll("[data-day-particle]").forEach(function(el) {
+    el.style.display = isNight ? "none" : "";
+  });
+  document.querySelectorAll("[data-firefly]").forEach(function(el) {
+    el.style.display = isNight ? "" : "none";
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// NPC DIALOGUE VARIETY
+// ══════════════════════════════════════════════════════════
+var NPC_DIALOGUES = [
+  "I'd love a {flower}!",
+  "My garden needs a {flower}\u2026",
+  "Do you have a {flower}? I'll pay well!",
+  "A {flower} would make my day!",
+  "I'm looking for a beautiful {flower}",
+  "My partner asked for a {flower} \u2014 help!",
+  "Wedding flowers! Need a {flower}!",
+  "Can I buy a {flower}? Pretty please!",
+  "I've been searching everywhere for a {flower}!",
+  "A little {flower} for my windowsill?",
+];
+var VIP_DIALOGUES = [
+  "I'm a collector \u2014 TOP coin for a {flower}!",
+  "Money is no object. I need a {flower}!",
+  "VIP order: one {flower}, price is yours!",
+];
+
+function getNPCDialogue(flowerName, isVip) {
+  var pool = isVip ? VIP_DIALOGUES : NPC_DIALOGUES;
+  var template = pool[Math.floor(Math.random() * pool.length)];
+  return template.replace("{flower}", flowerName);
+}
+
+// ══════════════════════════════════════════════════════════
+// DAILY LOGIN GIFT
+// ══════════════════════════════════════════════════════════
+function checkDailyLogin() {
+  var today = new Date().toISOString().slice(0, 10);
+  if (G.lastLoginDate === today) return; // already claimed today
+
+  // Calculate streak
+  if (!G.lastLoginDate) {
+    G.loginStreak = 0;
+  } else {
+    var lastDate = new Date(G.lastLoginDate);
+    var todayDate = new Date(today);
+    var diffDays = Math.round((todayDate - lastDate) / 86400000);
+    if (diffDays === 1) {
+      // Consecutive day
+    } else {
+      G.loginStreak = 0; // streak broken
+    }
+  }
+
+  G.loginStreak = (G.loginStreak || 0) + 1;
+  if (G.loginStreak > 7) G.loginStreak = 1; // reset after day 7
+
+  // Determine reward
+  var isDay7 = G.loginStreak === 7;
+  var rewardPkt = isDay7 ? "rare" : "common";
+  var rewardCoins = isDay7 ? 25 : 5 * G.loginStreak;
+
+  // Show login modal
+  showLoginGiftModal(G.loginStreak, rewardPkt, rewardCoins, today);
+}
+
+function showLoginGiftModal(streak, pktType, coins, today) {
+  // Create a standalone overlay (don't reuse tutorial overlay)
+  var overlay = document.createElement("div");
+  overlay.className = "overlay tutorial-overlay on";
+  overlay.style.zIndex = "99998";
+  document.body.appendChild(overlay);
+
+  var content = document.createElement("div");
+  content.className = "login-gift-card";
+
+  var title = document.createElement("div");
+  title.className = "tutorial-title";
+  title.textContent = "\ud83c\udf1f Daily Gift!";
+  content.appendChild(title);
+
+  // Streak dots
+  var dotsWrap = document.createElement("div");
+  dotsWrap.className = "login-streak";
+  for (var i = 1; i <= 7; i++) {
+    var dot = document.createElement("div");
+    dot.className = "streak-dot" + (i < streak ? " filled" : "") + (i === streak ? " today" : "");
+    dot.textContent = i === 7 ? "\u2605" : i;
+    dotsWrap.appendChild(dot);
+  }
+  content.appendChild(dotsWrap);
+
+  var reward = document.createElement("div");
+  reward.className = "login-reward";
+  reward.textContent = (streak === 7 ? "\ud83d\udc8e Rare" : "\ud83d\udce6 Common") + " Packet + " + coins + " coins!";
+  content.appendChild(reward);
+
+  var btn = document.createElement("button");
+  btn.className = "btn-login-claim";
+  btn.textContent = "Claim!";
+  btn.onclick = function() {
+    G.pkt[pktType]++;
+    G.coins += coins;
+    G.totalCoins += coins;
+    G.lastLoginDate = today;
+    updateHUD();
+    saveG();
+    overlay.remove();
+    playSound("achieve");
+    haptic(50);
+    toast("Day " + streak + " gift claimed! " + (streak === 7 ? "\ud83d\udc8e" : "\ud83d\udce6"), 2000);
+  };
+  content.appendChild(btn);
+
+  // Hide tutorial card, show login card
+  overlay.appendChild(content);
+}
+
+// ══════════════════════════════════════════════════════════
+// SHOWCASE — 3-slot flower display
+// ══════════════════════════════════════════════════════════
+function renderShowcase() {
+  var existing = document.querySelector(".showcase-wrap");
+  if (existing) existing.remove();
+
+  if (!G.showcase) G.showcase = [null, null, null];
+
+  var wrap = document.createElement("div");
+  wrap.className = "showcase-wrap";
+  var title = document.createElement("div");
+  title.className = "showcase-title";
+  title.textContent = "\ud83c\udf3a Flower Showcase";
+  wrap.appendChild(title);
+
+  var slots = document.createElement("div");
+  slots.className = "showcase-slots";
+  for (var i = 0; i < 3; i++) {
+    var slot = document.createElement("div");
+    var key = G.showcase ? G.showcase[i] : null;
+    slot.className = "showcase-slot" + (key ? " filled" : "");
+    if (key && FLOWERS[key]) {
+      slot.innerHTML = '<div class="showcase-flower">' + flowerSVG(key, MAX_STAGE) + '</div><div class="showcase-slot-name">' + FLOWERS[key].name + '</div>';
+      (function(idx) {
+        slot.onclick = function() {
+          G.showcase[idx] = null;
+          saveG();
+          renderShowcase();
+          toast("Removed from showcase", 1200);
+        };
+      })(i);
+    } else {
+      var empty = document.createElement("div");
+      empty.className = "showcase-slot-empty";
+      empty.textContent = "+";
+      slot.appendChild(empty);
+      (function(idx) {
+        slot.onclick = function() { openShowcasePicker(idx); };
+      })(i);
+    }
+    slots.appendChild(slot);
+  }
+  wrap.appendChild(slots);
+
+  // Insert before garden grid
+  var grid = document.getElementById("gardenGrid");
+  if (grid && grid.parentNode) {
+    grid.parentNode.insertBefore(wrap, grid);
+  }
+}
+
+function openShowcasePicker(slotIdx) {
+  if (!G.inventory.length && !G.discovered.length) {
+    toast("Discover flowers first!", 1500);
+    return;
+  }
+  // Use the NPC sell modal as a generic picker
+  var titleEl = document.getElementById("npcSellTitle");
+  titleEl.textContent = "Pick a flower for showcase";
+  var list = document.getElementById("npcSellList");
+  list.textContent = "";
+  // Show discovered flowers
+  G.discovered.forEach(function(key) {
+    var f = FLOWERS[key];
+    if (!f) return;
+    var row = document.createElement("button");
+    row.className = "plant-row " + f.rarity;
+    var svg = document.createElement("div");
+    svg.className = "pr-svg";
+    svg.innerHTML = flowerSVG(key, MAX_STAGE);
+    row.appendChild(svg);
+    var info = document.createElement("div");
+    info.className = "pr-info";
+    var nm = document.createElement("div");
+    nm.className = "pr-name";
+    nm.textContent = f.name;
+    info.appendChild(nm);
+    row.appendChild(info);
+    row.onclick = function() {
+      if (!G.showcase) G.showcase = [null, null, null];
+      G.showcase[slotIdx] = key;
+      saveG();
+      closeModal("npcSellOverlay");
+      renderShowcase();
+      playSound("click");
+      toast(f.name + " added to showcase!", 1500);
+    };
+    list.appendChild(row);
+  });
+  openModal("npcSellOverlay");
+}
+
+// ══════════════════════════════════════════════════════════
+// GARDEN COSMETICS
+// ══════════════════════════════════════════════════════════
+var GARDEN_DECORS = [
+  { id: "fence", name: "Wooden Fence", icon: "\ud83c\udf3e", type: "fence" },
+  { id: "birdbath", name: "Bird Bath", icon: "\ud83d\udc26", type: "item", pos: { top: "-20px", right: "12px" } },
+  { id: "gnome", name: "Garden Gnome", icon: "\ud83c\udf44", type: "item", pos: { bottom: "8px", left: "12px" } },
+  { id: "butterfly_jar", name: "Butterfly Jar", icon: "\ud83e\udd8b", type: "item", pos: { top: "-20px", left: "12px" } },
+  { id: "windchime", name: "Wind Chime", icon: "\ud83c\udfb5", type: "item", pos: { top: "-24px", left: "48%" } },
+];
+
+function applyGardenDecor() {
+  // Remove old decor item elements only (not the wrapper or grid)
+  document.querySelectorAll(".garden-decor-item").forEach(function(el) { el.remove(); });
+  var grid = document.getElementById("gardenGrid");
+  var wrapper = document.getElementById("gardenWrap");
+  if (!grid) return;
+  grid.classList.remove("garden-fence");
+
+  if (!G.gardenDecor || !G.gardenDecor.length) return;
+
+  G.gardenDecor.forEach(function(id) {
+    var decor = GARDEN_DECORS.find(function(d) { return d.id === id; });
+    if (!decor) return;
+    if (decor.type === "fence") {
+      grid.classList.add("garden-fence");
+    } else if (decor.type === "item" && decor.pos && wrapper) {
+      var el = document.createElement("div");
+      el.className = "garden-decor-item";
+      el.textContent = decor.icon;
+      Object.assign(el.style, decor.pos);
+      wrapper.appendChild(el);
+    }
+  });
+}
+
+setInterval(gameTick, 1000);
+
+// Night mode check every 60s
+setInterval(function() {
+  checkNightMode();
+  updateParticleVisibility();
+}, 60000);
+
+// ══════════════════════════════════════════════════════════
+// CUSTOMIZE MODAL
+// ══════════════════════════════════════════════════════════
+var POT_STYLES = [
+  { id: "terracotta", name: "Terracotta", icon: "\ud83c\udffa", unlock: "default" },
+  { id: "ceramic", name: "Ceramic", icon: "\ud83e\udd63", unlock: "25% Journal" },
+  { id: "golden", name: "Golden", icon: "\ud83c\udfc6", unlock: "75% Journal" },
+];
+var BG_STYLES = [
+  { id: "default", name: "Parchment", icon: "\ud83d\udcdc", unlock: "default" },
+  { id: "garden", name: "Garden", icon: "\ud83c\udf3f", unlock: "50% Journal" },
+  { id: "enchanted", name: "Enchanted", icon: "\u2728", unlock: "100% Journal" },
+];
+
+function isPotUnlocked(id) {
+  if (id === "terracotta") return true;
+  var pct = getJournalPercent();
+  if (id === "ceramic") return pct >= 25;
+  if (id === "golden") return pct >= 75;
+  return false;
+}
+function isBgUnlocked(id) {
+  if (id === "default") return true;
+  var pct = getJournalPercent();
+  if (id === "garden") return pct >= 50;
+  if (id === "enchanted") return pct >= 100;
+  return false;
+}
+
+function openCustomizeModal() {
+  var content = document.getElementById("customContent");
+  content.textContent = "";
+
+  // Pot styles section
+  var potSec = document.createElement("div");
+  potSec.className = "custom-section";
+  var potTitle = document.createElement("div");
+  potTitle.className = "custom-section-title";
+  potTitle.textContent = "Pot Style";
+  potSec.appendChild(potTitle);
+  var potGrid = document.createElement("div");
+  potGrid.className = "custom-grid";
+  POT_STYLES.forEach(function(ps) {
+    var unlocked = isPotUnlocked(ps.id);
+    var active = G.potStyle === ps.id;
+    var card = document.createElement("div");
+    card.className = "custom-card" + (active ? " active" : "") + (unlocked ? "" : " locked");
+    var icon = document.createElement("div");
+    icon.className = "custom-card-icon";
+    icon.textContent = ps.icon;
+    card.appendChild(icon);
+    var name = document.createElement("div");
+    name.className = "custom-card-name";
+    name.textContent = ps.name;
+    card.appendChild(name);
+    var status = document.createElement("div");
+    status.className = "custom-card-status";
+    status.textContent = active ? "\u2713 Equipped" : unlocked ? "Tap to equip" : "\ud83d\udd12 " + ps.unlock;
+    card.appendChild(status);
+    if (unlocked && !active) {
+      card.onclick = function() {
+        G.potStyle = ps.id;
+        saveG();
+        renderGarden();
+        openCustomizeModal();
+        toast("Pot style: " + ps.name + "!", 1500);
+      };
+    }
+    potGrid.appendChild(card);
+  });
+  potSec.appendChild(potGrid);
+  content.appendChild(potSec);
+
+  // Background section
+  var bgSec = document.createElement("div");
+  bgSec.className = "custom-section";
+  var bgTitle = document.createElement("div");
+  bgTitle.className = "custom-section-title";
+  bgTitle.textContent = "Background";
+  bgSec.appendChild(bgTitle);
+  var bgGrid = document.createElement("div");
+  bgGrid.className = "custom-grid";
+  BG_STYLES.forEach(function(bs) {
+    var unlocked = isBgUnlocked(bs.id);
+    var active = G.bgStyle === bs.id;
+    var card = document.createElement("div");
+    card.className = "custom-card" + (active ? " active" : "") + (unlocked ? "" : " locked");
+    var icon = document.createElement("div");
+    icon.className = "custom-card-icon";
+    icon.textContent = bs.icon;
+    card.appendChild(icon);
+    var name = document.createElement("div");
+    name.className = "custom-card-name";
+    name.textContent = bs.name;
+    card.appendChild(name);
+    var status = document.createElement("div");
+    status.className = "custom-card-status";
+    status.textContent = active ? "\u2713 Equipped" : unlocked ? "Tap to equip" : "\ud83d\udd12 " + bs.unlock;
+    card.appendChild(status);
+    if (unlocked && !active) {
+      card.onclick = function() {
+        G.bgStyle = bs.id;
+        applyBgStyle();
+        saveG();
+        openCustomizeModal();
+        toast("Background: " + bs.name + "!", 1500);
+      };
+    }
+    bgGrid.appendChild(card);
+  });
+  bgSec.appendChild(bgGrid);
+  content.appendChild(bgSec);
+
+  // Garden decorations section
+  var decorSec = document.createElement("div");
+  decorSec.className = "custom-section";
+  var decorTitle = document.createElement("div");
+  decorTitle.className = "custom-section-title";
+  decorTitle.textContent = "Garden Decorations";
+  decorSec.appendChild(decorTitle);
+  var decorGrid = document.createElement("div");
+  decorGrid.className = "custom-grid";
+  GARDEN_DECORS.forEach(function(d) {
+    var equipped = G.gardenDecor && G.gardenDecor.includes(d.id);
+    // Unlock: fence at 3 pots, others at various achievement counts
+    var unlocked = G.achievements && G.achievements.length >= (GARDEN_DECORS.indexOf(d) * 5 + 3);
+    if (d.id === "fence") unlocked = G.plots.length >= 3;
+    var card = document.createElement("div");
+    card.className = "custom-card" + (equipped ? " active" : "") + (unlocked ? "" : " locked");
+    var icon = document.createElement("div");
+    icon.className = "custom-card-icon";
+    icon.textContent = d.icon;
+    card.appendChild(icon);
+    var nm = document.createElement("div");
+    nm.className = "custom-card-name";
+    nm.textContent = d.name;
+    card.appendChild(nm);
+    var st = document.createElement("div");
+    st.className = "custom-card-status";
+    st.textContent = equipped ? "\u2713 Equipped" : unlocked ? "Tap to equip" : "\ud83d\udd12 Locked";
+    card.appendChild(st);
+    if (unlocked) {
+      card.onclick = function() {
+        if (!G.gardenDecor) G.gardenDecor = [];
+        if (equipped) {
+          G.gardenDecor = G.gardenDecor.filter(function(x) { return x !== d.id; });
+          if (d.type === "fence") document.getElementById("gardenGrid").classList.remove("garden-fence");
+        } else {
+          G.gardenDecor.push(d.id);
+        }
+        saveG();
+        applyGardenDecor();
+        openCustomizeModal();
+        playSound("click");
+        toast(equipped ? d.name + " removed" : d.name + " equipped!", 1200);
+      };
+    }
+    decorGrid.appendChild(card);
+  });
+  decorSec.appendChild(decorGrid);
+  content.appendChild(decorSec);
+
+  openModal("customOverlay");
+}
+
+// ══════════════════════════════════════════════════════════
+// TUTORIAL SYSTEM
+// ══════════════════════════════════════════════════════════
+var TUTORIAL_STEPS = [
+  { icon: "\ud83c\udf3a", title: "Welcome to Yurie's Flower Shop!", desc: "Grow beautiful flowers and sell them to visiting customers. Let's learn the basics!" },
+  { icon: "\ud83d\udca7", title: "Water Your Plants", desc: "Water fills automatically over time. Tap the \ud83c\udf0a whirlpool button for a burst, or catch drifting clouds for bonus water!" },
+  { icon: "\ud83d\udc64", title: "NPC Customers", desc: "Customers arrive asking for specific flowers. Tap them to fulfill orders and earn coins \u2014 they pay more than base price!" },
+  { icon: "\u2600\ufe0f", title: "Weather Changes", desc: "Weather shifts between Sunny, Rainy, and Drought. Rain gives free water, drought needs more watering. Plan ahead!" },
+  { icon: "\ud83e\uddec", title: "Hybridize Flowers", desc: "When two bloomed flowers are in adjacent pots, you can hybridize them for a chance at rare new seeds!" },
+  { icon: "\ud83c\udfc6", title: "Achievements & Style", desc: "Earn 40 achievements for coins. Complete your Journal to unlock pot styles and backgrounds in the Style menu!" },
+];
+var _tutStep = 0;
+
+function showTutorial() {
+  if (G.tutorialDone) return;
+  _tutStep = 0;
+  renderTutorialStep();
+  document.getElementById("tutorialOverlay").classList.add("on");
+  document.getElementById("tutorialSkip").onclick = closeTutorial;
+  document.getElementById("tutorialNext").onclick = nextTutorialStep;
+}
+function renderTutorialStep() {
+  var s = TUTORIAL_STEPS[_tutStep];
+  document.getElementById("tutorialStep").textContent = (_tutStep + 1) + "/" + TUTORIAL_STEPS.length;
+  document.getElementById("tutorialIcon").textContent = s.icon;
+  document.getElementById("tutorialTitle").textContent = s.title;
+  document.getElementById("tutorialDesc").textContent = s.desc;
+  var btn = document.getElementById("tutorialNext");
+  btn.textContent = _tutStep === TUTORIAL_STEPS.length - 1 ? "Let's Go!" : "Next";
+}
+function nextTutorialStep() {
+  _tutStep++;
+  if (_tutStep >= TUTORIAL_STEPS.length) {
+    closeTutorial();
+    return;
+  }
+  renderTutorialStep();
+}
+function closeTutorial() {
+  document.getElementById("tutorialOverlay").classList.remove("on");
+  G.tutorialDone = true;
+  saveG();
+  // Show daily login after tutorial
+  setTimeout(function() { checkDailyLogin(); }, 300);
+}
+
 (function wireBtns() {
   const MAP = {
     btnOpenPkt: openPktModal,
     btnJournal: openJournalModal,
     btnShop: openShopModal,
     btnInv: openInventoryModal,
+    btnAchieve: openAchievementsModal,
+    btnCustom: openCustomizeModal,
   };
   Object.entries(MAP).forEach(([id, fn]) => {
     const el = document.getElementById(id);
@@ -3416,8 +5569,10 @@ function weightedRandom(type = "common") {
       function (e) {
         e.preventDefault();
         e.stopPropagation();
+        getAudioCtx(); // unlock AudioContext on first touch (iOS requirement)
         this.classList.add("tapped");
         setTimeout(() => this.classList.remove("tapped"), 150);
+        playSound("click");
         fn();
       },
       { passive: false },
