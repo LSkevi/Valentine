@@ -1,4 +1,5 @@
-﻿let toastTimer;
+﻿console.log("[Garden] game.js loading...");
+let toastTimer;
 const FLOWERS = {
   // ── Common (59) ─────────────────────────────────────────────
   pinkTulip: {
@@ -1505,7 +1506,7 @@ const RARITY_LABEL = {
   rare: "\u2605 Rare",
   legendary: "\u2726 Legendary",
   unique: "\u2726\u2726 Unique \u2726\u2726",
-  hybrid: "\ud83e\uddec Hybrid",
+  hybrid: "\ud83e\uddec Fusion",
 };
 // ── Dynamic Hybrid Name Generator ────────────────────────
 function generateHybridName(name1, name2) {
@@ -1757,7 +1758,9 @@ let G = {
   showcase: [null, null, null],
   gardenDecor: [],
   soundEnabled: true,
-  musicEnabled: false, // off by default — opt-in
+  musicEnabled: true, // on by default
+  musicVolume: 0.045,
+  sfxVolume: 1.0,
   breedDiscovered: [],
   mutations: [],
 };
@@ -1798,6 +1801,8 @@ function saveG() {
     gardenDecor: G.gardenDecor,
     soundEnabled: G.soundEnabled,
     musicEnabled: G.musicEnabled,
+    musicVolume: G.musicVolume,
+    sfxVolume: G.sfxVolume,
     breedDiscovered: G.breedDiscovered,
     mutations: G.mutations,
   };
@@ -1846,6 +1851,8 @@ function loadG() {
       gardenDecor: s.gardenDecor ?? [],
       soundEnabled: s.soundEnabled !== false,
       musicEnabled: s.musicEnabled === true,
+      musicVolume: s.musicVolume ?? 0.045,
+      sfxVolume: s.sfxVolume ?? 1.0,
       breedDiscovered: s.breedDiscovered ?? [],
       mutations: s.mutations ?? [],
     });
@@ -2879,20 +2886,24 @@ loadG();
 initGame();
 
 function initGame() {
-  initPetals();
-  renderGarden();
-  renderTray();
-  renderDrops();
-  updateHUD();
-  updateShopPot();
-  renderNPCs();
-  renderWeather();
-  applyBgStyle();
+  console.log("[Garden] initGame started");
+  try { initPetals(); } catch(e) { console.error("[Garden] initPetals failed:", e); }
+  try { renderGarden(); } catch(e) { console.error("[Garden] renderGarden failed:", e); }
+  try { renderTray(); } catch(e) { console.error("[Garden] renderTray failed:", e); }
+  try { renderDrops(); } catch(e) { console.error("[Garden] renderDrops failed:", e); }
+  try { updateHUD(); } catch(e) { console.error("[Garden] updateHUD failed:", e); }
+  try { updateShopPot(); } catch(e) { console.error("[Garden] updateShopPot failed:", e); }
+  try { renderNPCs(); } catch(e) { console.error("[Garden] renderNPCs failed:", e); }
+  try { renderWeather(); } catch(e) { console.error("[Garden] renderWeather failed:", e); }
+  try { applyBgStyle(); } catch(e) { console.error("[Garden] applyBgStyle failed:", e); }
+  console.log("[Garden] initGame core done");
   // Hide game until title screen dismissed
   document.getElementById("gameScreen").style.display = "none";
 
   // Defer features that depend on later-defined data
   setTimeout(function() {
+    try {
+    console.log("[Garden] deferred init started");
     checkAchievements();
     checkNightMode();
     initParticles();
@@ -2900,43 +2911,181 @@ function initGame() {
     updateParticleVisibility();
     renderShowcase();
     applyGardenDecor();
+    console.log("[Garden] deferred init — wiring buttons");
     _soundEnabled = G.soundEnabled;
     // Wire inline audio buttons (in top-row-stats)
     var soundBtn = document.getElementById("soundBtn");
     if (soundBtn) {
       soundBtn.textContent = _soundEnabled ? "\ud83d\udd0a" : "\ud83d\udd07";
       soundBtn.classList.toggle("active", _soundEnabled);
-      soundBtn.onclick = function() {
-        _soundEnabled = !_soundEnabled;
-        G.soundEnabled = _soundEnabled;
-        soundBtn.textContent = _soundEnabled ? "\ud83d\udd0a" : "\ud83d\udd07";
-        soundBtn.classList.toggle("active", _soundEnabled);
-        saveG();
+      soundBtn.onclick = function(e) {
+        e.stopPropagation();
+        var existing = document.getElementById("sfxVolPopup");
+        if (existing) { existing.remove(); return; }
+        var popup = document.createElement("div");
+        popup.id = "sfxVolPopup";
+        popup.style.cssText = "position:fixed;top:44px;right:10px;background:var(--surface,#fffcf7);border:1.5px solid var(--border,rgba(60,50,40,0.08));border-radius:14px;padding:10px 14px;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:200;display:flex;flex-direction:column;gap:6px;min-width:160px;";
+        var row1 = document.createElement("div");
+        row1.style.cssText = "display:flex;align-items:center;justify-content:space-between;";
+        var lbl = document.createElement("span");
+        lbl.style.cssText = "font-size:0.78em;font-weight:700;color:var(--text,#3a3530);";
+        lbl.textContent = "Sound FX";
+        row1.appendChild(lbl);
+        var tog = document.createElement("button");
+        tog.style.cssText = "padding:4px 12px;border-radius:12px;border:1px solid var(--border,#ccc);font-family:inherit;font-size:0.75em;font-weight:700;cursor:pointer;touch-action:manipulation;background:" + (_soundEnabled ? "var(--primary,#527a5f)" : "var(--surface-alt,#f0ece4)") + ";color:" + (_soundEnabled ? "#fff" : "var(--text-muted,#6e6860)") + ";";
+        tog.textContent = _soundEnabled ? "ON" : "OFF";
+        tog.onclick = function(ev) {
+          ev.stopPropagation();
+          _soundEnabled = !_soundEnabled;
+          G.soundEnabled = _soundEnabled;
+          tog.textContent = _soundEnabled ? "ON" : "OFF";
+          tog.style.background = _soundEnabled ? "var(--primary,#527a5f)" : "var(--surface-alt,#f0ece4)";
+          tog.style.color = _soundEnabled ? "#fff" : "var(--text-muted,#6e6860)";
+          soundBtn.textContent = _soundEnabled ? "\ud83d\udd0a" : "\ud83d\udd07";
+          soundBtn.classList.toggle("active", _soundEnabled);
+          saveG();
+        };
+        row1.appendChild(tog);
+        popup.appendChild(row1);
+        var row2 = document.createElement("div");
+        row2.style.cssText = "display:flex;align-items:center;gap:8px;";
+        var volLbl = document.createElement("span");
+        volLbl.style.cssText = "font-size:0.7em;color:var(--text-muted,#6e6860);";
+        volLbl.textContent = "Vol";
+        row2.appendChild(volLbl);
+        var slider = document.createElement("input");
+        slider.type = "range"; slider.min = "0"; slider.max = "100";
+        slider.value = String(Math.round((G.sfxVolume || 1.0) * 100));
+        slider.style.cssText = "flex:1;accent-color:var(--primary,#527a5f);";
+        slider.oninput = function(ev) {
+          ev.stopPropagation();
+          G.sfxVolume = parseInt(this.value) / 100;
+          if (_sfxGain) _sfxGain.gain.value = G.sfxVolume;
+          saveG();
+        };
+        row2.appendChild(slider);
+        popup.appendChild(row2);
+        document.body.appendChild(popup);
+        setTimeout(function() {
+          function closePopup(ev) {
+            if (!popup.contains(ev.target) && ev.target !== soundBtn) { popup.remove(); document.removeEventListener("click",closePopup); document.removeEventListener("touchstart",closePopup); }
+          }
+          document.addEventListener("click", closePopup);
+          document.addEventListener("touchstart", closePopup);
+        }, 50);
       };
     }
     var musicBtn = document.getElementById("musicBtn");
     if (musicBtn) {
       musicBtn.textContent = "\ud83c\udfb5";
       musicBtn.classList.toggle("active", G.musicEnabled);
-      musicBtn.onclick = function() {
-        _musicEnabled = !_musicEnabled;
-        G.musicEnabled = _musicEnabled;
-        if (_musicEnabled) {
-          startAmbientMusic();
-          updateMusicForWeather();
-        } else {
-          stopAmbientMusic();
+      musicBtn.onclick = function(e) {
+        e.stopPropagation();
+        // Toggle popup slider
+        var existing = document.getElementById("musicVolPopup");
+        if (existing) { existing.remove(); return; }
+        var popup = document.createElement("div");
+        popup.id = "musicVolPopup";
+        popup.style.cssText = "position:fixed;top:44px;right:60px;background:var(--surface,#fffcf7);border:1.5px solid var(--border,rgba(60,50,40,0.08));border-radius:14px;padding:10px 14px;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:200;display:flex;flex-direction:column;gap:6px;min-width:160px;";
+        // On/Off toggle
+        var row1 = document.createElement("div");
+        row1.style.cssText = "display:flex;align-items:center;justify-content:space-between;";
+        var lbl = document.createElement("span");
+        lbl.style.cssText = "font-size:0.78em;font-weight:700;color:var(--text,#3a3530);";
+        lbl.textContent = "Music";
+        row1.appendChild(lbl);
+        var tog = document.createElement("button");
+        tog.style.cssText = "padding:4px 12px;border-radius:12px;border:1px solid var(--border,#ccc);font-family:inherit;font-size:0.75em;font-weight:700;cursor:pointer;touch-action:manipulation;background:" + (_musicEnabled ? "var(--primary,#527a5f)" : "var(--surface-alt,#f0ece4)") + ";color:" + (_musicEnabled ? "#fff" : "var(--text-muted,#6e6860)") + ";";
+        tog.textContent = _musicEnabled ? "ON" : "OFF";
+        tog.onclick = function(ev) {
+          ev.stopPropagation();
+          _musicEnabled = !_musicEnabled;
+          G.musicEnabled = _musicEnabled;
+          if (_musicEnabled) { startAmbientMusic(); updateMusicForWeather(); }
+          else { stopAmbientMusic(); }
+          tog.textContent = _musicEnabled ? "ON" : "OFF";
+          tog.style.background = _musicEnabled ? "var(--primary,#527a5f)" : "var(--surface-alt,#f0ece4)";
+          tog.style.color = _musicEnabled ? "#fff" : "var(--text-muted,#6e6860)";
+          musicBtn.classList.toggle("active", _musicEnabled);
+          saveG();
+        };
+        row1.appendChild(tog);
+        popup.appendChild(row1);
+        // Volume slider
+        var row2 = document.createElement("div");
+        row2.style.cssText = "display:flex;align-items:center;gap:8px;";
+        var volLbl = document.createElement("span");
+        volLbl.style.cssText = "font-size:0.7em;color:var(--text-muted,#6e6860);";
+        volLbl.textContent = "Vol";
+        row2.appendChild(volLbl);
+        var slider = document.createElement("input");
+        slider.type = "range";
+        slider.min = "0"; slider.max = "100";
+        slider.value = String(Math.round((G.musicVolume || 0.045) * 1000));
+        slider.style.cssText = "flex:1;accent-color:var(--primary,#527a5f);";
+        slider.oninput = function(ev) {
+          ev.stopPropagation();
+          var v = parseInt(this.value) / 1000;
+          G.musicVolume = v;
+          if (_musicNodes && _musicNodes.masterGain) _musicNodes.masterGain.gain.value = v;
+          saveG();
+        };
+        row2.appendChild(slider);
+        popup.appendChild(row2);
+        // Song selector row
+        var row3 = document.createElement("div");
+        row3.style.cssText = "display:flex;align-items:center;gap:6px;border-top:1px solid var(--border,rgba(60,50,40,0.08));padding-top:8px;margin-top:4px;";
+        var prevBtn = document.createElement("button");
+        prevBtn.style.cssText = "width:28px;height:28px;border-radius:50%;border:1px solid var(--border,#ccc);background:var(--surface-alt,#f0ece4);font-family:inherit;font-size:0.8em;cursor:pointer;touch-action:manipulation;color:var(--text,#3a3530);";
+        prevBtn.textContent = "\u25c0";
+        var nextBtn = document.createElement("button");
+        nextBtn.style.cssText = prevBtn.style.cssText;
+        nextBtn.textContent = "\u25b6";
+        var songName = document.createElement("span");
+        songName.style.cssText = "flex:1;text-align:center;font-size:0.72em;font-weight:700;color:var(--text,#3a3530);";
+        songName.textContent = SONGS[_currentSongIdx].name;
+        function updateSongDisplay() {
+          songName.textContent = SONGS[_currentSongIdx].name;
+          if (_musicEnabled && _musicNodes) { stopAmbientMusic(); startAmbientMusic(); }
         }
-        musicBtn.classList.toggle("active", _musicEnabled);
-        saveG();
+        prevBtn.onclick = function(ev) {
+          ev.stopPropagation();
+          _currentSongIdx = (_currentSongIdx - 1 + SONGS.length) % SONGS.length;
+          updateSongDisplay();
+        };
+        nextBtn.onclick = function(ev) {
+          ev.stopPropagation();
+          _currentSongIdx = (_currentSongIdx + 1) % SONGS.length;
+          updateSongDisplay();
+        };
+        row3.appendChild(prevBtn);
+        row3.appendChild(songName);
+        row3.appendChild(nextBtn);
+        popup.appendChild(row3);
+        document.body.appendChild(popup);
+        // Close on tap outside
+        setTimeout(function() {
+          function closePopup(ev) {
+            if (!popup.contains(ev.target) && ev.target !== musicBtn) {
+              popup.remove();
+              document.removeEventListener("click", closePopup);
+              document.removeEventListener("touchstart", closePopup);
+            }
+          }
+          document.addEventListener("click", closePopup);
+          document.addEventListener("touchstart", closePopup);
+        }, 50);
       };
     }
 
     // Title screen → Enter button
+    console.log("[Garden] wiring Enter button");
     var titleScreen = document.getElementById("titleScreen");
     var titleBtn = document.getElementById("titleEnter");
+    console.log("[Garden] titleBtn found:", !!titleBtn);
     if (titleBtn) {
       function enterGame() {
+        console.log("[Garden] enterGame called!");
         getAudioCtx(); // unlock audio on first interaction
         // Start ambient music if enabled
         _musicEnabled = G.musicEnabled;
@@ -2960,6 +3109,15 @@ function initGame() {
         e.preventDefault();
         enterGame();
       }, { passive: false });
+    }
+    } catch(err) {
+      console.error("[Garden] initGame deferred error:", err);
+      // Ensure Enter button still works even if setup fails
+      var fb = document.getElementById("titleEnter");
+      if (fb) fb.onclick = function() {
+        document.getElementById("titleScreen").style.display = "none";
+        document.getElementById("gameScreen").style.display = "";
+      };
     }
   }, 0);
 }
@@ -3123,7 +3281,7 @@ function buildPlotCard(p, i) {
         ? "\u2728 " + FLOWERS[p.key].name
         : STAGE_NAMES[p.stage];
   var hybBadge = (p.state === "bloomed" && canHybridize(i))
-    ? '<div class="hybridize-badge">\ud83e\uddec Hybridize!</div>'
+    ? '<div class="hybridize-badge">\ud83e\uddec Fuse!</div>'
     : "";
   div.innerHTML =
     potCardSVG(p) + (lbl ? `<div class="pot-lbl">${lbl}</div>` : "") + hybBadge;
@@ -3463,7 +3621,7 @@ function openBloomModal(i) {
   var sellBtn = document.getElementById("btnSell");
   var canHyb = canHybridize(i);
   if (canHyb) {
-    sellBtn.textContent = "\ud83e\uddec Hybridize with neighbor";
+    sellBtn.textContent = "\ud83e\uddec Fuse with neighbor";
     sellBtn.onclick = function() { closeModal("bloomOverlay"); openHybridModal(i); };
     sellBtn.style.display = "";
   } else {
@@ -3472,7 +3630,7 @@ function openBloomModal(i) {
   document.getElementById("btnStore").onclick = storeFlower;
   document.getElementById("btnLeave").onclick = function() {
     closeModal("bloomOverlay");
-    toast("Left in pot \u2014 hybridize when a neighbor blooms! \ud83c\udf38", 2000);
+    toast("Left in pot \u2014 fuse when a neighbor blooms! \ud83c\udf38", 2000);
   };
   openModal("bloomOverlay");
 }
@@ -3578,7 +3736,7 @@ function getFlowerHint(f) {
     rare: "Rare packet",
     legendary: "Keep opening!",
     unique: "Ultra rare\u2026",
-    hybrid: "Hybridize!",
+    hybrid: "Fuse!",
   };
   return hints[f.rarity] || "???";
 }
@@ -3757,6 +3915,14 @@ function openJournalModal() {
   const unlocked = order.filter((k) => G.discovered.includes(k)).length;
   document.getElementById("jnlProg").textContent =
     `${unlocked} / ${order.length} flowers discovered`;
+  // Fusion Guide button in journal
+  var existingFusionBtn = grid.parentElement.querySelector(".jnl-fusion-btn");
+  if (existingFusionBtn) existingFusionBtn.remove();
+  var fusionBtn = document.createElement("button");
+  fusionBtn.className = "jnl-fusion-btn";
+  fusionBtn.textContent = "\ud83e\uddec Fusion Guide";
+  fusionBtn.onclick = function() { closeModal("journalOverlay"); setTimeout(openBreedGuide, 200); };
+  grid.parentElement.insertBefore(fusionBtn, grid);
   order.forEach((key) => {
     const f = FLOWERS[key];
     const known = G.discovered.includes(key);
@@ -3791,7 +3957,7 @@ function buyPacket(type) {
   G.pkt[type]++;
   updateHUD();
   closeModal("shopOverlay");
-  playSound("coins");
+  playSound("buy");
   saveG();
   toast(`${PKT_ICON[type]} ${PKT_LABEL[type]} Packet bought!`, 1600);
 }
@@ -3816,7 +3982,7 @@ function buyPot() {
   updateHUD();
   renderGarden();
   updateShopPot();
-  playSound("coins");
+  playSound("buy");
   haptic(50);
   saveG();
   toast("New pot added! You now have " + G.plots.length + " pots \ud83c\udf3f", 2000);
@@ -3834,6 +4000,7 @@ function buyWaterUpgrade() {
   updateHUD();
   renderDrops();
   updateShopWater();
+  playSound("buy");
   saveG();
   toast("Water capacity upgraded to " + G.maxWater + "! \ud83d\udca7", 2000);
 }
@@ -4406,32 +4573,93 @@ const NPC_PATIENCE_MAX = 300000; // 5 min
 
 function createNPC() {
   if (G.npcs.length >= NPC_MAX) return;
-  // 70% chance to request something the player has in inventory
-  var requestKey;
+  var requestKey = null;
+  var requestRarity = null;
+  var isMystery = false;
+  var isWildcard = false;
+  var isVip = Math.random() < 0.08;
+
+  // Smart customer system: no spoilers
+  // 70% — ask for a discovered flower from journal
+  // 20% — mystery: ask for an undiscovered flower by rarity silhouette
+  // 10% — wildcard: "any [rarity] flower!"
+  var roll = Math.random();
   var invKeys = G.inventory.map(function(item) { return item.key; });
   var uniqueInvKeys = invKeys.filter(function(k, i) { return invKeys.indexOf(k) === i; });
-  if (uniqueInvKeys.length > 0 && Math.random() < 0.7) {
-    requestKey = uniqueInvKeys[Math.floor(Math.random() * uniqueInvKeys.length)];
+
+  if (roll < 0.70) {
+    // Ask for a discovered flower (prefer from inventory if available)
+    if (uniqueInvKeys.length > 0 && Math.random() < 0.7) {
+      requestKey = uniqueInvKeys[Math.floor(Math.random() * uniqueInvKeys.length)];
+    } else {
+      // From discovered flowers only
+      var discovered = G.discovered.filter(function(k) { return FLOWERS[k] && FLOWERS[k].rarity !== "hybrid"; });
+      if (discovered.length > 0) {
+        requestKey = discovered[Math.floor(Math.random() * discovered.length)];
+      } else {
+        // Fallback for very early game: pick from packet pool flowers
+        var fallback = Object.keys(FLOWERS).filter(function(k) { return FLOWERS[k].rarity === "common" && FLOWERS[k].w > 0; });
+        requestKey = fallback[Math.floor(Math.random() * fallback.length)];
+      }
+    }
+  } else if (roll < 0.90) {
+    // Mystery customer — wants an undiscovered flower, show silhouette
+    var undiscovered = Object.keys(FLOWERS).filter(function(k) {
+      return FLOWERS[k].w > 0 && FLOWERS[k].rarity !== "hybrid" && !G.discovered.includes(k);
+    });
+    if (undiscovered.length > 0) {
+      requestKey = undiscovered[Math.floor(Math.random() * undiscovered.length)];
+      isMystery = true;
+    } else {
+      // All discovered — fall back to discovered
+      var disc = G.discovered.filter(function(k) { return FLOWERS[k] && FLOWERS[k].rarity !== "hybrid"; });
+      requestKey = disc.length > 0 ? disc[Math.floor(Math.random() * disc.length)] : "pinkTulip";
+    }
   } else {
-    // Pick from all non-hybrid flowers (hybrids are too specific)
-    var allKeys = Object.keys(FLOWERS).filter(function(k) { return FLOWERS[k].rarity !== "hybrid"; });
-    requestKey = allKeys[Math.floor(Math.random() * allKeys.length)];
+    // Wildcard customer — "any [rarity] flower!"
+    isWildcard = true;
+    var rarities = ["common", "uncommon"];
+    if (G.discovered.some(function(k) { return FLOWERS[k] && FLOWERS[k].rarity === "rare"; })) rarities.push("rare");
+    if (G.discovered.some(function(k) { return FLOWERS[k] && FLOWERS[k].rarity === "legendary"; })) rarities.push("legendary");
+    requestRarity = rarities[Math.floor(Math.random() * rarities.length)];
+    // Pick a placeholder key for reward calculation
+    var pool = Object.keys(FLOWERS).filter(function(k) { return FLOWERS[k].rarity === requestRarity && FLOWERS[k].w > 0; });
+    requestKey = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : "pinkTulip";
   }
+
   var f = FLOWERS[requestKey];
+  if (!f) { requestKey = "pinkTulip"; f = FLOWERS[requestKey]; }
   var rarityMult = { common: 2.5, uncommon: 3, rare: 4, legendary: 5, unique: 6 };
   var reward = Math.round(f.sell * (rarityMult[f.rarity] || 2.5) * (0.9 + Math.random() * 0.4));
-  var isVip = Math.random() < 0.08; // 8% VIP chance
   if (isVip) reward = Math.round(f.sell * 8 * (0.9 + Math.random() * 0.3));
+  if (isWildcard) reward = Math.round(reward * 0.8); // slightly less for flexibility
+
   var _npcGender = Math.random() < 0.5 ? "f" : "m";
+  var dialogue;
+  if (isWildcard) {
+    var rLabel = RARITY_LABEL[requestRarity] || requestRarity;
+    dialogue = isVip
+      ? "I'll pay top coin for ANY " + rLabel + " flower!"
+      : "I'd love any " + rLabel + " flower you have!";
+  } else if (isMystery) {
+    dialogue = isVip
+      ? "I'm looking for something... mysterious. Surprise me!"
+      : "I heard you might have a rare flower I've never seen\u2026";
+  } else {
+    dialogue = getNPCDialogue(f.name, isVip);
+  }
+
   var npc = {
     id: G.npcIdCounter++,
     name: _npcGender === "f" ? NPC_FEMALE_NAMES[Math.floor(Math.random() * NPC_FEMALE_NAMES.length)] : NPC_MALE_NAMES[Math.floor(Math.random() * NPC_MALE_NAMES.length)],
     avatar: _npcGender === "f" ? NPC_FEMALE_AVATARS[Math.floor(Math.random() * NPC_FEMALE_AVATARS.length)] : NPC_MALE_AVATARS[Math.floor(Math.random() * NPC_MALE_AVATARS.length)],
     requestKey: requestKey,
-    requestRarity: null,
+    requestRarity: requestRarity,
     reward: reward,
     vip: isVip,
-    dialogue: getNPCDialogue(f.name, isVip),
+    mystery: isMystery,
+    wildcard: isWildcard,
+    dialogue: dialogue,
     spawnedAt: Date.now(),
     patience: NPC_PATIENCE_MIN + Math.random() * (NPC_PATIENCE_MAX - NPC_PATIENCE_MIN),
   };
@@ -4493,10 +4721,25 @@ function renderNPCs() {
     info.appendChild(timer);
     card.appendChild(info);
 
-    // Show the flower they want
+    // Show the flower they want (or mystery/wildcard)
     var flowerPreview = document.createElement("div");
-    flowerPreview.style.cssText = "width:36px;height:44px;flex-shrink:0;";
-    flowerPreview.innerHTML = flowerSVG(npc.requestKey, MAX_STAGE);
+    flowerPreview.style.cssText = "width:36px;height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;";
+    if (npc.mystery) {
+      // Silhouette — dark shape with question mark
+      flowerPreview.style.cssText += "font-size:1.5em;color:var(--text-light,#b5aea5);opacity:0.6;";
+      flowerPreview.textContent = "?";
+    } else if (npc.wildcard) {
+      // Rarity icon
+      var rarityIcons = { common: "\ud83c\udf3c", uncommon: "\ud83c\udf39", rare: "\ud83d\udc8e", legendary: "\u2728" };
+      flowerPreview.style.cssText += "font-size:1.3em;";
+      flowerPreview.textContent = rarityIcons[npc.requestRarity] || "\ud83c\udf3a";
+    } else {
+      var svgHtml = flowerSVG(npc.requestKey, MAX_STAGE);
+      var temp = document.createElement("div");
+      temp.style.cssText = "width:36px;height:44px;";
+      temp.insertAdjacentHTML("beforeend", svgHtml);
+      flowerPreview.appendChild(temp);
+    }
     card.appendChild(flowerPreview);
 
     var rew = document.createElement("div");
@@ -4518,29 +4761,49 @@ function openNPCSellModal(npcId) {
   var f = FLOWERS[npc.requestKey];
   if (!f) return;
   var titleEl = document.getElementById("npcSellTitle");
-  titleEl.textContent = npc.name + " wants: " + f.name;
+  if (npc.wildcard) {
+    titleEl.textContent = npc.name + " wants: Any " + (RARITY_LABEL[npc.requestRarity] || npc.requestRarity) + " flower";
+  } else if (npc.mystery) {
+    titleEl.textContent = npc.name + " wants: " + f.name;
+  } else {
+    titleEl.textContent = npc.name + " wants: " + f.name;
+  }
   var list = document.getElementById("npcSellList");
   list.textContent = "";
   // Find matching flowers in inventory
-  var matches = G.inventory.filter(function(item) { return item.key === npc.requestKey; });
+  var matches;
+  if (npc.wildcard) {
+    // Accept any flower of that rarity
+    matches = G.inventory.filter(function(item) { return FLOWERS[item.key] && FLOWERS[item.key].rarity === npc.requestRarity; });
+  } else {
+    matches = G.inventory.filter(function(item) { return item.key === npc.requestKey; });
+  }
   if (!matches.length) {
     var noMatch = document.createElement("div");
     noMatch.className = "tray-empty";
-    noMatch.textContent = "No " + f.name + " in your Garden House. Grow one, let it bloom, tap it and choose Store!";
+    if (npc.wildcard) {
+      noMatch.textContent = "No " + (RARITY_LABEL[npc.requestRarity] || "") + " flowers in your Garden House. Grow and store some!";
+    } else {
+      noMatch.textContent = "No " + f.name + " in your Garden House. Grow one, let it bloom, tap it and choose Store!";
+    }
     list.appendChild(noMatch);
   } else {
     matches.forEach(function(item) {
+      var itemF = FLOWERS[item.key] || f;
       var row = document.createElement("button");
-      row.className = "plant-row " + f.rarity;
+      row.className = "plant-row " + itemF.rarity;
       var svg = document.createElement("div");
       svg.className = "pr-svg";
-      svg.innerHTML = flowerSVG(item.key, MAX_STAGE);
+      var svgHtml = flowerSVG(item.key, MAX_STAGE);
+      var svgTemp = document.createElement("div");
+      svgTemp.insertAdjacentHTML("beforeend", svgHtml);
+      svg.appendChild(svgTemp.firstChild || svgTemp);
       row.appendChild(svg);
       var info = document.createElement("div");
       info.className = "pr-info";
       var nm = document.createElement("div");
       nm.className = "pr-name";
-      nm.textContent = f.name;
+      nm.textContent = itemF.name;
       info.appendChild(nm);
       var sub = document.createElement("div");
       sub.className = "pr-sub";
@@ -4548,8 +4811,8 @@ function openNPCSellModal(npcId) {
       info.appendChild(sub);
       row.appendChild(info);
       var badge = document.createElement("span");
-      badge.className = "pr-badge " + f.rarity;
-      badge.textContent = RARITY_LABEL[f.rarity];
+      badge.className = "pr-badge " + itemF.rarity;
+      badge.textContent = RARITY_LABEL[itemF.rarity];
       row.appendChild(badge);
       row.onclick = function() { fulfillNPC(npcId, item.uid); };
       list.appendChild(row);
@@ -4665,6 +4928,8 @@ function renderWeather() {
   renderWeatherFx();
   // Update ambient music for weather
   updateMusicForWeather();
+  // Rain ambient is SFX, not music
+  updateRainSfx();
 }
 
 // ── Visual Weather FX ────────────────────────────────────
@@ -4679,6 +4944,9 @@ function renderWeatherFx() {
   fx.style.opacity = "0";
   setTimeout(function() {
     while (fx.firstChild) fx.removeChild(fx.firstChild);
+    // Remove sun flare if weather changed from sunny
+    var oldFlare = document.querySelector(".sun-lens-flare");
+    if (oldFlare && w !== "sunny") oldFlare.remove();
     _currentWeatherFx = w;
     if (w === "rainy") {
       for (var i = 0; i < 35; i++) {
@@ -4692,17 +4960,24 @@ function renderWeatherFx() {
         fx.appendChild(drop);
       }
     } else if (w === "sunny") {
-      // Faint diagonal sun rays
-      var rayAngles = [-25, -10, 5, 18, 32, 45];
+      // Diagonal sun rays + lens flare
+      var rayAngles = [-30, -15, 0, 12, 25, 38, 50];
       rayAngles.forEach(function(angle, idx) {
         var ray = document.createElement("div");
         ray.className = "sun-ray";
-        var left = 10 + idx * 15 + (Math.random() * 8);
-        var width = 2 + Math.random() * 2;
-        var delay = idx * 0.6 + Math.random() * 1;
+        var left = 5 + idx * 13 + (Math.random() * 6);
+        var width = 3 + Math.random() * 3;
+        var delay = idx * 0.5 + Math.random() * 0.8;
         ray.style.cssText = "left:" + left + "%;width:" + width + "px;transform:rotate(" + angle + "deg);animation-delay:" + delay + "s;";
         fx.appendChild(ray);
       });
+      // Lens flare on top of everything
+      var oldFlare = document.querySelector(".sun-lens-flare");
+      if (!oldFlare) {
+        var flare = document.createElement("div");
+        flare.className = "sun-lens-flare";
+        document.body.appendChild(flare);
+      }
     } else if (w === "snowy") {
       for (var si = 0; si < 20; si++) {
         var flake = document.createElement("div");
@@ -4766,7 +5041,7 @@ function openHybridModal(plotIdx) {
   var desc = document.createElement("p");
   desc.style.cssText = "font-size:.78em;color:var(--text-secondary);text-align:center;margin-bottom:12px;";
   var hybCost = Math.max(HYBRID_COST_BASE[f1.rarity] || 30, HYBRID_COST_BASE[FLOWERS[G.plots[adj[0]].key].rarity] || 30);
-  desc.textContent = "Combine " + f1.name + " with a neighbor. Costs " + hybCost + " coins. Both flowers are consumed.";
+  desc.textContent = "Fuse " + f1.name + " with a neighbor. Costs " + hybCost + " coins. Both flowers are consumed.";
   content.appendChild(desc);
   adj.forEach(function(ai) {
     var f2 = FLOWERS[G.plots[ai].key];
@@ -4787,19 +5062,19 @@ function openHybridModal(plotIdx) {
     var hasRecipe = !!findBreedRecipe(f1.kind, f2.kind);
     sub.textContent = hasRecipe
       ? "\u2728 Recipe match! \u00b7 5% mutation chance \u00b7 10% fail"
-      : "New hybrid \u00b7 5% mutation chance \u00b7 10% fail";
+      : "New fusion \u00b7 5% mutation chance \u00b7 10% fail";
     info.appendChild(sub);
     row.appendChild(info);
     row.onclick = function() { doHybridize(plotIdx, ai); };
     content.appendChild(row);
   });
-  // Breeding Guide button
+  // Fusion Guide button
   var guideWrap = document.createElement("div");
   guideWrap.className = "breed-btn-wrap";
   var guideBtn = document.createElement("button");
   guideBtn.className = "tbtn tbtn-journal";
   guideBtn.style.cssText = "margin-top:12px;font-size:.78em;padding:8px 16px;";
-  guideBtn.textContent = "\ud83e\uddec Breeding Guide";
+  guideBtn.textContent = "\ud83e\uddec Fusion Guide";
   guideBtn.onclick = function() { closeModal("hybridOverlay"); setTimeout(openBreedGuide, 200); };
   guideWrap.appendChild(guideBtn);
   content.appendChild(guideWrap);
@@ -4812,7 +5087,7 @@ function doHybridize(idx1, idx2) {
   var cost = Math.max(HYBRID_COST_BASE[f1.rarity] || 30, HYBRID_COST_BASE[f2.rarity] || 30);
   if (G.coins < cost) {
     closeModal("hybridOverlay");
-    toast("Not enough coins! Need " + cost + " to hybridize \ud83d\udcb0", 2500);
+    toast("Not enough coins! Need " + cost + " to fuse \ud83d\udcb0", 2500);
     playSound("click");
     return;
   }
@@ -4927,7 +5202,7 @@ function doHybridize(idx1, idx2) {
   } else {
     // Fail — refund coins
     G.coins += cost;
-    toast("Hybridization failed\u2026 coins refunded \ud83d\ude1e", 2500);
+    toast("Fusion failed\u2026 coins refunded \ud83d\ude1e", 2500);
   }
   updateHUD();
   renderTray();
@@ -5097,8 +5372,8 @@ var ACHIEVEMENTS = [
   { id:"decor1", name:"Decorator", desc:"Unlock a new pot style", icon:"\ud83c\udfa8", reward:20, check:function(){return G.potStyle!=="terracotta";} },
   { id:"landscape1", name:"Landscape Artist", desc:"Unlock a new background", icon:"\ud83c\udf05", reward:20, check:function(){return G.bgStyle!=="default";} },
   { id:"luckypkt", name:"Lucky Packet", desc:"Get legendary from common", icon:"\ud83c\udf1f", reward:50, check:function(){return false;} }, // tracked via flag
-  { id:"hybrid1", name:"Hybridizer", desc:"Create your first hybrid", icon:"\ud83e\uddec", reward:20, check:function(){return G.hybridCount>=1;} },
-  { id:"hybrid10", name:"Mad Scientist", desc:"Create 10 hybrids", icon:"\ud83d\udd2c", reward:50, check:function(){return G.hybridCount>=10;} },
+  { id:"hybrid1", name:"First Fusion", desc:"Create your first fusion flower", icon:"\ud83e\uddec", reward:20, check:function(){return G.hybridCount>=1;} },
+  { id:"hybrid10", name:"Mad Scientist", desc:"Create 10 fusion flowers", icon:"\ud83d\udd2c", reward:50, check:function(){return G.hybridCount>=10;} },
   { id:"allweather", name:"Weather Watcher", desc:"Experience all 3 weather types", icon:"\ud83c\udf24\ufe0f", reward:15, check:function(){return false;} }, // tracked via flag
   { id:"streak7", name:"Dedicated", desc:"Play 7 different days", icon:"\ud83d\udcc5", reward:30, check:function(){return G.daysPlayed.length>=7;} },
 ];
@@ -5234,9 +5509,22 @@ function renderMilestoneSection() {
   section.appendChild(wrap);
 }
 
+// Petal pools per background theme
+var BG_PETAL_POOLS = {
+  "default":   ["\ud83c\udf38", "\ud83c\udf37", "\u273f", "\u2740", "\ud83d\udcae", "\ud83c\udf3a"],
+  "garden":    ["\ud83c\udf3f", "\ud83c\udf40", "\ud83c\udf3e", "\ud83c\udf31", "\u2618\ufe0f", "\ud83c\udf3b"],
+  "enchanted": ["\u2728", "\u2b50", "\ud83d\udd2e", "\u2727", "\ud83e\udeb7", "\ud83c\udf1f"],
+  "sunset":    ["\ud83c\udf05", "\ud83c\udf1e", "\u2601\ufe0f", "\ud83e\udda9", "\ud83c\udf3b", "\ud83e\udd8b"],
+  "ocean":     ["\ud83c\udf0a", "\ud83d\udc1a", "\u2693", "\ud83e\uddea", "\ud83c\udf2c\ufe0f", "\ud83d\udc20"],
+  "autumn":    ["\ud83c\udf42", "\ud83c\udf41", "\ud83c\udf44", "\ud83c\udf30", "\ud83e\udda5", "\ud83c\udf43"],
+  "night":     ["\u2b50", "\u2728", "\u2734\ufe0f", "\ud83c\udf1f", "\u00b7", "\u2726"],
+};
+
 function applyBgStyle() {
   var canvas = document.querySelector(".bg-canvas");
   if (!canvas) return;
+  // Remove night class
+  document.body.classList.remove("bg-night");
   switch (G.bgStyle) {
     case "garden":
       canvas.style.background = "linear-gradient(155deg, #e8f5e9 0%, #c8e6c9 40%, #a5d6a7 100%)";
@@ -5244,8 +5532,47 @@ function applyBgStyle() {
     case "enchanted":
       canvas.style.background = "linear-gradient(155deg, #ede7f6 0%, #d1c4e9 30%, #b39ddb 60%, #e8eaf6 100%)";
       break;
+    case "sunset":
+      canvas.style.background = "linear-gradient(155deg, #fff3e0 0%, #ffcc80 30%, #ff8a65 60%, #ef5350 100%)";
+      break;
+    case "ocean":
+      canvas.style.background = "linear-gradient(155deg, #e0f7fa 0%, #80deea 30%, #4dd0e1 60%, #b2ebf2 100%)";
+      break;
+    case "autumn":
+      canvas.style.background = "linear-gradient(155deg, #fff8e1 0%, #ffcc80 30%, #d4a056 60%, #8d6e63 100%)";
+      break;
+    case "night":
+      canvas.style.background = "linear-gradient(155deg, #0d1117 0%, #161b22 30%, #1a1e3a 60%, #0d1117 100%)";
+      document.body.classList.add("bg-night");
+      break;
     default:
       canvas.style.background = "";
+  }
+  // Refresh floating art to match theme
+  refreshPetals();
+}
+
+function refreshPetals() {
+  // Guard: BG_PETAL_POOLS may not be initialized yet during early init
+  if (typeof BG_PETAL_POOLS === "undefined" || !BG_PETAL_POOLS) return;
+  // Remove old petals
+  document.querySelectorAll(".petal").forEach(function(el) { el.remove(); });
+  // Create new ones with theme-appropriate pool
+  var pool = BG_PETAL_POOLS[G.bgStyle] || BG_PETAL_POOLS["default"];
+  var count = G.bgStyle === "night" ? 20 : 14;
+  for (var i = 0; i < count; i++) {
+    var el = document.createElement("div");
+    el.className = "petal";
+    el.textContent = pool[Math.floor(Math.random() * pool.length)];
+    var left = 5 + Math.random() * 90;
+    var dur = G.bgStyle === "night" ? (4 + Math.random() * 6) : (13 + Math.random() * 18);
+    var delay = Math.random() * 20;
+    var size = G.bgStyle === "night" ? (0.3 + Math.random() * 0.5) : (0.7 + Math.random() * 0.8);
+    el.style.cssText = "left:" + left + "%;font-size:" + size + "em;animation-duration:" + dur + "s;animation-delay:-" + delay + "s;";
+    if (G.bgStyle === "night") {
+      el.style.animationName = "twinkle";
+    }
+    document.body.appendChild(el);
   }
 }
 
@@ -5300,6 +5627,7 @@ function gameTick() {
 // ══════════════════════════════════════════════════════════
 var _audioCtx = null;
 var _soundEnabled = true;
+var _sfxGain = null;
 
 function getAudioCtx() {
   if (!_audioCtx) {
@@ -5307,8 +5635,17 @@ function getAudioCtx() {
     catch(e) { return null; }
   }
   if (_audioCtx.state === "suspended") _audioCtx.resume();
+  // Create SFX master gain on first use
+  if (!_sfxGain && _audioCtx) {
+    _sfxGain = _audioCtx.createGain();
+    _sfxGain.gain.value = G.sfxVolume ?? 1.0;
+    _sfxGain.connect(_audioCtx.destination);
+  }
   return _audioCtx;
 }
+
+// SFX output node — all sounds route through this for volume control
+function sfxOut() { return _sfxGain || getAudioCtx().destination; }
 
 function playSound(name) {
   if (!_soundEnabled) return;
@@ -5333,7 +5670,7 @@ function playSound(name) {
       gain.gain.setValueAtTime(0.12, now);
       gain.gain.exponentialRampToValueAtTime(0.04, now + 0.05);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-      osc.connect(filter).connect(gain).connect(ctx.destination);
+      osc.connect(filter).connect(gain).connect(sfxOut());
       osc.start(now); osc.stop(now + 0.25);
       // Resonance bubble: lower sine for the "bloop" body
       var osc3 = ctx.createOscillator();
@@ -5343,7 +5680,7 @@ function playSound(name) {
       osc3.frequency.exponentialRampToValueAtTime(120, now + 0.18);
       gain3.gain.setValueAtTime(0.06, now + 0.02);
       gain3.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-      osc3.connect(gain3).connect(ctx.destination);
+      osc3.connect(gain3).connect(sfxOut());
       osc3.start(now + 0.02); osc3.stop(now + 0.2);
       break;
 
@@ -5356,7 +5693,7 @@ function playSound(name) {
         gain.gain.setValueAtTime(0, now + i * 0.1);
         gain.gain.linearRampToValueAtTime(0.12, now + i * 0.1 + 0.05);
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.3);
-        osc.connect(gain).connect(ctx.destination);
+        osc.connect(gain).connect(sfxOut());
         osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + 0.3);
       });
       break;
@@ -5369,7 +5706,7 @@ function playSound(name) {
         osc.frequency.value = freq;
         gain.gain.setValueAtTime(0.05, now + i * 0.06);
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.12);
-        osc.connect(gain).connect(ctx.destination);
+        osc.connect(gain).connect(sfxOut());
         osc.start(now + i * 0.06); osc.stop(now + i * 0.06 + 0.12);
       });
       break;
@@ -5383,20 +5720,20 @@ function playSound(name) {
         gain.gain.setValueAtTime(0, now + i * 0.12);
         gain.gain.linearRampToValueAtTime(0.1, now + i * 0.12 + 0.04);
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.35);
-        osc.connect(gain).connect(ctx.destination);
+        osc.connect(gain).connect(sfxOut());
         osc.start(now + i * 0.12); osc.stop(now + i * 0.12 + 0.35);
       });
       break;
 
-    case "click":
+    case "click": // soft warm tap
       osc = ctx.createOscillator();
       gain = ctx.createGain();
       osc.type = "sine";
-      osc.frequency.value = 1200;
-      gain.gain.setValueAtTime(0.08, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(now); osc.stop(now + 0.06);
+      osc.frequency.value = 600;
+      gain.gain.setValueAtTime(0.06, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      osc.connect(gain).connect(sfxOut());
+      osc.start(now); osc.stop(now + 0.1);
       break;
 
     case "vip":
@@ -5408,7 +5745,7 @@ function playSound(name) {
         gain.gain.setValueAtTime(0, now + i * 0.15);
         gain.gain.linearRampToValueAtTime(0.1, now + i * 0.15 + 0.05);
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.15 + 0.4);
-        osc.connect(gain).connect(ctx.destination);
+        osc.connect(gain).connect(sfxOut());
         osc.start(now + i * 0.15); osc.stop(now + i * 0.15 + 0.4);
       });
       break;
@@ -5421,7 +5758,7 @@ function playSound(name) {
       osc.frequency.exponentialRampToValueAtTime(80, now + 0.15);
       gain.gain.setValueAtTime(0.12, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-      osc.connect(gain).connect(ctx.destination);
+      osc.connect(gain).connect(sfxOut());
       osc.start(now); osc.stop(now + 0.18);
       break;
 
@@ -5433,7 +5770,7 @@ function playSound(name) {
       osc.frequency.exponentialRampToValueAtTime(520, now + 0.1);
       gain.gain.setValueAtTime(0.1, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-      osc.connect(gain).connect(ctx.destination);
+      osc.connect(gain).connect(sfxOut());
       osc.start(now); osc.stop(now + 0.15);
       break;
 
@@ -5445,7 +5782,7 @@ function playSound(name) {
         osc.frequency.value = freq;
         gain.gain.setValueAtTime(0.08, now + i * 0.1);
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.2);
-        osc.connect(gain).connect(ctx.destination);
+        osc.connect(gain).connect(sfxOut());
         osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + 0.2);
       });
       break;
@@ -5459,7 +5796,7 @@ function playSound(name) {
         gain.gain.setValueAtTime(0, now + i * 0.08);
         gain.gain.linearRampToValueAtTime(0.1, now + i * 0.08 + 0.03);
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.25);
-        osc.connect(gain).connect(ctx.destination);
+        osc.connect(gain).connect(sfxOut());
         osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.25);
       });
       break;
@@ -5473,7 +5810,7 @@ function playSound(name) {
         gain.gain.setValueAtTime(0, now + i * 0.1);
         gain.gain.linearRampToValueAtTime(0.12, now + i * 0.1 + 0.04);
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.35);
-        osc.connect(gain).connect(ctx.destination);
+        osc.connect(gain).connect(sfxOut());
         osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + 0.35);
       });
       break;
@@ -5493,7 +5830,7 @@ function playSound(name) {
           ro.frequency.exponentialRampToValueAtTime(sf * 0.2, now + delay + 0.08);
           rg.gain.setValueAtTime(0.04 + Math.random() * 0.04, now + delay);
           rg.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.12);
-          ro.connect(rf).connect(rg).connect(ctx.destination);
+          ro.connect(rf).connect(rg).connect(sfxOut());
           ro.start(now + delay); ro.stop(now + delay + 0.12);
         })(_ri * 0.04 + Math.random() * 0.03);
       }
@@ -5515,7 +5852,7 @@ function playSound(name) {
           wg.gain.setValueAtTime(0, now + idx * 0.06);
           wg.gain.linearRampToValueAtTime(0.05, now + idx * 0.06 + 0.02);
           wg.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.15);
-          wo.connect(wf).connect(wg).connect(ctx.destination);
+          wo.connect(wf).connect(wg).connect(sfxOut());
           wo.start(now + idx * 0.06); wo.stop(now + idx * 0.06 + 0.15);
         })(_wi);
       }
@@ -5529,7 +5866,7 @@ function playSound(name) {
       _so.frequency.exponentialRampToValueAtTime(300, now + 0.6);
       _sg.gain.setValueAtTime(0.08, now + 0.5);
       _sg.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
-      _so.connect(_sf).connect(_sg).connect(ctx.destination);
+      _so.connect(_sf).connect(_sg).connect(sfxOut());
       _so.start(now + 0.5); _so.stop(now + 0.7);
       break;
 
@@ -5543,21 +5880,21 @@ function playSound(name) {
         gain.gain.setValueAtTime(0, now + i * 0.12);
         gain.gain.linearRampToValueAtTime(0.08, now + i * 0.12 + 0.05);
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.35);
-        osc.connect(gain).connect(ctx.destination);
+        osc.connect(gain).connect(sfxOut());
         osc.start(now + i * 0.12); osc.stop(now + i * 0.12 + 0.35);
       });
       break;
 
-    case "coins": // jingling coins
-      [1800, 2200, 1600, 2000, 1400].forEach(function(freq, i) {
+    case "coins": // soft coin jingle
+      [600, 700, 650, 750, 500].forEach(function(freq, i) {
         osc = ctx.createOscillator();
         gain = ctx.createGain();
-        osc.type = "square";
+        osc.type = "triangle";
         osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.03, now + i * 0.04);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.06);
-        osc.connect(gain).connect(ctx.destination);
-        osc.start(now + i * 0.04); osc.stop(now + i * 0.04 + 0.06);
+        gain.gain.setValueAtTime(0.04, now + i * 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.1);
+        osc.connect(gain).connect(sfxOut());
+        osc.start(now + i * 0.05); osc.stop(now + i * 0.05 + 0.1);
       });
       break;
 
@@ -5571,7 +5908,7 @@ function playSound(name) {
       gain.gain.setValueAtTime(0, now);
       gain.gain.linearRampToValueAtTime(0.06, now + 0.15);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-      osc.connect(gain).connect(ctx.destination);
+      osc.connect(gain).connect(sfxOut());
       osc.start(now); osc.stop(now + 0.6);
       break;
 
@@ -5583,7 +5920,7 @@ function playSound(name) {
         osc.frequency.value = freq;
         gain.gain.setValueAtTime(0.12, now + i * 0.12);
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.25);
-        osc.connect(gain).connect(ctx.destination);
+        osc.connect(gain).connect(sfxOut());
         osc.start(now + i * 0.12); osc.stop(now + i * 0.12 + 0.25);
       });
       break;
@@ -5595,7 +5932,7 @@ function playSound(name) {
         osc.frequency.value = freq;
         gain.gain.setValueAtTime(0.12, now + i * 0.1);
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.3);
-        osc.connect(gain).connect(ctx.destination);
+        osc.connect(gain).connect(sfxOut());
         osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + 0.3);
       });
       break;
@@ -5609,7 +5946,7 @@ function playSound(name) {
         var dur = i === 3 ? 0.5 : 0.2;
         gain.gain.setValueAtTime(vol, now + i * 0.1);
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + dur);
-        osc.connect(gain).connect(ctx.destination);
+        osc.connect(gain).connect(sfxOut());
         osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + dur);
       });
       break;
@@ -5627,7 +5964,7 @@ function playSound(name) {
           gain.gain.linearRampToValueAtTime(0.14, now + i * 0.1 + 0.3);
         }
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + dur);
-        osc.connect(gain).connect(ctx.destination);
+        osc.connect(gain).connect(sfxOut());
         osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + dur);
       });
       // Octave doubling on final note for fullness
@@ -5635,7 +5972,7 @@ function playSound(name) {
       osc.type = "sine"; osc.frequency.value = 1480; // F#6
       gain.gain.setValueAtTime(0.06, now + 0.4);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 1.1);
-      osc.connect(gain).connect(ctx.destination);
+      osc.connect(gain).connect(sfxOut());
       osc.start(now + 0.4); osc.stop(now + 1.1);
       break;
 
@@ -5648,7 +5985,7 @@ function playSound(name) {
         gain.gain.setValueAtTime(0, now + i * 0.08);
         gain.gain.linearRampToValueAtTime(0.1, now + i * 0.08 + 0.03);
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.25);
-        osc.connect(gain).connect(ctx.destination);
+        osc.connect(gain).connect(sfxOut());
         osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.25);
       });
       break;
@@ -5666,7 +6003,7 @@ function playSound(name) {
           gain.gain.linearRampToValueAtTime(0.12, now + i * 0.09 + 0.5);
         }
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + dur);
-        osc.connect(gain).connect(ctx.destination);
+        osc.connect(gain).connect(sfxOut());
         osc.start(now + i * 0.09); osc.stop(now + i * 0.09 + dur);
       });
       // Shimmer: two detuned high octaves for ethereal sparkle
@@ -5675,7 +6012,7 @@ function playSound(name) {
         osc.type = "sine"; osc.frequency.value = freq;
         gain.gain.setValueAtTime(0.04, now + 0.45);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 1.3);
-        osc.connect(gain).connect(ctx.destination);
+        osc.connect(gain).connect(sfxOut());
         osc.start(now + 0.45); osc.stop(now + 1.3);
       });
       break;
@@ -5690,7 +6027,7 @@ function playSound(name) {
       osc.frequency.exponentialRampToValueAtTime(800, now + 0.3);
       gain.gain.setValueAtTime(0.08, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-      osc.connect(frostFilter).connect(gain).connect(ctx.destination);
+      osc.connect(frostFilter).connect(gain).connect(sfxOut());
       osc.start(now); osc.stop(now + 0.35);
       break;
 
@@ -5703,20 +6040,33 @@ function playSound(name) {
         osc.frequency.linearRampToValueAtTime(freq * (i % 2 === 0 ? 1.03 : 0.97), now + 0.3);
         gain.gain.setValueAtTime(0.06, now + (i < 2 ? 0 : 0.1));
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-        osc.connect(gain).connect(ctx.destination);
+        osc.connect(gain).connect(sfxOut());
         osc.start(now + (i < 2 ? 0 : 0.1)); osc.stop(now + 0.4);
       });
       break;
 
-    case "coin_clink": // single metallic ping
+    case "coin_clink": // soft coin sound
       osc = ctx.createOscillator();
       gain = ctx.createGain();
-      osc.type = "square";
-      osc.frequency.value = 2000;
-      gain.gain.setValueAtTime(0.04, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(now); osc.stop(now + 0.08);
+      osc.type = "triangle";
+      osc.frequency.value = 800;
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      osc.connect(gain).connect(sfxOut());
+      osc.start(now); osc.stop(now + 0.12);
+      break;
+
+    case "buy": // warm ascending chime (same feel as sale)
+      [330, 440, 523].forEach(function(freq, i) {
+        osc = ctx.createOscillator();
+        gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.06, now + i * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.18);
+        osc.connect(gain).connect(sfxOut());
+        osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.18);
+      });
       break;
 
     case "packet_tear": // short noise burst (paper tearing)
@@ -5731,7 +6081,7 @@ function playSound(name) {
       gain = ctx.createGain();
       gain.gain.setValueAtTime(0.1, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-      noise.connect(tearFilter).connect(gain).connect(ctx.destination);
+      noise.connect(tearFilter).connect(gain).connect(sfxOut());
       noise.start(now); noise.stop(now + 0.08);
       break;
   }
@@ -5760,83 +6110,102 @@ var PENTA_HIGH = [523.3, 587.3, 659.3, 784, 880];       // C5-A5
 
 // ── 5 MUSIC MOODS — rotate every 5 minutes ──────────────
 // Each mood has its own chords, progressions, melody patterns, and tempo feel
-var MUSIC_MOODS = [
-  { // Mood 0: Morning Garden — bright C major, uplifting
-    name: "morning",
-    chords: [
-      { pad: [130.8, 196, 261.6, 329.6], bass: 65.4 },   // C
-      { pad: [110, 164.8, 220, 329.6],   bass: 55 },     // Am
-      { pad: [87.3, 130.8, 174.6, 261.6], bass: 87.3 },  // F
-      { pad: [98, 146.8, 196, 293.7],     bass: 49 },    // G
-    ],
-    progs: [[0,2,1,3],[0,3,1,2],[0,1,2,3]],
-    melodies: [[0,2,4,3,2],[0,1,3,2,4],[2,0,3,1,4]],
-    beatMs: 750,
-  },
-  { // Mood 1: Afternoon Breeze — G major, gentle and airy
-    name: "afternoon",
-    chords: [
-      { pad: [98, 146.8, 196, 246.9],    bass: 49 },     // G
-      { pad: [130.8, 164.8, 196, 261.6], bass: 65.4 },   // C/G
-      { pad: [82.4, 123.5, 164.8, 196],  bass: 82.4 },   // Em
-      { pad: [73.4, 110, 146.8, 196],    bass: 73.4 },   // D
-    ],
-    progs: [[0,1,2,3],[0,2,1,0],[2,3,0,1]],
-    melodies: [[4,3,2,0,1],[2,2,3,4,3,2,0],[0,4,2,3,1]],
-    beatMs: 800,
-  },
-  { // Mood 2: Twilight — A minor, dreamy and melancholic
-    name: "twilight",
-    chords: [
-      { pad: [110, 164.8, 220, 261.6],   bass: 55 },     // Am
-      { pad: [87.3, 130.8, 174.6, 220],  bass: 87.3 },   // F
-      { pad: [130.8, 164.8, 196, 261.6], bass: 65.4 },   // C
-      { pad: [82.4, 123.5, 164.8, 246.9],bass: 82.4 },   // Em
-    ],
-    progs: [[0,1,2,3],[0,3,1,2],[2,0,1,3]],
-    melodies: [[4,3,4,2,1,0],[0,1,0,2,3,2],[3,2,0,1,2,4]],
-    beatMs: 850,
-  },
-  { // Mood 3: Rainy Day — F major, cozy and warm
-    name: "rainy",
-    chords: [
-      { pad: [87.3, 130.8, 174.6, 220],  bass: 87.3 },   // F
-      { pad: [130.8, 164.8, 196, 261.6], bass: 65.4 },   // C
-      { pad: [73.4, 110, 146.8, 220],    bass: 73.4 },   // Dm
-      { pad: [87.3, 116.5, 174.6, 220],  bass: 58.3 },   // Bb
-    ],
-    progs: [[0,1,2,3],[0,2,1,0],[2,0,3,1]],
-    melodies: [[0,1,0,2,1,0],[2,1,3,2,0],[0,2,1,0,1,2,3]],
-    beatMs: 900,
-  },
-  { // Mood 4: Starlight — Em, ethereal and spacious
-    name: "starlight",
-    chords: [
-      { pad: [82.4, 123.5, 164.8, 246.9],bass: 82.4 },   // Em
-      { pad: [130.8, 164.8, 196, 261.6], bass: 65.4 },   // C
-      { pad: [98, 123.5, 164.8, 196],    bass: 49 },     // G/B
-      { pad: [73.4, 110, 146.8, 220],    bass: 73.4 },   // D
-    ],
-    progs: [[0,1,2,3],[0,2,3,1],[2,0,1,3]],
-    melodies: [[4,3,2,4,3,1,0],[0,2,4,2,0],[3,4,2,1,0,2]],
-    beatMs: 820,
-  },
+// ── 10 NAMED SONGS — each has chords, progressions, melodies, tempo ──
+// Songs rotate their internal progs/melodies every 30s for 2+ min variety
+var SONGS = [
+  { id: 0, name: "Groovy Garden", weather: "sunny", chords: [
+    { pad: [98,146.8,196,246.9], bass: 49 },       // G
+    { pad: [130.8,196,261.6,329.6], bass: 65.4 },  // C
+    { pad: [73.4,110,146.8,220], bass: 73.4 },     // D
+    { pad: [82.4,123.5,164.8,196], bass: 82.4 },   // Em
+  ], progs:[[0,1,2,3],[0,3,2,1],[2,0,1,3],[1,2,0,3]], melodies:[[0,2,4,2,3,4,2],[2,4,3,1,0,2,4],[0,1,2,4,3,2,1,0],[4,2,0,1,3,4,2]], beatMs: 700 },
+
+  { id: 1, name: "Morning Dew", weather: "sunny", chords: [
+    { pad: [130.8,196,261.6,329.6], bass: 65.4 },  // C
+    { pad: [98,146.8,196,293.7], bass: 49 },       // G
+    { pad: [110,164.8,220,329.6], bass: 55 },      // Am
+    { pad: [87.3,130.8,174.6,261.6], bass: 87.3 }, // F
+  ], progs:[[0,1,2,3],[0,2,3,1],[2,0,1,3],[3,2,1,0]], melodies:[[4,3,4,2,3,1,0],[0,1,3,4,3,2,0],[2,3,4,3,2,0,1],[0,4,2,3,1,2,4]], beatMs: 720 },
+
+  { id: 2, name: "Sunflower Waltz", weather: "sunny", chords: [
+    { pad: [73.4,110,146.8,220], bass: 73.4 },     // D
+    { pad: [98,146.8,196,246.9], bass: 49 },       // G
+    { pad: [130.8,164.8,196,261.6], bass: 65.4 },  // C
+    { pad: [82.4,123.5,164.8,246.9], bass: 82.4 }, // Em
+  ], progs:[[0,1,2,3],[2,0,1,3],[1,3,0,2]], melodies:[[2,3,4,3,2,0,1],[0,4,2,3,4,2,1],[1,0,2,4,3,2,0,1]], beatMs: 750 },
+
+  { id: 3, name: "Yurie's Garden", weather: "any", chords: [
+    { pad: [130.8,196,261.6,329.6], bass: 65.4 },  // C
+    { pad: [110,164.8,220,329.6], bass: 55 },      // Am
+    { pad: [87.3,130.8,174.6,261.6], bass: 87.3 }, // F
+    { pad: [98,146.8,196,293.7], bass: 49 },       // G
+  ], progs:[[0,2,1,3],[0,3,1,2],[0,1,2,3],[2,0,3,1]], melodies:[[0,2,4,3,2],[0,1,3,2,4],[2,0,3,1,4],[4,3,2,0,1,3]], beatMs: 780 },
+
+  { id: 4, name: "Rainy Lullaby", weather: "rainy", chords: [
+    { pad: [87.3,130.8,174.6,220], bass: 87.3 },   // F
+    { pad: [130.8,164.8,196,261.6], bass: 65.4 },  // C
+    { pad: [73.4,110,146.8,220], bass: 73.4 },     // Dm
+    { pad: [87.3,116.5,174.6,220], bass: 58.3 },   // Bb
+  ], progs:[[0,1,2,3],[0,2,1,0],[2,0,3,1],[1,3,0,2]], melodies:[[0,1,0,2,1,0],[2,1,3,2,0],[0,2,1,0,1,2,3],[3,2,1,0,2,1]], beatMs: 900 },
+
+  { id: 5, name: "Twilight Walk", weather: "any", chords: [
+    { pad: [110,164.8,220,261.6], bass: 55 },      // Am
+    { pad: [87.3,130.8,174.6,220], bass: 87.3 },   // F
+    { pad: [130.8,164.8,196,261.6], bass: 65.4 },  // C
+    { pad: [82.4,123.5,164.8,246.9], bass: 82.4 }, // Em
+  ], progs:[[0,1,2,3],[0,3,1,2],[2,0,1,3],[3,1,2,0]], melodies:[[4,3,4,2,1,0],[0,1,0,2,3,2],[3,2,0,1,2,4],[0,2,4,3,1,0]], beatMs: 850 },
+
+  { id: 6, name: "Starlight Sonata", weather: "any", chords: [
+    { pad: [82.4,123.5,164.8,246.9], bass: 82.4 }, // Em
+    { pad: [130.8,164.8,196,261.6], bass: 65.4 },  // C
+    { pad: [98,123.5,164.8,196], bass: 49 },       // G/B
+    { pad: [73.4,110,146.8,220], bass: 73.4 },     // D
+  ], progs:[[0,1,2,3],[0,2,3,1],[2,0,1,3],[3,2,0,1]], melodies:[[4,3,2,4,3,1,0],[0,2,4,2,0],[3,4,2,1,0,2],[1,3,4,2,0,1,3]], beatMs: 820 },
+
+  { id: 7, name: "Drought Blues", weather: "drought", chords: [
+    { pad: [110,164.8,220,261.6], bass: 55 },      // Am
+    { pad: [73.4,110,146.8,220], bass: 73.4 },     // Dm
+    { pad: [82.4,123.5,164.8,246.9], bass: 82.4 }, // Em
+    { pad: [110,130.8,164.8,196], bass: 55 },      // Am7
+  ], progs:[[0,1,2,3],[0,2,1,0],[3,1,0,2]], melodies:[[0,1,0,2,0,1],[2,1,0,2,3,2,1],[0,0,2,1,0,3,2],[4,3,2,1,0,1,2]], beatMs: 880 },
+
+  { id: 8, name: "Snowfall Waltz", weather: "snowy", chords: [
+    { pad: [130.8,164.8,196,261.6], bass: 65.4 },  // C
+    { pad: [98,146.8,196,246.9], bass: 49 },       // G
+    { pad: [87.3,130.8,174.6,261.6], bass: 87.3 }, // F
+    { pad: [110,164.8,220,329.6], bass: 55 },      // Am
+  ], progs:[[0,1,2,3],[0,2,3,1],[3,0,1,2],[2,3,0,1]], melodies:[[0,2,4,2,0],[4,3,2,3,4],[0,1,2,0,4,3,2],[2,4,3,2,0,1]], beatMs: 860 },
+
+  { id: 9, name: "Winter Night", weather: "snowy", chords: [
+    // Inspired by cozy winter RPG music — G major, gentle and nostalgic
+    { pad: [98,146.8,196,293.7], bass: 49 },       // G
+    { pad: [82.4,123.5,164.8,246.9], bass: 82.4 }, // Em
+    { pad: [130.8,196,261.6,329.6], bass: 65.4 },  // C
+    { pad: [73.4,110,146.8,220], bass: 73.4 },     // D
+  ], progs:[[0,1,2,3],[0,2,1,3],[2,0,3,1],[3,2,1,0]], melodies:[
+    // Main theme — gentle descending then rising, Stardew-style
+    [4,3,2,0,1,0,2,4],[2,3,4,3,2,1,0,1],[0,0,2,3,4,4,3,2],[4,2,0,1,2,4,3,2],
+    // Bridge — wider intervals, spacious
+    [0,4,2,0,3,4,2],[2,0,4,3,1,0,2],[4,3,1,0,2,3,4,0]
+  ], beatMs: 900 },
 ];
+
+var _currentSongIdx = 0;
 var _currentMoodIdx = 0;
 var _moodChangeTimer = null;
-var MOOD_CHANGE_MS = 300000; // 5 minutes
+var MOOD_CHANGE_MS = 30000; // rotate progs/melodies every 30s within a song
 
 function startAmbientMusic() {
   if (_musicNodes) return;
   var ctx = getAudioCtx();
   if (!ctx) return;
 
-  // Pick a random starting mood
-  _currentMoodIdx = Math.floor(Math.random() * MUSIC_MOODS.length);
+  // Start with Groovy Garden (song 0)
+  if (_currentSongIdx === 0 && !G._userPickedSong) _currentSongIdx = 0;
 
   // Master output chain
   var masterGain = ctx.createGain();
-  masterGain.gain.value = 0.045;
+  masterGain.gain.value = G.musicVolume || 0.045;
   masterGain.connect(ctx.destination);
 
   // Lo-fi warmth filter
@@ -5859,7 +6228,9 @@ function startAmbientMusic() {
   bassGain.gain.value = 0.4;
   bassGain.connect(warmFilter);
 
-  function getMood() { return MUSIC_MOODS[_currentMoodIdx % MUSIC_MOODS.length]; }
+  function getSong() {
+    return SONGS[_currentSongIdx % SONGS.length];
+  }
 
   var state = {
     progIdx: 0,
@@ -5874,7 +6245,7 @@ function startAmbientMusic() {
 
   // ── PAD VOICE — warm sustained chords, 4 beats per chord ──
   function playPad() {
-    var mood = getMood();
+    var mood = getSong();
     var prog = mood.progs[state.progIdx % mood.progs.length];
     var chord = mood.chords[prog[state.chordStep % prog.length]];
     var now = ctx.currentTime;
@@ -5903,7 +6274,7 @@ function startAmbientMusic() {
 
     state.chordStep++;
     // Every full progression, maybe switch to a new one within the mood
-    var mood = getMood();
+    var mood = getSong();
     if (state.chordStep % 4 === 0 && Math.random() < 0.4) {
       state.progIdx = Math.floor(Math.random() * mood.progs.length);
     }
@@ -5912,7 +6283,7 @@ function startAmbientMusic() {
   // ── MELODY VOICE — pentatonic notes, syncopated ──
   function playMelody() {
     var now = ctx.currentTime;
-    var mood = getMood();
+    var mood = getSong();
     var pattern = mood.melodies[state.melodyPatIdx % mood.melodies.length];
     var degree = pattern[state.melodyNoteIdx % pattern.length];
 
@@ -5951,7 +6322,7 @@ function startAmbientMusic() {
     // Switch pattern and octave periodically
     if (state.melodyNoteIdx >= pattern.length) {
       state.melodyNoteIdx = 0;
-      var moodNow = getMood();
+      var moodNow = getSong();
       if (Math.random() < 0.5) {
         state.melodyPatIdx = Math.floor(Math.random() * moodNow.melodies.length);
       }
@@ -5962,7 +6333,7 @@ function startAmbientMusic() {
   // ── BASS VOICE — root notes, gentle pulse ──
   function playBass() {
     var now = ctx.currentTime;
-    var mood = getMood();
+    var mood = getSong();
     var prog = mood.progs[state.progIdx % mood.progs.length];
     var chord = mood.chords[prog[(state.chordStep - 1 + prog.length) % prog.length]];
 
@@ -5994,7 +6365,7 @@ function startAmbientMusic() {
 
   // ── Timing — uses current mood's BPM ──
   function startTimers() {
-    var bms = getMood().beatMs;
+    var bms = getSong().beatMs;
     playPad();
     playBass();
     _musicInterval = setInterval(function() { playPad(); playBass(); }, bms * 4);
@@ -6011,13 +6382,12 @@ function startAmbientMusic() {
   // Mood rotation every 5 minutes
   _moodChangeTimer = setInterval(function() {
     // Pick a different mood
-    var newIdx;
-    do { newIdx = Math.floor(Math.random() * MUSIC_MOODS.length); } while (newIdx === _currentMoodIdx && MUSIC_MOODS.length > 1);
-    _currentMoodIdx = newIdx;
+    // Rotate internal progression/melody within current song
+    var song = getSong();
     state.chordStep = 0;
     state.melodyNoteIdx = 0;
-    state.progIdx = Math.floor(Math.random() * getMood().progs.length);
-    state.melodyPatIdx = Math.floor(Math.random() * getMood().melodies.length);
+    state.progIdx = (state.progIdx + 1) % song.progs.length;
+    state.melodyPatIdx = (state.melodyPatIdx + 1) % song.melodies.length;
     // Restart timers with new tempo
     clearTimers();
     startTimers();
@@ -6062,18 +6432,23 @@ function updateMusicForWeather() {
   if (G.weather === "rainy") {
     filter.frequency.linearRampToValueAtTime(500, now + 2);
     mg.gain.linearRampToValueAtTime(0.2, now + 2);
-    startRainAmbient();
   } else if (G.weather === "snowy") {
     filter.frequency.linearRampToValueAtTime(450, now + 2);
     mg.gain.linearRampToValueAtTime(0.25, now + 2);
-    stopRainAmbient();
   } else if (G.weather === "sunny") {
     filter.frequency.linearRampToValueAtTime(900, now + 2);
     mg.gain.linearRampToValueAtTime(0.4, now + 2);
-    stopRainAmbient();
   } else {
     filter.frequency.linearRampToValueAtTime(600, now + 2);
     mg.gain.linearRampToValueAtTime(0.3, now + 2);
+  }
+}
+
+// Rain ambient SFX — triggered by weather, not music
+function updateRainSfx() {
+  if (G.weather === "rainy" && _soundEnabled) {
+    startRainAmbient();
+  } else {
     stopRainAmbient();
   }
 }
@@ -6093,7 +6468,7 @@ function startRainAmbient() {
   bp.type = "bandpass"; bp.frequency.value = 1400; bp.Q.value = 1.2;
   var g = ctx.createGain();
   g.gain.value = 0.005;
-  src.connect(bp).connect(g).connect(ctx.destination);
+  src.connect(bp).connect(g).connect(sfxOut());
   src.start();
   _rainAmbient = { src: src, gain: g };
 }
@@ -6425,6 +6800,10 @@ var BG_STYLES = [
   { id: "default", name: "Parchment", icon: "\ud83d\udcdc", unlock: "default" },
   { id: "garden", name: "Garden", icon: "\ud83c\udf3f", unlock: "50% Journal" },
   { id: "enchanted", name: "Enchanted", icon: "\u2728", unlock: "100% Journal" },
+  { id: "sunset", name: "Sunset", icon: "\ud83c\udf05", unlock: "10 sales" },
+  { id: "ocean", name: "Ocean Breeze", icon: "\ud83c\udf0a", unlock: "25 blooms" },
+  { id: "autumn", name: "Autumn", icon: "\ud83c\udf42", unlock: "15 fusions" },
+  { id: "night", name: "Starry Night", icon: "\u2b50", unlock: "5 days played" },
 ];
 
 function isPotUnlocked(id) {
@@ -6439,6 +6818,10 @@ function isBgUnlocked(id) {
   var pct = getJournalPercent();
   if (id === "garden") return pct >= 50;
   if (id === "enchanted") return pct >= 100;
+  if (id === "sunset") return G.npcSales >= 10;
+  if (id === "ocean") return G.totalBlooms >= 25;
+  if (id === "autumn") return G.hybridCount >= 15;
+  if (id === "night") return G.daysPlayed && G.daysPlayed.length >= 5;
   return false;
 }
 
@@ -6585,13 +6968,13 @@ var TUTORIAL_STEPS = [
   { icon: "\ud83c\udf3a", title: "Welcome to Yurie's Flower Shop!", desc: "Grow flowers, serve customers, and build your dream garden. Your pots react to weather, flowers sway in the breeze, and every bloom bursts with petals!" },
   { icon: "\ud83d\udca7", title: "Getting Water", desc: "Water trickles in over time. Tap the bucket button to swipe and fill it fast! Catch drifting clouds for bonus drops." },
   { icon: "\ud83c\udf31", title: "Growing Flowers", desc: "Open packets for seeds, plant them in pots, then water to grow. Each flower takes 3 stages to bloom. Watch for petal particles when it blooms!" },
-  { icon: "\ud83d\udc64", title: "Serving Customers", desc: "Customers visit your shop asking for specific flowers. Store bloomed flowers in the Garden House, then tap a customer to sell! VIP customers pay 5x! This is your main source of income." },
-  { icon: "\ud83e\uddec", title: "Hybridize & Breed", desc: "Leave two bloomed flowers in adjacent pots, then tap one to hybridize! Open the Breeding Guide to see 20 recipe combos. There's a 5% chance of a unique color mutation \u2014 collect them all!" },
+  { icon: "\ud83d\udc64", title: "Serving Customers", desc: "Customers ask for flowers you've discovered. Some show a '?' mystery request, and wildcards accept any flower of a rarity! VIP customers (purple) pay 8x. This is your main income!" },
+  { icon: "\ud83e\uddec", title: "Flower Fusion", desc: "Leave two bloomed flowers in adjacent pots, then tap one to fuse them! Open the Fusion Guide from the Journal to see 20 recipe combos. 5% chance of a unique color mutation!" },
   { icon: "\u2600\ufe0f", title: "Weather Effects", desc: "Weather changes your whole garden! Sunny \u2600\ufe0f speeds growth and gives pots a golden glow. Rainy \ud83c\udf27\ufe0f gives free water and drips on your pots. Snowy \u2744\ufe0f frosts pot rims and can nip growing flowers! Drought \ud83c\udf35 dries out your pots and needs extra water." },
-  { icon: "\ud83c\udfb5", title: "Music & Sound", desc: "Tap the \ud83c\udfb5 button (top-right, next to sound) to toggle cottagecore garden music. It changes with the weather \u2014 brighter when sunny, muffled in snow, gentle rain ambience. The \ud83d\udd0a button controls sound effects." },
+  { icon: "\ud83c\udfb5", title: "Music & Sound", desc: "Tap \ud83c\udfb5 (top-right) for music with volume slider. Two soundtracks: 'Groovy Garden' plays on sunny days, 'Yurie's Garden' plays on rain/snow/drought. Rain drops are a sound effect controlled by \ud83d\udd0a. Both have volume sliders!" },
   { icon: "\ud83c\udfc6", title: "Achievements & Style", desc: "Earn 40 achievements for coins. Complete your flower Journal to unlock pot styles, backgrounds, and garden decorations in the Style menu!" },
   { icon: "\ud83d\uded2", title: "The Shop", desc: "Buy seed packets (common to legendary), new pots (up to 12!), and water upgrades. Expand your garden and grow rarer flowers for bigger profits!" },
-  { icon: "\ud83c\udf1f", title: "Daily Gifts & Tips", desc: "Come back every day for streak rewards \u2014 7 days earns a Rare packet! Pro tip: hybridize during snow for a frosty challenge, or save rare flowers for VIP customers who pay top coin!" },
+  { icon: "\ud83c\udf1f", title: "Daily Gifts & Tips", desc: "Come back every day for streak rewards \u2014 7 days earns a Rare packet! Pro tip: fuse during snow for a frosty challenge, or save rare flowers for VIP customers who pay top coin!" },
 ];
 var _tutStep = 0;
 
@@ -6653,12 +7036,14 @@ var HELP_PAGES = [
   {
     title: "Making Money",
     html: '<h3>Selling to Customers</h3>'
-      + '<p>Customers visit your shop every 35\u201390 seconds (up to 3 at a time). They ask for a specific flower and offer coins.</p>'
-      + '<p><b>How to sell:</b> Bloom a flower \u2192 Store it in the Garden House \u2192 Tap a customer \u2192 Select the matching flower.</p>'
+      + '<p>Customers visit every 35\u201390 seconds (up to 3 at a time). Three types:</p>'
+      + '<p><b>Regular (70%)</b> \u2014 Ask for a flower you\'ve already discovered. No spoilers!</p>'
+      + '<p><b>Mystery (20%)</b> \u2014 Show a "?" silhouette. They want an undiscovered flower \u2014 discover more to find out what!</p>'
+      + '<p><b>Wildcard (10%)</b> \u2014 Accept ANY flower of a specific rarity. Great for clearing inventory!</p>'
       + '<h3>Reward Multipliers</h3>'
-      + '<p>Common flowers: <b>2.5x</b> sell value | Uncommon: <b>3x</b> | Rare: <b>4x</b> | Legendary: <b>5x</b></p>'
-      + '<p><b>VIP customers</b> (8% chance, purple glow) pay <b>8x</b> the flower\'s base value!</p>'
-      + '<div class="help-tip">A legendary flower (base 80 coins) sold to a VIP customer can earn 640+ coins!</div>'
+      + '<p>Common: <b>2.5x</b> | Uncommon: <b>3x</b> | Rare: <b>4x</b> | Legendary: <b>5x</b></p>'
+      + '<p><b>VIP customers</b> (8% chance, purple glow) pay <b>8x</b>!</p>'
+      + '<div class="help-tip">Keep 3-4 flowers in Garden House at all times. Wildcard customers pay slightly less but accept anything of that rarity!</div>'
   },
   {
     title: "Packets & Seeds",
@@ -6671,14 +7056,14 @@ var HELP_PAGES = [
       + '<div class="help-tip">Invest in better packets early \u2014 one rare flower sold to a customer pays for the packet and more.</div>'
   },
   {
-    title: "Hybridization",
+    title: "Flower Fusion",
     html: '<h3>Creating New Flowers</h3>'
-      + '<p>When two <b>bloomed flowers sit in adjacent pots</b> (side by side or above/below), you can hybridize them!</p>'
-      + '<p>Tap a bloomed flower \u2192 Choose "Hybridize" \u2192 Pick a neighbor. Both flowers are consumed and you get a new seed.</p>'
+      + '<p>When two <b>bloomed flowers sit in adjacent pots</b> (side by side or above/below), you can fuse them!</p>'
+      + '<p>Tap a bloomed flower \u2192 Choose "Fuse" \u2192 Pick a neighbor. Both flowers are consumed and you get a new seed.</p>'
       + '<h3>Breeding Recipes</h3>'
-      + '<p>There are <b>20 pre-defined recipe combos</b> (e.g., Rose + Tulip = Sunset Rose). Open the <b>Breeding Guide</b> from the Hybridize menu to see hints!</p>'
+      + '<p>There are <b>20 pre-defined recipe combos</b> (e.g., Rose + Tulip = Sunset Rose). Open the <b>Fusion Guide</b> from the Journal to see hints!</p>'
       + '<h3>Mutations</h3>'
-      + '<p>Every hybridization has a <b>5% mutation chance</b> \u2014 you get a unique color variant with a special name like "Vivid Sunset Rose". Collect them all!</p>'
+      + '<p>Every fusion has a <b>5% mutation chance</b> \u2014 you get a unique color variant with a special name like "Vivid Sunset Rose". Collect them all!</p>'
       + '<div class="help-tip">Hybrids can\'t drop from packets \u2014 they\'re exclusive to breeding. Great for completing your Journal!</div>'
   },
   {
@@ -6712,13 +7097,15 @@ var HELP_PAGES = [
   {
     title: "Music & Tips",
     html: '<h3>Music & Sound</h3>'
-      + '<p>The <b>\ud83c\udfb5 button</b> (top-right) toggles cottagecore garden music. 5 different moods rotate every 5 minutes. Music changes with weather!</p>'
+      + '<p>Tap <b>\ud83c\udfb5</b> to open a music popup with ON/OFF toggle and volume slider. Tap <b>\ud83d\udd0a</b> for the same with sound effects.</p>'
+      + '<p>Two soundtracks: <b>Groovy Garden</b> (upbeat, plays on sunny days) and <b>Yurie\'s Garden</b> (cozy, plays during rain/snow/drought). Each has 3-5 mood variations that rotate every 5 minutes.</p>'
+      + '<p>Rain drops are a <b>sound effect</b> (controlled by SFX volume), not music.</p>'
       + '<p>The <b>\ud83d\udd0a button</b> toggles sound effects (water, bloom, sale, weather sounds).</p>'
       + '<h3>Pro Tips</h3>'
       + '<div class="help-tip">Keep 3\u20134 flowers in Garden House at all times \u2014 customers often request what you have!</div>'
       + '<div class="help-tip">Buy uncommon packets early. The customer reward multiplier (3x) pays for the packet in one sale.</div>'
       + '<div class="help-tip">VIP customers (purple glow) are rare but pay 8x. Always have a rare/legendary flower ready for them!</div>'
-      + '<div class="help-tip">Hybridize during sunny weather \u2014 you\'ll regrow consumed flowers faster.</div>'
+      + '<div class="help-tip">Fuse during sunny weather \u2014 you\'ll regrow consumed flowers faster.</div>'
   },
 ];
 var _helpPage = 0;
@@ -6884,3 +7271,51 @@ function confettiBurst() {
     setTimeout(() => el.remove(), dur * 1000 + 100);
   }
 }
+
+// ══════════════════════════════════════════════════════════
+// CONSOLE COMMANDS — type G.help in browser console
+// ══════════════════════════════════════════════════════════
+Object.defineProperty(G, "help", {
+  get: function() {
+    console.log("%c Yurie's Flower Shop — Console Commands ", "background:#527a5f;color:#fff;font-weight:bold;padding:4px 8px;border-radius:4px;");
+    console.log("");
+    console.log("%cState Commands:", "color:#dbb05c;font-weight:bold;");
+    console.log("  G.coins = 9999       — Set coins");
+    console.log("  G.water = G.maxWater — Fill water");
+    console.log("  G.pkt.common = 99    — Give packets (also: uncommon, rare, legendary)");
+    console.log("  saveG()              — Save current state");
+    console.log("");
+    console.log("%cWeather:", "color:#dbb05c;font-weight:bold;");
+    console.log('  G.weather = "sunny"; _currentWeatherFx = ""; renderWeather();');
+    console.log('  G.weather = "rainy"; _currentWeatherFx = ""; renderWeather();');
+    console.log('  G.weather = "snowy"; _currentWeatherFx = ""; renderWeather();');
+    console.log('  G.weather = "drought"; _currentWeatherFx = ""; renderWeather();');
+    console.log("");
+    console.log("%cUnlock:", "color:#dbb05c;font-weight:bold;");
+    console.log("  // Discover all flowers:");
+    console.log('  Object.keys(FLOWERS).forEach(k => { if(!G.discovered.includes(k)) G.discovered.push(k); }); saveG();');
+    console.log("  // Unlock all achievements:");
+    console.log('  ACHIEVEMENTS.forEach(a => { if(!G.achievements.includes(a.id)) G.achievements.push(a.id); }); saveG();');
+    console.log("  // Max stats:");
+    console.log("  G.totalBlooms=200; G.npcSales=50; G.hybridCount=30; G.npcBestStreak=15; G.daysPlayed=['2026-01-01','2026-01-02','2026-01-03','2026-01-04','2026-01-05']; saveG();");
+    console.log("");
+    console.log("%cBackground:", "color:#dbb05c;font-weight:bold;");
+    console.log('  G.bgStyle = "night"; applyBgStyle(); saveG();');
+    console.log('  // Options: default, garden, enchanted, sunset, ocean, autumn, night');
+    console.log("");
+    console.log("%cMusic:", "color:#dbb05c;font-weight:bold;");
+    console.log("  startAmbientMusic()   — Start music");
+    console.log("  stopAmbientMusic()    — Stop music");
+    console.log("  _currentMoodIdx = 2   — Switch mood (0-4)");
+    console.log("");
+    console.log("%cReset:", "color:#e57373;font-weight:bold;");
+    console.log('  localStorage.removeItem("yurieGarden_v1"); location.reload();  — Full reset');
+    console.log("");
+    console.log("%cUI:", "color:#dbb05c;font-weight:bold;");
+    console.log("  updateHUD(); renderGarden(); renderTray(); renderDrops();  — Refresh UI");
+    console.log("  openHelpGuide()    — Open help guide");
+    console.log("  openBreedGuide()   — Open breeding guide");
+    console.log('  G.tutorialDone = false; saveG();  — Re-show tutorial on refresh');
+    return "Type any command above in the console.";
+  }
+});

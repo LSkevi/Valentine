@@ -24,8 +24,8 @@
 
   --text: #3a3530;
   --text-secondary: #6b655c;
-  --text-muted: #6e6860;
-  --text-light: #b5aea5;
+  --text-muted: #635d55;
+  --text-light: #948d84;
 
   --border: rgba(60, 50, 40, 0.08);
   --border-strong: rgba(60, 50, 40, 0.15);
@@ -552,10 +552,10 @@ body {
   transform: scale(1.3);
 }
 @keyframes cloudDrift {
-  0% { left: -60px; opacity: 0; }
+  0% { transform: translateX(0); opacity: 0; }
   5% { opacity: 1; }
   90% { opacity: 1; }
-  100% { left: calc(100vw + 60px); opacity: 0; }
+  100% { transform: translateX(calc(100vw + 120px)); opacity: 0; }
 }
 .cloud-splash {
   position: fixed;
@@ -2203,21 +2203,39 @@ body {
   from { opacity: 0.7; transform: scale(1); }
   to { opacity: 1; transform: scale(1.12); }
 }
-/* Sun rays — faint diagonal yellow beams */
+/* Sun rays — visible diagonal yellow beams */
 .sun-ray {
   position: absolute;
   top: -20%;
-  width: 3px;
+  width: 4px;
   height: 140%;
-  background: linear-gradient(to bottom, rgba(255, 220, 80, 0.18), rgba(255, 220, 80, 0.05) 60%, transparent);
+  background: linear-gradient(to bottom, rgba(255, 220, 80, 0.3), rgba(255, 220, 80, 0.08) 60%, transparent);
   transform-origin: top center;
   pointer-events: none;
   animation: rayPulse 5s ease-in-out infinite alternate;
 }
 @keyframes rayPulse {
-  0% { opacity: 0.4; }
-  50% { opacity: 0.8; }
-  100% { opacity: 0.5; }
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+/* Sun lens flare — sits on top of EVERYTHING */
+.sun-lens-flare {
+  position: fixed;
+  top: -30px;
+  right: -20px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,240,150,0.35) 0%, rgba(255,200,50,0.12) 40%, transparent 70%);
+  pointer-events: none;
+  z-index: 50;
+  animation: flarePulse 6s ease-in-out infinite alternate;
+}
+@keyframes flarePulse {
+  0% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0.7; transform: scale(0.95); }
 }
 .snowflake {
   position: absolute;
@@ -2280,6 +2298,24 @@ body {
 }
 
 /* ── Breeding guide ─────────────────────────────────── */
+/* ── Fusion Guide button in Journal ──────────────────── */
+.jnl-fusion-btn {
+  display: block;
+  margin: 0 auto 12px;
+  padding: 8px 20px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--primary-lighter);
+  background: var(--surface-alt);
+  color: var(--primary);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.82em;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.12s, background 0.12s;
+}
+.jnl-fusion-btn:active { transform: scale(0.93); background: var(--surface-hover); }
+
 .breed-prog {
   text-align: center;
   font-size: 0.78em;
@@ -2355,8 +2391,8 @@ body {
 /* ── Inline audio buttons in top bar ─────────────────── */
 .stat-spacer { flex: 1; }
 .audio-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: var(--surface-alt);
   border: 1px solid var(--border);
@@ -2369,6 +2405,9 @@ body {
   opacity: 0.5;
   transition: opacity 0.15s, transform 0.12s;
   flex-shrink: 0;
+  /* Expand tap area to 44px minimum */
+  padding: 4px;
+  margin: -4px;
 }
 .audio-btn.active { opacity: 1; }
 .audio-btn:active { transform: scale(0.88); }
@@ -2382,8 +2421,8 @@ body.night-mode {
   --surface-hover: #2a2f4a;
   --text: #e0dcd4;
   --text-secondary: #a8a4a0;
-  --text-muted: #7a7672;
-  --text-light: #5a5652;
+  --text-muted: #8a8680;
+  --text-light: #605c56;
   --border: rgba(200, 195, 180, 0.1);
   --border-strong: rgba(200, 195, 180, 0.18);
   --primary: #6b9e7a;
@@ -2629,6 +2668,24 @@ body.night-mode .npc-card.vip {
   background: rgba(255,252,247,0.8);
   padding: 1px 2px;
   border-radius: 0 0 8px 8px;
+}
+
+/* ── Starry Night background ─────────────────────────── */
+body.bg-night .top-bar { background: rgba(13, 17, 23, 0.92); }
+body.bg-night .seed-tray { background: rgba(13, 17, 23, 0.95); }
+body.bg-night .stat-pill { background: #161b22; color: #8bc49a; }
+body.bg-night .garden-header h2 { color: #c9d1d9; }
+body.bg-night .garden-header p { color: #7a7672; }
+body.bg-night .weather-bar { opacity: 0.9; }
+body.bg-night .toast { background: rgba(22, 27, 34, 0.92); }
+body.bg-night .sheet { background: #161b22; }
+body.bg-night .sh-title { color: #c9d1d9; }
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: translateY(0) scale(1); }
+  25% { opacity: 0.9; transform: translateY(-2px) scale(1.1); }
+  50% { opacity: 0.3; transform: translateY(1px) scale(0.9); }
+  75% { opacity: 1; transform: translateY(-1px) scale(1.05); }
 }
 
 /* ── Garden cosmetic decorations ──────────────────────── */

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Garden Music Maker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    body{font-family:'Quicksand',sans-serif;background:#1a1e2e;color:#e0dcd4;min-height:100vh;min-height:100dvh;overflow-x:hidden;user-select:none;-webkit-user-select:none;}
+
+    /* Top bar */
+    .top{display:flex;align-items:center;gap:10px;padding:12px 16px;background:#232840;border-bottom:1px solid rgba(200,195,180,0.08);}
+    .back{color:#527a5f;font-weight:700;font-size:0.85em;text-decoration:none;}
+    .back:hover{color:#8bc49a;}
+    .logo{flex:1;text-align:center;font-weight:700;font-size:1em;color:#8bc49a;}
+    .logo small{font-weight:500;color:#5a5652;font-size:0.7em;}
+
+    /* Controls */
+    .ctrl{display:flex;align-items:center;gap:8px;padding:10px 16px;flex-wrap:wrap;}
+    .ctrl-btn{padding:8px 18px;border-radius:20px;border:1.5px solid rgba(139,196,154,0.3);background:rgba(139,196,154,0.08);color:#8bc49a;font-family:inherit;font-weight:700;font-size:0.85em;cursor:pointer;transition:all 0.12s;touch-action:manipulation;}
+    .ctrl-btn:active{transform:scale(0.93);}
+    .ctrl-btn.playing{background:#527a5f;color:#fff;border-color:#527a5f;}
+    .ctrl-btn.stop{border-color:rgba(229,115,115,0.3);color:#e57373;background:rgba(229,115,115,0.06);}
+    .ctrl-btn.clear{border-color:rgba(200,195,180,0.15);color:#7a7672;}
+    .ctrl-spacer{flex:1;}
+    .ctrl label{font-size:0.72em;color:#5a5652;}
+    .ctrl input[type=range]{width:80px;accent-color:#8bc49a;}
+    .ctrl .val{font-size:0.72em;color:#8bc49a;min-width:32px;}
+
+    /* Instrument selector */
+    .instr-bar{display:flex;gap:4px;padding:4px 16px 8px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    .instr-tab{padding:6px 14px;border-radius:16px;border:1.5px solid rgba(200,195,180,0.1);background:#1e2236;color:#7a7672;font-family:inherit;font-weight:600;font-size:0.75em;cursor:pointer;white-space:nowrap;transition:all 0.12s;touch-action:manipulation;}
+    .instr-tab.active{background:var(--inst-color,#527a5f);color:#fff;border-color:var(--inst-color,#527a5f);}
+
+    /* Grid */
+    .grid-wrap{padding:0 8px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    .grid{display:grid;gap:2px;min-width:fit-content;position:relative;}
+    .grid-header{display:contents;}
+    .step-num{font-size:0.55em;color:#3a3632;text-align:center;padding:2px 0;font-weight:600;}
+    .step-num.beat{color:#5a5652;}
+
+    /* Row labels */
+    .row-label{display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:0.65em;font-weight:700;color:var(--inst-color,#8bc49a);white-space:nowrap;min-width:36px;}
+
+    /* Cells */
+    .cell{width:100%;aspect-ratio:1;border-radius:4px;background:#1e2236;border:1px solid rgba(200,195,180,0.06);cursor:pointer;transition:background 0.08s,transform 0.08s;touch-action:manipulation;position:relative;}
+    .cell:active{transform:scale(0.88);}
+    .cell.on{background:var(--inst-color,#527a5f);border-color:var(--inst-color,#527a5f);box-shadow:0 0 6px var(--inst-color,rgba(82,122,95,0.4));}
+    .cell.beat-line{border-left:1.5px solid rgba(200,195,180,0.1);}
+
+    /* Playhead */
+    .playhead{position:absolute;top:0;bottom:0;width:2px;background:#dbb05c;z-index:10;pointer-events:none;transition:left 0.05s linear;box-shadow:0 0 8px rgba(219,176,92,0.5);}
+    .cell.current{background:rgba(219,176,92,0.15) !important;}
+    .cell.on.current{filter:brightness(1.3);}
+
+    /* Presets */
+    .preset-bar{display:flex;gap:4px;padding:8px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    .preset-btn{padding:6px 12px;border-radius:12px;border:1px solid rgba(200,195,180,0.1);background:#1e2236;color:#a8a4a0;font-family:inherit;font-size:0.7em;font-weight:600;cursor:pointer;white-space:nowrap;touch-action:manipulation;transition:all 0.12s;}
+    .preset-btn:active{transform:scale(0.93);background:rgba(139,196,154,0.15);}
+
+    /* Info panel */
+    .info{padding:12px 16px;font-size:0.72em;color:#5a5652;line-height:1.5;}
+    .info b{color:#8bc49a;}
+    .info .tip{background:rgba(219,176,92,0.06);border-left:2px solid #dbb05c;padding:6px 10px;border-radius:0 6px 6px 0;margin-top:8px;color:#dbb05c;font-size:0.95em;}
+
+    /* Filter bar */
+    .filter-bar{display:flex;align-items:center;gap:8px;padding:6px 16px;background:rgba(35,40,64,0.5);}
+    .filter-bar label{font-size:0.7em;color:#5a5652;min-width:50px;}
+    .filter-bar input{flex:1;accent-color:#8bc49a;}
+    .filter-bar .val{font-size:0.7em;color:#8bc49a;min-width:44px;text-align:right;}
+  </style>
+</head>
+<body>
+
+<div class="top">
+  <a href="/" class="back">&larr; Game</a>
+  <div class="logo">Garden Music Maker <small>step sequencer</small></div>
+</div>
+
+<div class="ctrl">
+  <button class="ctrl-btn" id="playBtn" onclick="togglePlay()">&#9654; Play</button>
+  <button class="ctrl-btn stop" onclick="stopSeq()">&#9632; Stop</button>
+  <button class="ctrl-btn clear" onclick="clearGrid()">Clear</button>
+  <div class="ctrl-spacer"></div>
+  <label>BPM</label>
+  <input type="range" id="bpmSlider" min="60" max="180" value="90" oninput="setBpm(this.value)">
+  <span class="val" id="bpmVal">90</span>
+</div>
+
+<div class="instr-bar" id="instrBar"></div>
+
+<div class="filter-bar">
+  <label>Lo-Fi Filter</label>
+  <input type="range" id="filterSlider" min="200" max="4000" value="1200" oninput="setFilter(this.value)">
+  <span class="val" id="filterVal">1200 Hz</span>
+  <label style="min-width:auto;">Vol</label>
+  <input type="range" id="volSlider" min="0" max="100" value="60" oninput="setVol(this.value)" style="width:60px;">
+</div>
+
+<div class="grid-wrap">
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="preset-bar" id="presetBar"></div>
+
+<div class="info">
+  <b>How to use:</b> Pick an instrument tab, tap cells to place notes, hit Play. The playhead sweeps left-to-right playing your notes. Switch instruments to layer sounds.
+  <div class="tip">Try the presets below the grid for instant cottagecore patterns. Then modify them!</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════
+var STEPS = 16; // columns
+var INSTRUMENTS = [
+  { id:"pad_C",   name:"C pad",   color:"#527a5f", type:"pad", freq:[130.8,196,261.6] },
+  { id:"pad_Am",  name:"Am pad",  color:"#7e57c2", type:"pad", freq:[110,164.8,220] },
+  { id:"pad_F",   name:"F pad",   color:"#e57373", type:"pad", freq:[87.3,130.8,174.6] },
+  { id:"pad_G",   name:"G pad",   color:"#4db6ac", type:"pad", freq:[98,146.8,196] },
+  { id:"mel_C",   name:"C",       color:"#8bc49a", type:"mel", freq:261.6 },
+  { id:"mel_D",   name:"D",       color:"#a5d6a7", type:"mel", freq:293.7 },
+  { id:"mel_E",   name:"E",       color:"#c5e1a5", type:"mel", freq:329.6 },
+  { id:"mel_G",   name:"G",       color:"#fff176", type:"mel", freq:392 },
+  { id:"mel_A",   name:"A",       color:"#ffe082", type:"mel", freq:440 },
+  { id:"mel_C5",  name:"C5",      color:"#ffcc80", type:"mel", freq:523.3 },
+  { id:"mel_D5",  name:"D5",      color:"#ffab91", type:"mel", freq:587.3 },
+  { id:"mel_E5",  name:"E5",      color:"#ef9a9a", type:"mel", freq:659.3 },
+  { id:"bass_C",  name:"Bass C",  color:"#5c6bc0", type:"bass", freq:65.4 },
+  { id:"bass_F",  name:"Bass F",  color:"#7986cb", type:"bass", freq:87.3 },
+  { id:"bass_G",  name:"Bass G",  color:"#9fa8da", type:"bass", freq:49 },
+  { id:"bass_A",  name:"Bass A",  color:"#b39ddb", type:"bass", freq:55 },
+  { id:"kick",    name:"Kick",    color:"#8d6e63", type:"drum", drum:"kick" },
+  { id:"hat",     name:"Hat",     color:"#a1887f", type:"drum", drum:"hat" },
+  { id:"snap",    name:"Snap",    color:"#bcaaa4", type:"drum", drum:"snap" },
+];
+
+// Group instruments for tabs
+var GROUPS = [
+  { name:"Melody", ids:["mel_C","mel_D","mel_E","mel_G","mel_A","mel_C5","mel_D5","mel_E5"], color:"#8bc49a" },
+  { name:"Chords", ids:["pad_C","pad_Am","pad_F","pad_G"], color:"#527a5f" },
+  { name:"Bass", ids:["bass_C","bass_F","bass_G","bass_A"], color:"#7986cb" },
+  { name:"Drums", ids:["kick","hat","snap"], color:"#a1887f" },
+];
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+var grid = {}; // grid[instId][step] = true/false
+INSTRUMENTS.forEach(function(inst) {
+  grid[inst.id] = new Array(STEPS).fill(false);
+});
+
+var _ctx = null;
+var _masterGain = null;
+var _filter = null;
+var _playing = false;
+var _step = 0;
+var _timer = null;
+var _bpm = 90;
+var _currentGroup = 0;
+
+function getCtx() {
+  if (!_ctx) {
+    _ctx = new (window.AudioContext || window.webkitAudioContext)();
+    _masterGain = _ctx.createGain();
+    _masterGain.gain.value = 0.06;
+    _filter = _ctx.createBiquadFilter();
+    _filter.type = "lowpass";
+    _filter.frequency.value = 1200;
+    _filter.Q.value = 0.6;
+    _filter.connect(_masterGain).connect(_ctx.destination);
+  }
+  if (_ctx.state === "suspended") _ctx.resume();
+  return _ctx;
+}
+
+// ═══════════════════════════════════════
+// SOUND ENGINE
+// ═══════════════════════════════════════
+function playInst(inst) {
+  var ctx = getCtx();
+  var now = ctx.currentTime;
+
+  if (inst.type === "pad") {
+    inst.freq.forEach(function(f) {
+      for (var d = 0; d < 2; d++) {
+        var o = ctx.createOscillator();
+        var g = ctx.createGain();
+        o.type = d === 0 ? "sine" : "triangle";
+        o.frequency.value = f + (d === 0 ? -1.5 : 1.5);
+        g.gain.setValueAtTime(0, now);
+        g.gain.linearRampToValueAtTime(d === 0 ? 0.25 : 0.06, now + 0.08);
+        g.gain.linearRampToValueAtTime(0, now + 0.5);
+        o.connect(g).connect(_filter);
+        o.start(now); o.stop(now + 0.55);
+      }
+    });
+  } else if (inst.type === "mel") {
+    var o = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.type = Math.random() < 0.6 ? "sine" : "triangle";
+    o.frequency.value = inst.freq + (Math.random() - 0.5) * 2;
+    g.gain.setValueAtTime(0, now);
+    g.gain.linearRampToValueAtTime(0.35, now + 0.03);
+    g.gain.linearRampToValueAtTime(0, now + 0.35);
+    o.connect(g).connect(_filter);
+    o.start(now); o.stop(now + 0.4);
+  } else if (inst.type === "bass") {
+    var o = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.type = "sine";
+    o.frequency.value = inst.freq;
+    g.gain.setValueAtTime(0, now);
+    g.gain.linearRampToValueAtTime(0.45, now + 0.04);
+    g.gain.linearRampToValueAtTime(0, now + 0.4);
+    o.connect(g).connect(_filter);
+    o.start(now); o.stop(now + 0.45);
+  } else if (inst.type === "drum") {
+    if (inst.drum === "kick") {
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(160, now);
+      o.frequency.exponentialRampToValueAtTime(40, now + 0.12);
+      g.gain.setValueAtTime(0.5, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      o.connect(g).connect(_masterGain);
+      o.start(now); o.stop(now + 0.25);
+    } else if (inst.drum === "hat") {
+      var bufSz = ctx.sampleRate * 0.05;
+      var buf = ctx.createBuffer(1, bufSz, ctx.sampleRate);
+      var d = buf.getChannelData(0);
+      for (var i = 0; i < bufSz; i++) d[i] = (Math.random() * 2 - 1) * 0.3;
+      var src = ctx.createBufferSource();
+      src.buffer = buf;
+      var hp = ctx.createBiquadFilter();
+      hp.type = "highpass"; hp.frequency.value = 7000;
+      var g = ctx.createGain();
+      g.gain.setValueAtTime(0.25, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+      src.connect(hp).connect(g).connect(_masterGain);
+      src.start(now); src.stop(now + 0.06);
+    } else if (inst.drum === "snap") {
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.type = "square";
+      o.frequency.value = 1800;
+      g.gain.setValueAtTime(0.15, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+      o.connect(g).connect(_masterGain);
+      o.start(now); o.stop(now + 0.05);
+    }
+  }
+}
+
+// ═══════════════════════════════════════
+// SEQUENCER
+// ═══════════════════════════════════════
+function togglePlay() {
+  if (_playing) { stopSeq(); return; }
+  getCtx();
+  _playing = true;
+  _step = 0;
+  document.getElementById("playBtn").classList.add("playing");
+  document.getElementById("playBtn").textContent = "|| Pause";
+  tick();
+}
+
+function stopSeq() {
+  _playing = false;
+  if (_timer) { clearTimeout(_timer); _timer = null; }
+  document.getElementById("playBtn").classList.remove("playing");
+  document.getElementById("playBtn").textContent = "\u25b6 Play";
+  // Clear current highlights
+  document.querySelectorAll(".cell.current").forEach(function(c) { c.classList.remove("current"); });
+}
+
+function tick() {
+  if (!_playing) return;
+  // Highlight current column
+  document.querySelectorAll(".cell.current").forEach(function(c) { c.classList.remove("current"); });
+  document.querySelectorAll('.cell[data-step="' + _step + '"]').forEach(function(c) { c.classList.add("current"); });
+
+  // Play all active instruments on this step
+  INSTRUMENTS.forEach(function(inst) {
+    if (grid[inst.id][_step]) {
+      playInst(inst);
+    }
+  });
+
+  _step = (_step + 1) % STEPS;
+  var interval = (60000 / _bpm) / 4; // 16th notes
+  _timer = setTimeout(tick, interval);
+}
+
+function setBpm(v) {
+  _bpm = parseInt(v);
+  document.getElementById("bpmVal").textContent = v;
+}
+
+function setFilter(v) {
+  document.getElementById("filterVal").textContent = v + " Hz";
+  if (_filter) _filter.frequency.value = parseInt(v);
+}
+
+function setVol(v) {
+  if (_masterGain) _masterGain.gain.value = parseInt(v) / 1000;
+}
+
+function clearGrid() {
+  INSTRUMENTS.forEach(function(inst) {
+    for (var s = 0; s < STEPS; s++) grid[inst.id][s] = false;
+  });
+  renderGrid();
+}
+
+// ═══════════════════════════════════════
+// GRID RENDERING
+// ═══════════════════════════════════════
+function renderGrid() {
+  var el = document.getElementById("grid");
+  el.textContent = "";
+  var group = GROUPS[_currentGroup];
+  var rows = group.ids.map(function(id) { return INSTRUMENTS.find(function(inst) { return inst.id === id; }); });
+
+  // Grid template: label column + 16 step columns
+  el.style.gridTemplateColumns = "40px " + ("1fr ").repeat(STEPS);
+  el.style.gridTemplateRows = "auto " + ("1fr ").repeat(rows.length);
+
+  // Header row: empty + step numbers
+  var corner = document.createElement("div");
+  el.appendChild(corner);
+  for (var s = 0; s < STEPS; s++) {
+    var num = document.createElement("div");
+    num.className = "step-num" + (s % 4 === 0 ? " beat" : "");
+    num.textContent = s % 4 === 0 ? (s / 4 + 1) : "";
+    el.appendChild(num);
+  }
+
+  // Data rows
+  rows.forEach(function(inst) {
+    // Label
+    var lbl = document.createElement("div");
+    lbl.className = "row-label";
+    lbl.style.setProperty("--inst-color", inst.color);
+    lbl.textContent = inst.name;
+    el.appendChild(lbl);
+
+    // Cells
+    for (var s = 0; s < STEPS; s++) {
+      var cell = document.createElement("div");
+      cell.className = "cell" + (grid[inst.id][s] ? " on" : "") + (s % 4 === 0 ? " beat-line" : "");
+      cell.style.setProperty("--inst-color", inst.color);
+      cell.dataset.inst = inst.id;
+      cell.dataset.step = s;
+      cell.onclick = (function(instId, step, cellEl) {
+        return function() {
+          grid[instId][step] = !grid[instId][step];
+          cellEl.classList.toggle("on");
+          if (grid[instId][step]) {
+            // Preview sound on tap
+            var inst = INSTRUMENTS.find(function(i) { return i.id === instId; });
+            if (inst) playInst(inst);
+          }
+        };
+      })(inst.id, s, cell);
+      el.appendChild(cell);
+    }
+  });
+}
+
+// ═══════════════════════════════════════
+// INSTRUMENT TABS
+// ═══════════════════════════════════════
+function renderTabs() {
+  var bar = document.getElementById("instrBar");
+  bar.textContent = "";
+  GROUPS.forEach(function(group, idx) {
+    var tab = document.createElement("button");
+    tab.className = "instr-tab" + (idx === _currentGroup ? " active" : "");
+    tab.style.setProperty("--inst-color", group.color);
+    tab.textContent = group.name;
+    tab.onclick = function() {
+      _currentGroup = idx;
+      renderTabs();
+      renderGrid();
+    };
+    bar.appendChild(tab);
+  });
+}
+
+// ═══════════════════════════════════════
+// PRESETS
+// ═══════════════════════════════════════
+var PRESETS = [
+  {
+    name: "Cottagecore Basic",
+    data: {
+      "pad_C":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      "pad_Am":[0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+      "pad_F":[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+      "pad_G":[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],
+      "mel_E":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      "mel_G":[0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0],
+      "mel_A":[0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+      "mel_C5":[0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0],
+      "mel_D":[0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0],
+      "bass_C":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      "bass_A":[0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+      "bass_F":[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+      "bass_G":[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],
+    }
+  },
+  {
+    name: "Rainy Mood",
+    data: {
+      "pad_Am":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      "pad_F":[0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+      "pad_C":[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+      "pad_G":[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],
+      "mel_C":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      "mel_D":[0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      "mel_C":[0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+      "mel_E":[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+      "mel_G":[0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0],
+      "bass_A":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      "bass_F":[0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+      "bass_C":[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+      "bass_G":[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],
+      "hat":[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+    }
+  },
+  {
+    name: "Starlight",
+    data: {
+      "pad_C":[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+      "pad_G":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      "mel_C5":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      "mel_A":[0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      "mel_G":[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+      "mel_E":[0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0],
+      "mel_D":[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+      "mel_E5":[0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0],
+      "bass_G":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      "bass_C":[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+    }
+  },
+  {
+    name: "Groovy Garden",
+    data: {
+      "pad_C":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      "pad_F":[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+      "mel_G":[1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0],
+      "mel_A":[0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0],
+      "mel_C5":[0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0],
+      "mel_E":[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0],
+      "mel_D":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],
+      "bass_C":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      "bass_F":[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+      "kick":[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],
+      "hat":[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+      "snap":[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+    }
+  },
+  {
+    name: "Clear All",
+    data: {}
+  },
+];
+
+function loadPreset(preset) {
+  // Clear everything first
+  INSTRUMENTS.forEach(function(inst) {
+    for (var s = 0; s < STEPS; s++) grid[inst.id][s] = false;
+  });
+  // Apply preset
+  Object.keys(preset.data).forEach(function(instId) {
+    var steps = preset.data[instId];
+    for (var s = 0; s < steps.length && s < STEPS; s++) {
+      grid[instId][s] = !!steps[s];
+    }
+  });
+  renderGrid();
+}
+
+function renderPresets() {
+  var bar = document.getElementById("presetBar");
+  bar.textContent = "";
+  PRESETS.forEach(function(p) {
+    var btn = document.createElement("button");
+    btn.className = "preset-btn";
+    btn.textContent = p.name;
+    btn.onclick = function() { loadPreset(p); };
+    bar.appendChild(btn);
+  });
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+renderTabs();
+renderGrid();
+renderPresets();
+</script>
+</body>
+</html>
