@@ -1485,14 +1485,186 @@ const FLOWERS = {
     stem: "#66bb6a",
     sell: 200,
   },
+  // ── Hybrid-Only Flowers (cannot drop from packets) ────────
+  sunsetRose: { name: "Sunset Rose", kind: "rose", appearance: "rose", rarity: "hybrid", w: 0, petal: "#ff7043", stem: "#66bb6a", sell: 45, parents: ["rose", "tulip"] },
+  moonlightLily: { name: "Moonlight Lily", kind: "lily", appearance: "lily", rarity: "hybrid", w: 0, petal: "#b0bec5", stem: "#558b2f", sell: 50, parents: ["lily", "violet"] },
+  crimsonOrchid: { name: "Crimson Orchid", kind: "orchid", appearance: "orchid", rarity: "hybrid", w: 0, petal: "#c62828", stem: "#33691e", sell: 55, parents: ["orchid", "rose"] },
+  goldenDaisy: { name: "Golden Daisy", kind: "daisy", appearance: "daisy", rarity: "hybrid", w: 0, petal: "#ffd600", stem: "#558b2f", sell: 35, parents: ["daisy", "sunflower"] },
+  frostedCherry: { name: "Frosted Cherry", kind: "cherry", appearance: "cherry", rarity: "hybrid", w: 0, petal: "#e1bee7", stem: "#66bb6a", sell: 40, parents: ["cherry", "lily"] },
+  shadowIris: { name: "Shadow Iris", kind: "iris", appearance: "iris", rarity: "hybrid", w: 0, petal: "#37474f", stem: "#33691e", sell: 50, parents: ["iris", "tulip"] },
+  coralPeony: { name: "Coral Peony", kind: "peony", appearance: "peony", rarity: "hybrid", w: 0, petal: "#ff8a65", stem: "#558b2f", sell: 45, parents: ["peony", "poppy"] },
+  stardustLavender: { name: "Stardust Lavender", kind: "lavender", appearance: "lavender", rarity: "hybrid", w: 0, petal: "#ce93d8", stem: "#558b2f", sell: 40, parents: ["lavender", "violet"] },
+  emeraldTulip: { name: "Emerald Tulip", kind: "tulip", appearance: "tulip", rarity: "hybrid", w: 0, petal: "#4caf50", stem: "#33691e", sell: 55, parents: ["tulip", "iris"] },
+  phoenixSunflower: { name: "Phoenix Sunflower", kind: "sunflower", appearance: "sunflower", rarity: "hybrid", w: 0, petal: "#ff5722", stem: "#558b2f", sell: 60, parents: ["sunflower", "rose"] },
+  crystalViolet: { name: "Crystal Violet", kind: "violet", appearance: "violet", rarity: "hybrid", w: 0, petal: "#80deea", stem: "#66bb6a", sell: 45, parents: ["violet", "daisy"] },
+  midnightPoppy: { name: "Midnight Poppy", kind: "poppy", appearance: "poppy", rarity: "hybrid", w: 0, petal: "#1a237e", stem: "#33691e", sell: 50, parents: ["poppy", "iris"] },
 };
 const RARITY_LABEL = {
   common: "Common",
   uncommon: "Uncommon",
-  rare: "★ Rare",
-  legendary: "✦ Legendary",
-  unique: "✦✦ Unique ✦✦",
+  rare: "\u2605 Rare",
+  legendary: "\u2726 Legendary",
+  unique: "\u2726\u2726 Unique \u2726\u2726",
+  hybrid: "\ud83e\uddec Hybrid",
 };
+// ── Dynamic Hybrid Name Generator ────────────────────────
+function generateHybridName(name1, name2) {
+  var words1 = name1.split(" "), words2 = name2.split(" ");
+  var prefix, species;
+  // Single-word names: use special prefixes
+  var singlePrefixes = {
+    "Sunflower": "Solar", "Lavender": "Misty", "Snapdragon": "Dragon",
+  };
+  if (words1.length >= 2) {
+    prefix = words1[0];
+  } else {
+    prefix = singlePrefixes[name1] || (name1.slice(0, -2));
+  }
+  if (words2.length >= 2) {
+    species = words2[words2.length - 1];
+  } else {
+    species = name2;
+  }
+  // Same species? Mix the color adjectives instead
+  if (words1[words1.length - 1] === words2[words2.length - 1] && words1.length >= 2 && words2.length >= 2) {
+    prefix = words1[0] + "-" + words2[0];
+    species = words1[words1.length - 1];
+  }
+  return prefix + " " + species;
+}
+
+function generateHybridKey(key1, key2) {
+  // Consistent ordering so rose+tulip = tulip+rose
+  var sorted = [key1, key2].sort();
+  return "dyn_" + sorted[0] + "_" + sorted[1];
+}
+
+function mixColors(hex1, hex2) {
+  var r1 = parseInt(hex1.slice(1, 3), 16), g1 = parseInt(hex1.slice(3, 5), 16), b1 = parseInt(hex1.slice(5, 7), 16);
+  var r2 = parseInt(hex2.slice(1, 3), 16), g2 = parseInt(hex2.slice(3, 5), 16), b2 = parseInt(hex2.slice(5, 7), 16);
+  var r = Math.round((r1 + r2) / 2), g = Math.round((g1 + g2) / 2), b = Math.round((b1 + b2) / 2);
+  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+// Map kind to display species name (capitalized)
+var KIND_DISPLAY = {
+  tulip:"Tulip", rose:"Rose", daisy:"Daisy", sunflower:"Sunflower",
+  poppy:"Poppy", cherry:"Cherry Blossom", violet:"Violet", lily:"Lily",
+  iris:"Iris", daffodil:"Daffodil", peony:"Peony", orchid:"Orchid",
+  lavender:"Lavender", carnation:"Carnation", chrysanthemum:"Mum",
+  hyacinth:"Hyacinth", bluebell:"Bluebell", cosmos:"Cosmos",
+};
+
+// Color name from hex (approximate)
+function colorNameFromHex(hex) {
+  var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  var max = Math.max(r,g,b), min = Math.min(r,g,b);
+  var brightness = (r + g + b) / 3;
+  if (brightness > 220) return "White";
+  if (brightness < 40) return "Dark";
+  if (max - min < 30) return brightness > 140 ? "Silver" : "Shadow";
+  if (r > g + 40 && r > b + 40) return r > 180 ? "Scarlet" : "Crimson";
+  if (r > 180 && g > 100 && b < 80) return "Amber";
+  if (r > 180 && g > 140 && b > 140) return "Blush";
+  if (g > r + 30 && g > b + 30) return g > 160 ? "Jade" : "Forest";
+  if (b > r + 30 && b > g + 30) return b > 160 ? "Azure" : "Cobalt";
+  if (r > 150 && b > 150 && g < 100) return "Violet";
+  if (r > 180 && g > 80 && g < 150) return "Coral";
+  if (r > 200 && g > 180) return "Golden";
+  if (g > 150 && b > 150) return "Teal";
+  return "Mystic";
+}
+
+// Shift hex color hue by degrees (for mutations)
+function shiftHue(hex, degrees) {
+  var r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
+  var max = Math.max(r,g,b), min = Math.min(r,g,b), d = max - min;
+  var h = 0, s = max === 0 ? 0 : d / max, v = max;
+  if (d > 0) {
+    if (max === r) h = ((g-b)/d + (g<b?6:0)) / 6;
+    else if (max === g) h = ((b-r)/d + 2) / 6;
+    else h = ((r-g)/d + 4) / 6;
+  }
+  h = ((h * 360 + degrees) % 360) / 360;
+  if (h < 0) h += 1;
+  var hi = Math.floor(h * 6), f = h * 6 - hi, p = v*(1-s), q = v*(1-f*s), t = v*(1-(1-f)*s);
+  var ro, go, bo;
+  switch(hi % 6) {
+    case 0: ro=v; go=t; bo=p; break;
+    case 1: ro=q; go=v; bo=p; break;
+    case 2: ro=p; go=v; bo=t; break;
+    case 3: ro=p; go=q; bo=v; break;
+    case 4: ro=t; go=p; bo=v; break;
+    case 5: ro=v; go=p; bo=q; break;
+  }
+  return "#" + [ro,go,bo].map(function(c) { return Math.round(c*255).toString(16).padStart(2,"0"); }).join("");
+}
+
+// Look up a breed recipe for two flower kinds
+function findBreedRecipe(kind1, kind2) {
+  var sorted = [kind1, kind2].sort();
+  var key = sorted[0] + "+" + sorted[1];
+  return BREED_RECIPES[key] || null;
+}
+
+function getOrCreateDynamicHybrid(key1, key2) {
+  var hybKey = generateHybridKey(key1, key2);
+  // Already exists?
+  if (FLOWERS[hybKey]) return hybKey;
+  var f1 = FLOWERS[key1], f2 = FLOWERS[key2];
+  if (!f1 || !f2) return key1; // fallback
+  // Use parent1's appearance (shape) with mixed colors
+  var mixedPetal = mixColors(f1.petal, f2.petal);
+  var mixedStem = mixColors(f1.stem, f2.stem);
+  // Name = color adjective from mixed petal + species from the shape (kind)
+  var colorAdj = colorNameFromHex(mixedPetal);
+  var speciesName = KIND_DISPLAY[f1.kind] || f1.kind.charAt(0).toUpperCase() + f1.kind.slice(1);
+  var hybridName = colorAdj + " " + speciesName;
+  var avgSell = Math.round((f1.sell + f2.sell) * 0.8);
+  FLOWERS[hybKey] = {
+    name: hybridName,
+    kind: f1.kind,
+    appearance: f1.appearance,
+    rarity: "hybrid",
+    w: 0,
+    petal: mixedPetal,
+    stem: mixedStem,
+    sell: Math.max(avgSell, 20),
+    dynamic: true,
+    parent1: key1,
+    parent2: key2,
+  };
+  return hybKey;
+}
+
+// ── Breeding Recipes (kind1+kind2 → possible offspring) ─────
+// Each recipe maps a sorted kind pair to weighted outcomes
+const BREED_RECIPES = {
+  "rose+tulip":     [{ key: "sunsetRose", w: 60 }, { key: "emeraldTulip", w: 25 }],
+  "lily+violet":    [{ key: "moonlightLily", w: 55 }, { key: "crystalViolet", w: 30 }],
+  "orchid+rose":    [{ key: "crimsonOrchid", w: 60 }],
+  "daisy+sunflower":[{ key: "goldenDaisy", w: 65 }],
+  "cherry+lily":    [{ key: "frostedCherry", w: 55 }],
+  "iris+tulip":     [{ key: "shadowIris", w: 60 }],
+  "peony+poppy":    [{ key: "coralPeony", w: 60 }],
+  "lavender+violet":[{ key: "stardustLavender", w: 55 }],
+  "iris+tulip":     [{ key: "emeraldTulip", w: 50 }, { key: "shadowIris", w: 35 }],
+  "rose+sunflower": [{ key: "phoenixSunflower", w: 60 }],
+  "daisy+violet":   [{ key: "crystalViolet", w: 55 }],
+  "iris+poppy":     [{ key: "midnightPoppy", w: 60 }],
+  // Additional cross-kind recipes for broader coverage
+  "cherry+rose":    [{ key: "crimsonOrchid", w: 30 }, { key: "sunsetRose", w: 40 }],
+  "daffodil+lily":  [{ key: "moonlightLily", w: 40 }, { key: "goldenDaisy", w: 30 }],
+  "lavender+peony": [{ key: "coralPeony", w: 35 }, { key: "stardustLavender", w: 40 }],
+  "orchid+violet":  [{ key: "crystalViolet", w: 40 }, { key: "crimsonOrchid", w: 30 }],
+  "poppy+sunflower":[{ key: "phoenixSunflower", w: 45 }, { key: "midnightPoppy", w: 30 }],
+  "daisy+tulip":    [{ key: "goldenDaisy", w: 45 }, { key: "emeraldTulip", w: 30 }],
+  "peony+rose":     [{ key: "coralPeony", w: 40 }, { key: "sunsetRose", w: 35 }],
+  "iris+lily":      [{ key: "shadowIris", w: 40 }, { key: "moonlightLily", w: 35 }],
+};
+// Mutation name prefixes
+var MUTATION_PREFIXES = ["Vivid", "Pale", "Deep", "Bright", "Dusky", "Frosty", "Warm", "Wild"];
+
 const STAGE_NAMES = ["🌰 Seed", "🌱 Sprout", "🌿 Growing", "🌸 Bloomed!"];
 const STAGE_WATERS = 3,
   MAX_STAGE = 3;
@@ -1505,11 +1677,11 @@ const WATER_CAP_UPGRADES = [
   { cap: 16, cost: 200, label: "Water Can +4 (16 max)" },
   { cap: 20, cost: 500, label: "Water Can +4 (20 max)" },
 ];
-const WEATHER_TYPES = ["sunny", "rainy", "drought"];
-const WEATHER_LABELS = { sunny: "\u2600\ufe0f Sunny", rainy: "\ud83c\udf27\ufe0f Rainy", drought: "\ud83c\udf35 Drought" };
-const WEATHER_CLASSES = { sunny: "weather-sunny", rainy: "weather-rainy", drought: "weather-drought" };
-const WEATHER_INTERVAL_MIN = 300000;
-const WEATHER_INTERVAL_MAX = 900000;
+const WEATHER_TYPES = ["sunny", "rainy", "drought", "snowy"];
+const WEATHER_LABELS = { sunny: "\u2600\ufe0f Sunny", rainy: "\ud83c\udf27\ufe0f Rainy", drought: "\ud83c\udf35 Drought", snowy: "\u2744\ufe0f Snowy" };
+const WEATHER_CLASSES = { sunny: "weather-sunny", rainy: "weather-rainy", drought: "weather-drought", snowy: "weather-snowy" };
+const WEATHER_INTERVAL_MIN = 120000; // 2 min
+const WEATHER_INTERVAL_MAX = 300000; // 5 min
 
 const POT_COLORS = {
   terracotta: { rH: "#e8724e", rM: "#c9522a", rD: "#a83e18", bM: "#c24e26", bS: "#7a3010", deco: "" },
@@ -1585,6 +1757,9 @@ let G = {
   showcase: [null, null, null],
   gardenDecor: [],
   soundEnabled: true,
+  musicEnabled: false, // off by default — opt-in
+  breedDiscovered: [],
+  mutations: [],
 };
 
 const SAVE_KEY = "yurieGarden_v1";
@@ -1622,6 +1797,9 @@ function saveG() {
     showcase: G.showcase,
     gardenDecor: G.gardenDecor,
     soundEnabled: G.soundEnabled,
+    musicEnabled: G.musicEnabled,
+    breedDiscovered: G.breedDiscovered,
+    mutations: G.mutations,
   };
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify(s));
@@ -1667,6 +1845,32 @@ function loadG() {
       showcase: s.showcase ?? [null, null, null],
       gardenDecor: s.gardenDecor ?? [],
       soundEnabled: s.soundEnabled !== false,
+      musicEnabled: s.musicEnabled === true,
+      breedDiscovered: s.breedDiscovered ?? [],
+      mutations: s.mutations ?? [],
+    });
+    // Rebuild dynamic hybrid FLOWERS entries from save data
+    // Check seeds, inventory, plots, discovered for dyn_ keys
+    var allKeys = [].concat(
+      G.seeds.map(function(s) { return s.key; }),
+      G.inventory.map(function(i) { return i.key; }),
+      G.plots.filter(function(p) { return p.key; }).map(function(p) { return p.key; }),
+      G.discovered
+    );
+    allKeys.forEach(function(k) {
+      if (k && k.indexOf("dyn_") === 0 && !FLOWERS[k]) {
+        // Parse parent keys from dyn_key1_key2
+        var parts = k.slice(4).split("_");
+        // Find the split point — keys can contain underscores so try all splits
+        for (var si = 1; si < parts.length; si++) {
+          var p1 = parts.slice(0, si).join("_");
+          var p2 = parts.slice(si).join("_");
+          if (FLOWERS[p1] && FLOWERS[p2]) {
+            getOrCreateDynamicHybrid(p1, p2);
+            break;
+          }
+        }
+      }
     });
     return true;
   } catch (e) {
@@ -2697,7 +2901,7 @@ function initGame() {
     renderShowcase();
     applyGardenDecor();
     _soundEnabled = G.soundEnabled;
-    checkDailyLogin();
+    // Daily login is triggered after title screen enter (not here — avoids double-call)
     // Add sound toggle button
     var toggle = document.createElement("div");
     toggle.className = "sound-toggle";
@@ -2710,12 +2914,35 @@ function initGame() {
     };
     document.body.appendChild(toggle);
 
+    // Music toggle button
+    var musicToggle = document.createElement("div");
+    musicToggle.className = "music-toggle";
+    musicToggle.textContent = G.musicEnabled ? "\ud83c\udfb5" : "\ud83c\udfb5\u0336";
+    musicToggle.style.opacity = G.musicEnabled ? "1" : "0.5";
+    musicToggle.onclick = function() {
+      _musicEnabled = !_musicEnabled;
+      G.musicEnabled = _musicEnabled;
+      if (_musicEnabled) {
+        startAmbientMusic();
+        updateMusicForWeather();
+      } else {
+        stopAmbientMusic();
+      }
+      musicToggle.textContent = _musicEnabled ? "\ud83c\udfb5" : "\ud83c\udfb5\u0336";
+      musicToggle.style.opacity = _musicEnabled ? "1" : "0.5";
+      saveG();
+    };
+    document.body.appendChild(musicToggle);
+
     // Title screen → Enter button
     var titleScreen = document.getElementById("titleScreen");
     var titleBtn = document.getElementById("titleEnter");
     if (titleBtn) {
       function enterGame() {
         getAudioCtx(); // unlock audio on first interaction
+        // Start ambient music if enabled
+        _musicEnabled = G.musicEnabled;
+        if (_musicEnabled) startAmbientMusic();
         playSound("bloom");
         haptic(50);
         titleScreen.classList.add("hidden");
@@ -2766,6 +2993,13 @@ function updatePlotCard(i) {
   if (grid.children[i]) {
     grid.replaceChild(buildPlotCard(G.plots[i], i), grid.children[i]);
   }
+  // Refresh adjacent pots so hybridize badges update
+  var adj = getAdjacentBloomed(i);
+  [i - 1, i + 1, i - 3, i + 3].forEach(function(n) {
+    if (n >= 0 && n < G.plots.length && grid.children[n]) {
+      grid.replaceChild(buildPlotCard(G.plots[n], n), grid.children[n]);
+    }
+  });
 }
 function potCardSVG(p) {
   var colors = POT_COLORS[G.potStyle] || POT_COLORS.terracotta;
@@ -2890,8 +3124,11 @@ function buildPlotCard(p, i) {
       : p.state === "bloomed"
         ? "\u2728 " + FLOWERS[p.key].name
         : STAGE_NAMES[p.stage];
+  var hybBadge = (p.state === "bloomed" && canHybridize(i))
+    ? '<div class="hybridize-badge">\ud83e\uddec Hybridize!</div>'
+    : "";
   div.innerHTML =
-    potCardSVG(p) + (lbl ? `<div class="pot-lbl">${lbl}</div>` : "");
+    potCardSVG(p) + (lbl ? `<div class="pot-lbl">${lbl}</div>` : "") + hybBadge;
   return div;
 }
 function clickPlot(i) {
@@ -2948,9 +3185,14 @@ function waterPlot(i) {
       setTimeout(() => {
         updatePlotCard(i);
         confettiBurst();
+        // Spawn petal-colored bloom particles
+        var grid2 = document.getElementById("gardenGrid");
+        var plotEl = grid2 ? grid2.children[i] : null;
+        var bKey = G.plots[i].key;
+        spawnBloomParticles(plotEl, FLOWERS[bKey] ? FLOWERS[bKey].petal : "#f48fb1");
         playSound("bloom");
         haptic(80);
-        openBloomModal(i);
+        toast(FLOWERS[G.plots[i].key].name + " bloomed! Tap it! \ud83c\udf38", 2500);
       }, 350);
     } else {
       updatePlotCard(i);
@@ -2977,7 +3219,7 @@ function renderTray() {
   const tray = document.getElementById("trayItems");
   if (!G.seeds.length) {
     tray.innerHTML =
-      '<div class="tray-empty">Open a seed packet to start growing! 📦</div>';
+      '<div class="tray-empty">No seeds! Open a packet from the Packets button above.</div>';
     return;
   }
   tray.innerHTML = "";
@@ -3011,11 +3253,18 @@ function openPktModal() {
   document.getElementById("pktSelector").innerHTML = types
     .map((t) => {
       const cnt = G.pkt[t] || 0;
-      return `<div class="pkt-sel-card pkt-${t}${cnt ? "" : " empty"}" onclick="selectPktType('${t}')">
-      <span class="pkt-sel-icon">${PKT_ICON[t]}</span>
-      <span class="pkt-sel-name">${PKT_LABEL[t]} Packet</span>
-      <span class="pkt-sel-cnt${cnt ? "" : " none"}">×${cnt}</span>
-    </div>`;
+      var btns = [1, 3, 5].map(function(n) {
+        var canOpen = cnt >= n;
+        return '<button class="pkt-qty-btn' + (canOpen ? '' : ' disabled') + '" ' +
+          (canOpen ? 'onclick="selectPktType(\'' + t + '\',' + n + ')"' : 'disabled') +
+          '>Open ' + n + '</button>';
+      }).join('');
+      return '<div class="pkt-sel-card pkt-' + t + (cnt ? '' : ' empty') + '">' +
+        '<span class="pkt-sel-icon">' + PKT_ICON[t] + '</span>' +
+        '<span class="pkt-sel-name">' + PKT_LABEL[t] + '</span>' +
+        '<span class="pkt-sel-cnt' + (cnt ? '' : ' none') + '">\u00d7' + cnt + '</span>' +
+        (cnt ? '<div class="pkt-qty-row">' + btns + '</div>' : '') +
+      '</div>';
     })
     .join("");
   document.getElementById("pktSelector").style.display = "";
@@ -3024,55 +3273,111 @@ function openPktModal() {
   document.getElementById("pktTitle").textContent = "🎁 Open a Packet";
   openModal("pktOverlay");
 }
-function selectPktType(type) {
-  if (!G.pkt[type] || G.opening) return;
+function selectPktType(type, qty) {
+  qty = qty || 1;
+  if (G.pkt[type] < qty || G.opening) return;
   G.pendingPktType = type;
   G.opening = true;
-  // Decrement immediately to prevent double-spend, but defer save until key is revealed
-  G.pkt[type]--;
+  G.pkt[type] -= qty;
   updateHUD();
+  playSound("packet_tear"); // paper tearing SFX
   document.getElementById("pktSelector").style.display = "none";
   document.getElementById("pktTitle").textContent =
-    `${PKT_ICON[type]} Open a ${PKT_LABEL[type]} Packet`;
-  const card = document.getElementById("pktCardEl");
-  card.className = `pkt-card t-${type}`;
-  card.querySelector(".pkt-icon").textContent = PKT_ICON[type];
-  document.getElementById("pktOpenWrap").style.display = "";
-  document.getElementById("pktHint").style.display = "";
-  playSound("packet_" + type);
-  setTimeout(() => {
-    card.classList.add("shaking");
-    setTimeout(() => {
-      G.openedKey = weightedRandom(type);
-      saveG(); // save now that seed is determined — packet spend is committed
-      const f = FLOWERS[G.openedKey];
-      playSound("reveal_" + f.rarity);
-      haptic(f.rarity === "legendary" || f.rarity === "unique" ? 100 : 40);
-      document.getElementById("pktOpenWrap").style.display = "none";
-      document.getElementById("resFlower").innerHTML =
-        `<div style="width:100%;height:100%">${flowerSVG(G.openedKey, MAX_STAGE)}</div>`;
-      document.getElementById("resName").textContent = f.name;
-      const rl = document.getElementById("resRarity");
-      rl.textContent = RARITY_LABEL[f.rarity];
-      rl.className = `res-rarity ${f.rarity}`;
-      const msgs = {
-        common: "A lovely flower for your garden! 🌸",
-        uncommon: "A beautiful find — how wonderful! 💕",
-        rare: `✨ A rare ${f.name}! A stunning bloom, so hard to find! ✨`,
-        legendary: `🌟 OH WOW! A legendary ${f.name}! One of the rarest flowers — just like you, one of a kind! 🌟`,
-        unique: `💎 UNBELIEVABLE! A WHITE LILY — the UNIQUE flower! Only one in the entire garden. You are truly one of a kind! 🌟💎`,
-      };
-      document.getElementById("resMsg").textContent =
-        msgs[f.rarity] || "A beautiful flower! 🌸";
-      document.getElementById("pktResult").classList.add("show");
-      G.opening = false;
-      if (f.rarity === "legendary" || f.rarity === "unique") {
-        multiSparkle();
-      }
-      if (f.rarity === "unique") confettiBurst();
-      else spawnSparkle(window.innerWidth / 2, window.innerHeight * 0.4, "✨");
-    }, 540);
-  }, 100);
+    PKT_ICON[type] + " Opening " + qty + " " + PKT_LABEL[type] + (qty > 1 ? " Packets" : " Packet");
+
+  if (qty === 1) {
+    // Single packet — show animation
+    var card = document.getElementById("pktCardEl");
+    card.className = "pkt-card t-" + type;
+    card.querySelector(".pkt-icon").textContent = PKT_ICON[type];
+    document.getElementById("pktOpenWrap").style.display = "";
+    document.getElementById("pktHint").style.display = "";
+    playSound("packet_" + type);
+    setTimeout(function() {
+      card.classList.add("shaking");
+      setTimeout(function() {
+        G.openedKey = weightedRandom(type);
+        saveG();
+        var f = FLOWERS[G.openedKey];
+        playSound("reveal_" + f.rarity);
+        haptic(f.rarity === "legendary" || f.rarity === "unique" ? 100 : 40);
+        document.getElementById("pktOpenWrap").style.display = "none";
+        document.getElementById("resFlower").innerHTML =
+          '<div style="width:100%;height:100%">' + flowerSVG(G.openedKey, MAX_STAGE) + '</div>';
+        document.getElementById("resName").textContent = f.name;
+        var rl = document.getElementById("resRarity");
+        rl.textContent = RARITY_LABEL[f.rarity];
+        rl.className = "res-rarity " + f.rarity;
+        document.getElementById("resMsg").textContent = getRevealMsg(f);
+        document.getElementById("pktResult").classList.add("show");
+        G.opening = false;
+        if (f.rarity === "legendary" || f.rarity === "unique") multiSparkle();
+        if (f.rarity === "unique") confettiBurst();
+        else spawnSparkle(window.innerWidth / 2, window.innerHeight * 0.4, "\u2728");
+      }, 540);
+    }, 100);
+  } else {
+    // Multi-packet — open all at once, show results list
+    document.getElementById("pktOpenWrap").style.display = "none";
+    document.getElementById("pktHint").style.display = "none";
+    var results = [];
+    for (var i = 0; i < qty; i++) {
+      var key = weightedRandom(type);
+      results.push(key);
+      if (!G.discovered.includes(key)) G.discovered.push(key);
+      G.seeds.push({ id: G.seedId++, key: key });
+    }
+    saveG();
+    // Find best rarity for sound
+    var rarityOrder = ["unique", "legendary", "rare", "uncommon", "common"];
+    var bestRarity = "common";
+    results.forEach(function(k) {
+      var r = FLOWERS[k].rarity;
+      if (rarityOrder.indexOf(r) < rarityOrder.indexOf(bestRarity)) bestRarity = r;
+    });
+    playSound("reveal_" + bestRarity);
+    haptic(bestRarity === "legendary" || bestRarity === "unique" ? 100 : 40);
+    // Build result list
+    var resultEl = document.getElementById("pktResult");
+    resultEl.innerHTML = "";
+    results.forEach(function(key, idx) {
+      var f = FLOWERS[key];
+      var row = document.createElement("div");
+      row.className = "pkt-multi-result";
+      row.style.animationDelay = (idx * 0.1) + "s";
+      row.innerHTML =
+        '<div class="pkt-multi-flower">' + flowerSVG(key, MAX_STAGE) + '</div>' +
+        '<div class="pkt-multi-info">' +
+          '<div class="pkt-multi-name">' + f.name + '</div>' +
+          '<div class="res-rarity ' + f.rarity + '" style="font-size:.7em;padding:3px 10px;">' + RARITY_LABEL[f.rarity] + '</div>' +
+        '</div>';
+      resultEl.appendChild(row);
+    });
+    var allBtn = document.createElement("button");
+    allBtn.className = "btn-collect";
+    allBtn.textContent = "All " + qty + " seeds added! \u2714";
+    allBtn.onclick = function() { closeModal("pktOverlay"); };
+    allBtn.style.animationDelay = (qty * 0.1 + 0.2) + "s";
+    resultEl.appendChild(allBtn);
+    resultEl.classList.add("show");
+    G.openedKey = null; // already auto-collected
+    G.opening = false;
+    renderTray();
+    if (bestRarity === "unique") confettiBurst();
+    else if (bestRarity === "legendary" || bestRarity === "rare") multiSparkle();
+  }
+}
+
+function getRevealMsg(f) {
+  var msgs = {
+    common: "A lovely flower for your garden!",
+    uncommon: "A beautiful find \u2014 how wonderful!",
+    rare: "\u2728 A rare " + f.name + "! Stunning!",
+    legendary: "\ud83c\udf1f A legendary " + f.name + "! One of a kind!",
+    unique: "\ud83d\udc8e The UNIQUE flower! Unbelievable!",
+    hybrid: "\ud83e\uddec A hybrid " + f.name + "!",
+  };
+  return msgs[f.rarity] || "A beautiful flower!";
 }
 function collectSeed() {
   if (!G.openedKey) return;
@@ -3146,7 +3451,7 @@ function openBloomModal(i) {
   badge.className = `bloom-badge ${f.rarity}`;
 
   // Atmospheric glow color keyed to rarity
-  const glowColors = { common: "#9a9488", uncommon: "#9575cd", rare: "#5c7fbf", legendary: "#d4a03a", unique: "#b03068" };
+  const glowColors = { common: "#9a9488", uncommon: "#9575cd", rare: "#5c7fbf", legendary: "#d4a03a", unique: "#b03068", hybrid: "#66bb6a" };
   document.getElementById("bloomGlow").style.background = glowColors[f.rarity] || "#9a9488";
 
   // Rarity-correct sub message
@@ -3162,14 +3467,19 @@ function openBloomModal(i) {
             : `Beautiful! Your ${f.name.toLowerCase()} is glowing! 🌸`;
 
   var sellBtn = document.getElementById("btnSell");
-  if (canHybridize(i)) {
+  var canHyb = canHybridize(i);
+  if (canHyb) {
     sellBtn.textContent = "\ud83e\uddec Hybridize with neighbor";
     sellBtn.onclick = function() { closeModal("bloomOverlay"); openHybridModal(i); };
+    sellBtn.style.display = "";
   } else {
-    sellBtn.textContent = "\ud83d\udca1 Store it \u2014 sell to NPCs for more!";
-    sellBtn.onclick = storeFlower;
+    sellBtn.style.display = "none";
   }
   document.getElementById("btnStore").onclick = storeFlower;
+  document.getElementById("btnLeave").onclick = function() {
+    closeModal("bloomOverlay");
+    toast("Left in pot \u2014 hybridize when a neighbor blooms! \ud83c\udf38", 2000);
+  };
   openModal("bloomOverlay");
 }
 function storeFlower() {
@@ -3180,6 +3490,7 @@ function storeFlower() {
   G.seedId++;
   G.inventory.push({ key, uid: G.seedId, storedAt: Date.now() });
   clearPlot(G.bloomPlot);
+  G.bloomPlot = null;
   closeModal("bloomOverlay");
   updateHUD();
   saveG();
@@ -3197,7 +3508,7 @@ function openInventoryModal() {
   grid.innerHTML = "";
   if (!G.inventory.length) {
     grid.innerHTML =
-      '<div class="tray-empty">Your Garden House is empty.<br>Store bloomed flowers to keep them! 🌸</div>';
+      '<div class="tray-empty">Garden House is empty.<br>Tap a bloomed flower and choose Store to keep it here for selling to NPCs!</div>';
     openModal("invOverlay");
     return;
   }
@@ -3273,6 +3584,7 @@ function getFlowerHint(f) {
     rare: "Rare packet",
     legendary: "Keep opening!",
     unique: "Ultra rare\u2026",
+    hybrid: "Hybridize!",
   };
   return hints[f.rarity] || "???";
 }
@@ -3432,6 +3744,19 @@ function openJournalModal() {
     "darkHellebore",
     // Unique (1)
     "whiteLily",
+    // Hybrid (12) — only from hybridization
+    "sunsetRose",
+    "moonlightLily",
+    "crimsonOrchid",
+    "goldenDaisy",
+    "frostedCherry",
+    "shadowIris",
+    "coralPeony",
+    "stardustLavender",
+    "emeraldTulip",
+    "phoenixSunflower",
+    "crystalViolet",
+    "midnightPoppy",
   ];
   const grid = document.getElementById("jnlGrid");
   grid.innerHTML = "";
@@ -4075,12 +4400,10 @@ function weightedRandom(type = "common") {
 // ══════════════════════════════════════════════════════════
 // NPC FLOWER SHOP SYSTEM
 // ══════════════════════════════════════════════════════════
-const NPC_NAMES = [
-  "Hana","Lily","Rose","Daisy","Iris","Violet","Jasmine","Flora",
-  "Ivy","Poppy","Dahlia","Willow","Sakura","Fern","Sage","Meadow",
-  "Clover","Briar","Azalea","Primrose","Marigold","Wren","Lark","Robin"
-];
-const NPC_AVATARS = ["\ud83d\udc69","\ud83d\udc68","\ud83d\udc75","\ud83d\udc74","\ud83d\udc67","\ud83d\udc66","\ud83e\uddd1","\ud83d\udc71"];
+var NPC_FEMALE_NAMES = ["Hana","Lily","Rose","Daisy","Iris","Violet","Jasmine","Flora","Ivy","Poppy","Sakura","Azalea","Primrose","Meadow"];
+var NPC_MALE_NAMES = ["Oliver","James","Finn","Leo","Hugo","Felix","Theo","Max","Kai","Ren","Sage","Briar","Lark","Robin"];
+var NPC_FEMALE_AVATARS = ["\ud83d\udc69","\ud83d\udc69\u200d\ud83e\uddb0","\ud83d\udc75","\ud83d\udc67","\ud83d\udc71\u200d\u2640\ufe0f"];
+var NPC_MALE_AVATARS = ["\ud83d\udc68","\ud83d\udc68\u200d\ud83e\uddb0","\ud83d\udc74","\ud83d\udc66","\ud83d\udc71"];
 const NPC_MAX = 3;
 const NPC_SPAWN_MIN = 30000; // 30s minimum between spawns
 const NPC_SPAWN_MAX = 75000; // 75s max
@@ -4089,17 +4412,27 @@ const NPC_PATIENCE_MAX = 300000; // 5 min
 
 function createNPC() {
   if (G.npcs.length >= NPC_MAX) return;
-  var allKeys = Object.keys(FLOWERS);
-  var requestKey = allKeys[Math.floor(Math.random() * allKeys.length)];
+  // 70% chance to request something the player has in inventory
+  var requestKey;
+  var invKeys = G.inventory.map(function(item) { return item.key; });
+  var uniqueInvKeys = invKeys.filter(function(k, i) { return invKeys.indexOf(k) === i; });
+  if (uniqueInvKeys.length > 0 && Math.random() < 0.7) {
+    requestKey = uniqueInvKeys[Math.floor(Math.random() * uniqueInvKeys.length)];
+  } else {
+    // Pick from all non-hybrid flowers (hybrids are too specific)
+    var allKeys = Object.keys(FLOWERS).filter(function(k) { return FLOWERS[k].rarity !== "hybrid"; });
+    requestKey = allKeys[Math.floor(Math.random() * allKeys.length)];
+  }
   var f = FLOWERS[requestKey];
   var rarityMult = { common: 1.3, uncommon: 1.6, rare: 2, legendary: 2.5, unique: 3 };
   var reward = Math.round(f.sell * (rarityMult[f.rarity] || 1.5) * (0.9 + Math.random() * 0.4));
   var isVip = Math.random() < 0.05; // 5% VIP chance
   if (isVip) reward = Math.round(f.sell * 5 * (0.9 + Math.random() * 0.3));
+  var _npcGender = Math.random() < 0.5 ? "f" : "m";
   var npc = {
     id: G.npcIdCounter++,
-    name: NPC_NAMES[Math.floor(Math.random() * NPC_NAMES.length)],
-    avatar: NPC_AVATARS[Math.floor(Math.random() * NPC_AVATARS.length)],
+    name: _npcGender === "f" ? NPC_FEMALE_NAMES[Math.floor(Math.random() * NPC_FEMALE_NAMES.length)] : NPC_MALE_NAMES[Math.floor(Math.random() * NPC_MALE_NAMES.length)],
+    avatar: _npcGender === "f" ? NPC_FEMALE_AVATARS[Math.floor(Math.random() * NPC_FEMALE_AVATARS.length)] : NPC_MALE_AVATARS[Math.floor(Math.random() * NPC_MALE_AVATARS.length)],
     requestKey: requestKey,
     requestRarity: null,
     reward: reward,
@@ -4121,7 +4454,7 @@ function renderNPCs() {
   if (!G.npcs.length) {
     var empty = document.createElement("div");
     empty.className = "npc-empty";
-    empty.textContent = "No customers right now\u2026 they'll arrive soon!";
+    empty.textContent = "No customers yet\u2026 they visit every 30\u201375 seconds!";
     section.appendChild(empty);
     return;
   }
@@ -4166,6 +4499,12 @@ function renderNPCs() {
     info.appendChild(timer);
     card.appendChild(info);
 
+    // Show the flower they want
+    var flowerPreview = document.createElement("div");
+    flowerPreview.style.cssText = "width:36px;height:44px;flex-shrink:0;";
+    flowerPreview.innerHTML = flowerSVG(npc.requestKey, MAX_STAGE);
+    card.appendChild(flowerPreview);
+
     var rew = document.createElement("div");
     rew.className = "npc-reward";
     var ic = document.createElement("span");
@@ -4193,7 +4532,7 @@ function openNPCSellModal(npcId) {
   if (!matches.length) {
     var noMatch = document.createElement("div");
     noMatch.className = "tray-empty";
-    noMatch.textContent = "You don't have a " + f.name + " in your Garden House. Grow one and store it!";
+    noMatch.textContent = "No " + f.name + " in your Garden House. Grow one, let it bloom, tap it and choose Store!";
     list.appendChild(noMatch);
   } else {
     matches.forEach(function(item) {
@@ -4282,14 +4621,21 @@ function tickNPCs() {
 // ══════════════════════════════════════════════════════════
 function tickWeather() {
   var now = Date.now();
-  if (!G.weatherTimer) G.weatherTimer = now;
-  var elapsed = now - G.weatherTimer;
-  var interval = WEATHER_INTERVAL_MIN + Math.random() * (WEATHER_INTERVAL_MAX - WEATHER_INTERVAL_MIN);
-  if (elapsed > interval) {
+  if (!G.weatherTimer) G.weatherTimer = now + WEATHER_INTERVAL_MIN + Math.random() * (WEATHER_INTERVAL_MAX - WEATHER_INTERVAL_MIN);
+  if (now >= G.weatherTimer) {
     var oldWeather = G.weather;
-    var options = WEATHER_TYPES.filter(function(w) { return w !== oldWeather; });
-    G.weather = options[Math.floor(Math.random() * options.length)];
-    G.weatherTimer = now;
+    // Weighted selection: sunny 40%, rainy 30%, drought 15%, snowy 15%
+    var weights = { sunny: 40, rainy: 30, drought: 15, snowy: 15 };
+    weights[oldWeather] = 0; // never repeat same weather
+    var pool = [], total = 0;
+    WEATHER_TYPES.forEach(function(w) { total += weights[w]; });
+    var r = Math.random() * total, acc = 0;
+    G.weather = "sunny"; // fallback
+    for (var wi = 0; wi < WEATHER_TYPES.length; wi++) {
+      acc += weights[WEATHER_TYPES[wi]];
+      if (r < acc) { G.weather = WEATHER_TYPES[wi]; break; }
+    }
+    G.weatherTimer = now + WEATHER_INTERVAL_MIN + Math.random() * (WEATHER_INTERVAL_MAX - WEATHER_INTERVAL_MIN);
     saveG();
     if (G.weather === "rainy" && G.water < G.maxWater) {
       G.water = Math.min(G.maxWater, G.water + 1);
@@ -4297,7 +4643,11 @@ function tickWeather() {
       saveG();
     }
     playSound("weather");
-    toast("Weather changed: " + WEATHER_LABELS[G.weather], 2000);
+    if (G.weather === "snowy") {
+      toast("\u2744\ufe0f Snow! Your growing flowers may get frosty!", 3000);
+    } else {
+      toast("Weather changed: " + WEATHER_LABELS[G.weather], 2000);
+    }
     checkAchievements();
   }
   renderWeather();
@@ -4308,6 +4658,76 @@ function renderWeather() {
   if (!bar) return;
   bar.textContent = WEATHER_LABELS[G.weather] || WEATHER_LABELS.sunny;
   bar.className = "weather-bar " + (WEATHER_CLASSES[G.weather] || WEATHER_CLASSES.sunny);
+  // Weather-responsive sway intensity
+  var swayMap = { sunny: 1.5, rainy: 2.5, drought: 0.5, snowy: 1.8 };
+  document.documentElement.style.setProperty("--sway-intensity", swayMap[G.weather] || 1.5);
+  // Visual weather effects
+  renderWeatherFx();
+  // Update ambient music for weather
+  updateMusicForWeather();
+}
+
+// ── Visual Weather FX ────────────────────────────────────
+var _currentWeatherFx = "";
+function renderWeatherFx() {
+  var fx = document.getElementById("weatherFx");
+  if (!fx) return;
+  var w = G.weather;
+  if (w === _currentWeatherFx) return; // already showing
+  // Fade out old
+  fx.classList.add("weather-fx-fade");
+  fx.style.opacity = "0";
+  setTimeout(function() {
+    while (fx.firstChild) fx.removeChild(fx.firstChild);
+    _currentWeatherFx = w;
+    if (w === "rainy") {
+      for (var i = 0; i < 25; i++) {
+        var drop = document.createElement("div");
+        drop.className = "rain-drop";
+        var left = Math.random() * 100;
+        var h = 15 + Math.random() * 15;
+        var dur = 0.8 + Math.random() * 0.6;
+        var delay = Math.random() * 2;
+        drop.style.cssText = "left:" + left + "%;height:" + h + "px;animation-duration:" + dur + "s;animation-delay:-" + delay + "s;";
+        fx.appendChild(drop);
+      }
+    } else if (w === "sunny") {
+      var glow = document.createElement("div");
+      glow.className = "sun-glow";
+      fx.appendChild(glow);
+      var flareData = [
+        { top: 30, right: 20, sz: 12 },
+        { top: 80, right: 60, sz: 8 },
+        { top: 50, right: 5, sz: 16 },
+      ];
+      flareData.forEach(function(fd) {
+        var flare = document.createElement("div");
+        flare.className = "sun-flare";
+        flare.style.cssText = "top:" + fd.top + "px;right:" + fd.right + "px;width:" + fd.sz + "px;height:" + fd.sz + "px;animation-delay:" + (Math.random() * 2) + "s;";
+        fx.appendChild(flare);
+      });
+    } else if (w === "drought") {
+      var overlay = document.createElement("div");
+      overlay.className = "drought-overlay";
+      fx.appendChild(overlay);
+    } else if (w === "snowy") {
+      var tint = document.createElement("div");
+      tint.className = "frost-tint";
+      fx.appendChild(tint);
+      for (var si = 0; si < 20; si++) {
+        var flake = document.createElement("div");
+        flake.className = "snowflake";
+        var sl = Math.random() * 100;
+        var ssz = 4 + Math.random() * 5;
+        var sdur = 4 + Math.random() * 4;
+        var sdelay = Math.random() * 6;
+        var drift = (Math.random() - 0.5) * 40;
+        flake.style.cssText = "left:" + sl + "%;width:" + ssz + "px;height:" + ssz + "px;animation-duration:" + sdur + "s;animation-delay:-" + sdelay + "s;--snow-drift:" + drift + "px;";
+        fx.appendChild(flake);
+      }
+    }
+    fx.style.opacity = "1";
+  }, 300);
 }
 
 // Rain auto-waters: called in game tick
@@ -4322,7 +4742,9 @@ function rainAutoWater() {
 
 // How many waters needed per stage for current weather
 function watersNeeded() {
-  return G.weather === "drought" ? Math.ceil(STAGE_WATERS * 1.5) : STAGE_WATERS;
+  if (G.weather === "drought") return Math.ceil(STAGE_WATERS * 1.5);
+  if (G.weather === "sunny") return Math.max(2, STAGE_WATERS - 1); // sun speeds growth
+  return STAGE_WATERS;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -4372,12 +4794,25 @@ function openHybridModal(plotIdx) {
     info.appendChild(nm);
     var sub = document.createElement("div");
     sub.className = "pr-sub";
-    sub.textContent = "60% new seed \u00b7 30% rare seed \u00b7 10% fail";
+    var hasRecipe = !!findBreedRecipe(f1.kind, f2.kind);
+    sub.textContent = hasRecipe
+      ? "\u2728 Recipe match! \u00b7 5% mutation chance \u00b7 10% fail"
+      : "New hybrid \u00b7 5% mutation chance \u00b7 10% fail";
     info.appendChild(sub);
     row.appendChild(info);
     row.onclick = function() { doHybridize(plotIdx, ai); };
     content.appendChild(row);
   });
+  // Breeding Guide button
+  var guideWrap = document.createElement("div");
+  guideWrap.className = "breed-btn-wrap";
+  var guideBtn = document.createElement("button");
+  guideBtn.className = "tbtn tbtn-journal";
+  guideBtn.style.cssText = "margin-top:12px;font-size:.78em;padding:8px 16px;";
+  guideBtn.textContent = "\ud83e\uddec Breeding Guide";
+  guideBtn.onclick = function() { closeModal("hybridOverlay"); setTimeout(openBreedGuide, 200); };
+  guideWrap.appendChild(guideBtn);
+  content.appendChild(guideWrap);
   openModal("hybridOverlay");
 }
 
@@ -4386,7 +4821,9 @@ function doHybridize(idx1, idx2) {
   var f1 = FLOWERS[key1], f2 = FLOWERS[key2];
   var cost = Math.max(HYBRID_COST_BASE[f1.rarity] || 30, HYBRID_COST_BASE[f2.rarity] || 30);
   if (G.coins < cost) {
-    toast("Need " + cost + " coins to hybridize!", 2000);
+    closeModal("hybridOverlay");
+    toast("Not enough coins! Need " + cost + " to hybridize \ud83d\udcb0", 2500);
+    playSound("click");
     return;
   }
   G.coins -= cost;
@@ -4395,20 +4832,108 @@ function doHybridize(idx1, idx2) {
   clearPlot(idx2);
   playSound("hybrid");
   haptic(60);
+
+  var kind1 = f1.kind, kind2 = f2.kind;
+
+  // Check breed recipes first
+  var recipe = findBreedRecipe(kind1, kind2);
+  // Also check for pre-defined "golden" hybrid match
+  var goldenMatch = Object.keys(FLOWERS).filter(function(k) {
+    var h = FLOWERS[k];
+    if (!h.parents) return false;
+    return (h.parents.includes(kind1) && h.parents.includes(kind2));
+  });
+
   var roll = Math.random();
-  if (roll < 0.6) {
-    // Success: seed of one parent's species with other's rarity consideration
+  var mutationRoll = Math.random();
+  var isMutation = mutationRoll < 0.05; // 5% mutation chance
+
+  if (recipe && roll < 0.45) {
+    // Recipe match — weighted random from recipe outcomes
+    var totalW = 0;
+    recipe.forEach(function(r) { totalW += r.w; });
+    var rr = Math.random() * totalW, racc = 0;
+    var resultKey = recipe[0].key;
+    for (var ri = 0; ri < recipe.length; ri++) {
+      racc += recipe[ri].w;
+      if (rr < racc) { resultKey = recipe[ri].key; break; }
+    }
+    // Track breed discovery
+    var recipeKey = [kind1, kind2].sort().join("+");
+    if (!G.breedDiscovered.includes(recipeKey)) G.breedDiscovered.push(recipeKey);
+
+    if (isMutation && FLOWERS[resultKey]) {
+      // Mutation! Shift hue and create variant
+      var baseF = FLOWERS[resultKey];
+      var hueShift = 15 + Math.random() * 30;
+      if (Math.random() < 0.5) hueShift = -hueShift;
+      var mutPetal = shiftHue(baseF.petal, hueShift);
+      var mutPrefix = MUTATION_PREFIXES[Math.floor(Math.random() * MUTATION_PREFIXES.length)];
+      var mutName = mutPrefix + " " + baseF.name;
+      var mutKey = "mut_" + resultKey + "_" + Date.now();
+      FLOWERS[mutKey] = {
+        name: mutName, kind: baseF.kind, appearance: baseF.appearance,
+        rarity: "hybrid", w: 0, petal: mutPetal, stem: baseF.stem,
+        sell: Math.round(baseF.sell * 1.2), dynamic: true, mutation: true,
+        parent1: key1, parent2: key2,
+      };
+      G.seeds.push({ id: G.seedId++, key: mutKey });
+      G.hybridCount++;
+      G.mutations.push(mutKey);
+      if (!G.discovered.includes(mutKey)) G.discovered.push(mutKey);
+      playSound("mutation");
+      toast("\u2728 MUTATION: " + mutName + "! A unique color variant!", 3500);
+    } else {
+      G.seeds.push({ id: G.seedId++, key: resultKey });
+      G.hybridCount++;
+      if (!G.discovered.includes(resultKey)) G.discovered.push(resultKey);
+      playSound("reveal_legendary");
+      toast("\u2728 RECIPE HYBRID: " + FLOWERS[resultKey].name + "! \u2728", 3000);
+    }
+  } else if (goldenMatch.length > 0 && roll < 0.25) {
+    // Golden pre-defined hybrid
+    var hk = goldenMatch[Math.floor(Math.random() * goldenMatch.length)];
+    G.seeds.push({ id: G.seedId++, key: hk });
+    G.hybridCount++;
+    playSound("reveal_legendary");
+    toast("\u2728 RARE HYBRID: " + FLOWERS[hk].name + "! \u2728", 3000);
+  } else if (roll < 0.85) {
+    // Dynamic hybrid — unique name from parents
+    var dynKey = getOrCreateDynamicHybrid(key1, key2);
+
+    if (isMutation && FLOWERS[dynKey]) {
+      // Mutation on dynamic hybrid
+      var dBase = FLOWERS[dynKey];
+      var dShift = 15 + Math.random() * 30;
+      if (Math.random() < 0.5) dShift = -dShift;
+      var dPetal = shiftHue(dBase.petal, dShift);
+      var dPrefix = MUTATION_PREFIXES[Math.floor(Math.random() * MUTATION_PREFIXES.length)];
+      var dMutKey = "mut_" + dynKey + "_" + Date.now();
+      FLOWERS[dMutKey] = {
+        name: dPrefix + " " + dBase.name, kind: dBase.kind, appearance: dBase.appearance,
+        rarity: "hybrid", w: 0, petal: dPetal, stem: dBase.stem,
+        sell: Math.round(dBase.sell * 1.2), dynamic: true, mutation: true,
+        parent1: key1, parent2: key2,
+      };
+      G.seeds.push({ id: G.seedId++, key: dMutKey });
+      G.hybridCount++;
+      G.mutations.push(dMutKey);
+      if (!G.discovered.includes(dMutKey)) G.discovered.push(dMutKey);
+      playSound("mutation");
+      toast("\u2728 MUTATION: " + FLOWERS[dMutKey].name + "! Unique color!", 3500);
+    } else {
+      G.seeds.push({ id: G.seedId++, key: dynKey });
+      G.hybridCount++;
+      if (!G.discovered.includes(dynKey)) G.discovered.push(dynKey);
+      playSound("reveal_hybrid");
+      toast("\ud83e\uddec " + FLOWERS[dynKey].name + " created! A new species!", 3000);
+    }
+  } else if (roll < 0.95) {
+    // Seed of one parent
     var parentKey = Math.random() < 0.5 ? key1 : key2;
-    G.seeds.push({ id: G.seedId++, key: parentKey, hybrid: true });
+    G.seeds.push({ id: G.seedId++, key: parentKey });
     G.hybridCount++;
-    toast("Hybrid success! Got a " + FLOWERS[parentKey].name + " seed \ud83e\uddec", 2500);
-  } else if (roll < 0.9) {
-    // Rare seed
-    var rareKeys = Object.keys(FLOWERS).filter(function(k) { return FLOWERS[k].rarity === "rare"; });
-    var rk = rareKeys[Math.floor(Math.random() * rareKeys.length)];
-    G.seeds.push({ id: G.seedId++, key: rk, hybrid: true });
-    G.hybridCount++;
-    toast("Lucky hybrid! Got a rare " + FLOWERS[rk].name + " seed! \u2728", 2500);
+    toast("Got a " + FLOWERS[parentKey].name + " seed \ud83e\uddec", 2500);
   } else {
     // Fail — refund coins
     G.coins += cost;
@@ -4420,6 +4945,109 @@ function doHybridize(idx1, idx2) {
   saveG();
   closeModal("hybridOverlay");
   checkAchievements();
+}
+
+// ══════════════════════════════════════════════════════════
+// BREEDING GUIDE
+// ══════════════════════════════════════════════════════════
+function openBreedGuide() {
+  var grid = document.getElementById("breedGrid");
+  var prog = document.getElementById("breedProg");
+  while (grid.firstChild) grid.removeChild(grid.firstChild);
+
+  var recipeKeys = Object.keys(BREED_RECIPES);
+  var discovered = G.breedDiscovered || [];
+  var discCount = 0;
+
+  recipeKeys.forEach(function(rk) {
+    var kinds = rk.split("+");
+    var isDiscovered = discovered.includes(rk);
+    if (isDiscovered) discCount++;
+
+    var card = document.createElement("div");
+    card.className = "breed-card" + (isDiscovered ? " discovered" : "");
+
+    // Parent display
+    var parents = document.createElement("div");
+    parents.className = "breed-parents";
+
+    // Find a sample flower of each kind for SVG preview
+    var sample1 = findSampleFlowerByKind(kinds[0]);
+    var sample2 = findSampleFlowerByKind(kinds[1]);
+
+    var svg1 = document.createElement("div");
+    svg1.style.cssText = "width:32px;height:40px;flex-shrink:0;";
+    if (sample1) {
+      svg1.insertAdjacentHTML("beforeend", flowerSVG(sample1, MAX_STAGE));
+    } else {
+      svg1.textContent = "\ud83c\udf3a";
+    }
+    parents.appendChild(svg1);
+
+    var plus = document.createElement("span");
+    plus.className = "breed-plus";
+    plus.textContent = "+";
+    parents.appendChild(plus);
+
+    var svg2 = document.createElement("div");
+    svg2.style.cssText = "width:32px;height:40px;flex-shrink:0;";
+    if (sample2) {
+      svg2.insertAdjacentHTML("beforeend", flowerSVG(sample2, MAX_STAGE));
+    } else {
+      svg2.textContent = "\ud83c\udf3a";
+    }
+    parents.appendChild(svg2);
+    card.appendChild(parents);
+
+    // Arrow
+    var arrow = document.createElement("span");
+    arrow.className = "breed-arrow";
+    arrow.textContent = "\u2192";
+    card.appendChild(arrow);
+
+    // Result
+    var result = document.createElement("div");
+    result.className = "breed-result";
+    if (isDiscovered) {
+      var outcomes = BREED_RECIPES[rk];
+      outcomes.forEach(function(o) {
+        var nm = document.createElement("div");
+        nm.className = "breed-result-name";
+        nm.textContent = FLOWERS[o.key] ? FLOWERS[o.key].name : o.key;
+        result.appendChild(nm);
+      });
+    } else {
+      var hint = document.createElement("div");
+      hint.className = "breed-result-unknown";
+      hint.textContent = "???";
+      result.appendChild(hint);
+      var hintText = document.createElement("div");
+      hintText.className = "breed-result-hint";
+      var kd = KIND_DISPLAY || {};
+      hintText.textContent = "Try " + (kd[kinds[0]] || kinds[0]) + " \u00d7 " + (kd[kinds[1]] || kinds[1]);
+      result.appendChild(hintText);
+    }
+    card.appendChild(result);
+    grid.appendChild(card);
+  });
+
+  prog.textContent = discCount + " / " + recipeKeys.length + " recipes discovered";
+  if (G.mutations && G.mutations.length > 0) {
+    prog.textContent += " \u00b7 " + G.mutations.length + " mutation" + (G.mutations.length === 1 ? "" : "s");
+  }
+  openModal("breedOverlay");
+}
+
+function findSampleFlowerByKind(kind) {
+  var keys = Object.keys(FLOWERS);
+  for (var i = 0; i < keys.length; i++) {
+    if (FLOWERS[keys[i]].kind === kind && FLOWERS[keys[i]].w > 0) return keys[i];
+  }
+  // fallback: any flower of that kind
+  for (var j = 0; j < keys.length; j++) {
+    if (FLOWERS[keys[j]].kind === kind) return keys[j];
+  }
+  return null;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -4446,7 +5074,7 @@ var ACHIEVEMENTS = [
   { id:"bloom100", name:"Century Bloom", desc:"Bloom 100 flowers", icon:"\ud83c\udfc6", reward:100, check:function(){return G.totalBlooms>=100;} },
   { id:"fullgarden", name:"Full Garden", desc:"Fill every pot at once", icon:"\ud83c\udf3a", reward:30, check:function(){return G.plots.every(function(p){return p.state!=="empty";});} },
   { id:"speed", name:"Speed Bloom", desc:"Have 3+ bloomed at once", icon:"\u26a1", reward:20, check:function(){return G.plots.filter(function(p){return p.state==="bloomed";}).length>=3;} },
-  { id:"patience", name:"Patient Gardener", desc:"Have 6+ pots growing", icon:"\ud83e\uddd1\u200d\ud83c\udf3e", reward:25, check:function(){return G.plots.filter(function(p){return p.state==="growing";}).length>=6;} },
+  { id:"patience", name:"Patient Gardener", desc:"Have 6+ pots growing", icon:"\ud83c\udf3e", reward:25, check:function(){return G.plots.filter(function(p){return p.state==="growing";}).length>=6;} },
   { id:"water100", name:"Water Wizard", desc:"Use 100 total waters", icon:"\ud83d\udca7", reward:20, check:function(){return G.totalWaters>=100;} },
   { id:"droughtbloom", name:"Drought Survivor", desc:"Bloom during drought", icon:"\ud83c\udf35", reward:30, check:function(){return G.weather==="drought"&&G.plots.some(function(p){return p.state==="bloomed";});} },
   { id:"rainbloom5", name:"Rain Dancer", desc:"Bloom 5+ flowers in rain", icon:"\ud83c\udf27\ufe0f", reward:25, check:function(){return false;} }, // tracked via flag
@@ -4457,7 +5085,7 @@ var ACHIEVEMENTS = [
   { id:"alllegendary", name:"Living Legend", desc:"Discover all legendary flowers", icon:"\ud83c\udf1f", reward:100, check:function(){var ls=Object.keys(FLOWERS).filter(function(k){return FLOWERS[k].rarity==="legendary";});return ls.every(function(k){return G.discovered.includes(k);});} },
   { id:"unique", name:"One of a Kind", desc:"Discover the unique flower", icon:"\ud83d\udc8e", reward:75, check:function(){return Object.keys(FLOWERS).filter(function(k){return FLOWERS[k].rarity==="unique";}).some(function(k){return G.discovered.includes(k);});} },
   { id:"rainbow", name:"Rainbow Garden", desc:"Own 5+ different species in inventory", icon:"\ud83c\udf08", reward:20, check:function(){var kinds=new Set(G.inventory.map(function(i){return FLOWERS[i.key].kind;}));return kinds.size>=5;} },
-  { id:"specialist", name:"Species Specialist", desc:"Discover all colors of one species", icon:"\ud83e\uddea", reward:30, check:function(){var byKind={};Object.entries(FLOWERS).forEach(function(e){var k=e[0],v=e[1];byKind[v.kind]=byKind[v.kind]||[];byKind[v.kind].push(k);});return Object.values(byKind).some(function(keys){return keys.length>=3&&keys.every(function(k){return G.discovered.includes(k);});});} },
+  { id:"specialist", name:"Species Specialist", desc:"Discover all colors of one species", icon:"\ud83d\udd2c", reward:30, check:function(){var byKind={};Object.entries(FLOWERS).forEach(function(e){var k=e[0],v=e[1];byKind[v.kind]=byKind[v.kind]||[];byKind[v.kind].push(k);});return Object.values(byKind).some(function(keys){return keys.length>=3&&keys.every(function(k){return G.discovered.includes(k);});});} },
   { id:"rare5", name:"Rare Hunter", desc:"Discover 5 rare flowers", icon:"\u2b50", reward:25, check:function(){return G.discovered.filter(function(k){return FLOWERS[k]&&FLOWERS[k].rarity==="rare";}).length>=5;} },
   { id:"allcommon", name:"Common Collector", desc:"Discover all common flowers", icon:"\ud83c\udfe1", reward:40, check:function(){var cs=Object.keys(FLOWERS).filter(function(k){return FLOWERS[k].rarity==="common";});return cs.every(function(k){return G.discovered.includes(k);});} },
   { id:"fulljournal", name:"Full Journal", desc:"Discover every flower (100%)", icon:"\ud83d\udcd6", reward:200, check:function(){return G.discovered.length>=Object.keys(FLOWERS).length;} },
@@ -4473,14 +5101,14 @@ var ACHIEVEMENTS = [
   { id:"bulk5", name:"Bulk Dealer", desc:"Sell 5 flowers total", icon:"\ud83d\udce6", reward:15, check:function(){return G.totalSold>=5;} },
   { id:"sell50", name:"Haggler", desc:"Sell 50 flowers total", icon:"\ud83e\udd1d", reward:40, check:function(){return G.totalSold>=50;} },
   // Garden (31-40)
-  { id:"pot3", name:"Expansion I", desc:"Buy your 3rd pot", icon:"\ud83e\udeb4", reward:15, check:function(){return G.plots.length>=3;} },
-  { id:"pot6", name:"Expansion II", desc:"Buy your 6th pot", icon:"\ud83e\udeb4", reward:30, check:function(){return G.plots.length>=6;} },
+  { id:"pot3", name:"Expansion I", desc:"Buy your 3rd pot", icon:"\ud83c\udf31", reward:15, check:function(){return G.plots.length>=3;} },
+  { id:"pot6", name:"Expansion II", desc:"Buy your 6th pot", icon:"\ud83c\udf31", reward:30, check:function(){return G.plots.length>=6;} },
   { id:"pot12", name:"Expansion III", desc:"Unlock all 12 pots", icon:"\ud83c\udf3e", reward:75, check:function(){return G.plots.length>=12;} },
   { id:"decor1", name:"Decorator", desc:"Unlock a new pot style", icon:"\ud83c\udfa8", reward:20, check:function(){return G.potStyle!=="terracotta";} },
   { id:"landscape1", name:"Landscape Artist", desc:"Unlock a new background", icon:"\ud83c\udf05", reward:20, check:function(){return G.bgStyle!=="default";} },
   { id:"luckypkt", name:"Lucky Packet", desc:"Get legendary from common", icon:"\ud83c\udf1f", reward:50, check:function(){return false;} }, // tracked via flag
   { id:"hybrid1", name:"Hybridizer", desc:"Create your first hybrid", icon:"\ud83e\uddec", reward:20, check:function(){return G.hybridCount>=1;} },
-  { id:"hybrid10", name:"Mad Scientist", desc:"Create 10 hybrids", icon:"\ud83e\uddd1\u200d\ud83d\udd2c", reward:50, check:function(){return G.hybridCount>=10;} },
+  { id:"hybrid10", name:"Mad Scientist", desc:"Create 10 hybrids", icon:"\ud83d\udd2c", reward:50, check:function(){return G.hybridCount>=10;} },
   { id:"allweather", name:"Weather Watcher", desc:"Experience all 3 weather types", icon:"\ud83c\udf24\ufe0f", reward:15, check:function(){return false;} }, // tracked via flag
   { id:"streak7", name:"Dedicated", desc:"Play 7 different days", icon:"\ud83d\udcc5", reward:30, check:function(){return G.daysPlayed.length>=7;} },
 ];
@@ -4644,6 +5272,20 @@ function gameTick() {
     _rainWaterCounter = 0;
     rainAutoWater();
   }
+  // Snow frost nip: 15% chance per tick to nip a growing flower (lose 1 water)
+  if (G.weather === "snowy" && Math.random() < 0.003) { // ~15% per 50s cycle
+    var growingPlots = G.plots.map(function(p, idx) { return p.state === "growing" ? idx : -1; }).filter(function(x) { return x >= 0; });
+    if (growingPlots.length > 0) {
+      var frostIdx = growingPlots[Math.floor(Math.random() * growingPlots.length)];
+      if (G.plots[frostIdx].waters > 0) {
+        G.plots[frostIdx].waters--;
+        playSound("frost_nip");
+        toast("\u2744\ufe0f Frost nipped " + FLOWERS[G.plots[frostIdx].key].name + "! Lost 1 water", 2000);
+        updatePlotCard(frostIdx);
+        saveG();
+      }
+    }
+  }
   // Track daily play
   var today = new Date().toISOString().slice(0, 10);
   if (!G.daysPlayed.includes(today)) {
@@ -4719,12 +5361,12 @@ function playSound(name) {
       break;
 
     case "sale":
-      [800, 1000, 1200].forEach(function(freq, i) {
+      [400, 500, 600].forEach(function(freq, i) {
         osc = ctx.createOscillator();
         gain = ctx.createGain();
-        osc.type = "square";
+        osc.type = "triangle";
         osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.06, now + i * 0.06);
+        gain.gain.setValueAtTime(0.05, now + i * 0.06);
         gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.12);
         osc.connect(gain).connect(ctx.destination);
         osc.start(now + i * 0.06); osc.stop(now + i * 0.06 + 0.12);
@@ -4996,6 +5638,20 @@ function playSound(name) {
       osc.start(now + 0.4); osc.stop(now + 1.1);
       break;
 
+    case "reveal_hybrid": // same as rare — shimmering arpeggio
+      [587, 740, 880].forEach(function(freq, i) {
+        osc = ctx.createOscillator();
+        gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, now + i * 0.08);
+        gain.gain.linearRampToValueAtTime(0.1, now + i * 0.08 + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.25);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.25);
+      });
+      break;
+
     case "reveal_unique": // celestial 6-note ascending with shimmer: the legendary+ reveal
       [262, 330, 392, 494, 587, 784].forEach(function(freq, i) { // C4→E4→G4→B4→D5→G5
         osc = ctx.createOscillator(); gain = ctx.createGain();
@@ -5022,11 +5678,188 @@ function playSound(name) {
         osc.start(now + 0.45); osc.stop(now + 1.3);
       });
       break;
+
+    case "frost_nip": // crystalline descending tone
+      osc = ctx.createOscillator();
+      gain = ctx.createGain();
+      var frostFilter = ctx.createBiquadFilter();
+      frostFilter.type = "highpass"; frostFilter.frequency.value = 2000;
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(2400, now);
+      osc.frequency.exponentialRampToValueAtTime(800, now + 0.3);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      osc.connect(frostFilter).connect(gain).connect(ctx.destination);
+      osc.start(now); osc.stop(now + 0.35);
+      break;
+
+    case "mutation": // wobbly detuned bloom
+      [523, 530, 659, 670].forEach(function(freq, i) {
+        osc = ctx.createOscillator();
+        gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        osc.frequency.linearRampToValueAtTime(freq * (i % 2 === 0 ? 1.03 : 0.97), now + 0.3);
+        gain.gain.setValueAtTime(0.06, now + (i < 2 ? 0 : 0.1));
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + (i < 2 ? 0 : 0.1)); osc.stop(now + 0.4);
+      });
+      break;
+
+    case "coin_clink": // single metallic ping
+      osc = ctx.createOscillator();
+      gain = ctx.createGain();
+      osc.type = "square";
+      osc.frequency.value = 2000;
+      gain.gain.setValueAtTime(0.04, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now); osc.stop(now + 0.08);
+      break;
+
+    case "packet_tear": // short noise burst (paper tearing)
+      var bufSz = ctx.sampleRate * 0.08;
+      var buf = ctx.createBuffer(1, bufSz, ctx.sampleRate);
+      var data = buf.getChannelData(0);
+      for (var ni = 0; ni < bufSz; ni++) data[ni] = (Math.random() * 2 - 1) * 0.5;
+      var noise = ctx.createBufferSource();
+      noise.buffer = buf;
+      var tearFilter = ctx.createBiquadFilter();
+      tearFilter.type = "highpass"; tearFilter.frequency.value = 3000;
+      gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      noise.connect(tearFilter).connect(gain).connect(ctx.destination);
+      noise.start(now); noise.stop(now + 0.08);
+      break;
   }
 }
 
 function haptic(ms) {
   try { if (navigator.vibrate) navigator.vibrate(ms || 30); } catch(e) {}
+}
+
+// ══════════════════════════════════════════════════════════
+// AMBIENT MUSIC — procedural lo-fi garden soundtrack
+// ══════════════════════════════════════════════════════════
+var _musicNodes = null;
+var _musicEnabled = false;
+var _musicInterval = null;
+var _rainAmbient = null;
+
+function startAmbientMusic() {
+  if (_musicNodes) return; // already playing
+  var ctx = getAudioCtx();
+  if (!ctx) return;
+
+  var masterGain = ctx.createGain();
+  masterGain.gain.value = 0.03; // very quiet
+  masterGain.connect(ctx.destination);
+
+  var filter = ctx.createBiquadFilter();
+  filter.type = "lowpass";
+  filter.frequency.value = 600;
+  filter.Q.value = 1;
+  filter.connect(masterGain);
+
+  // C major progression: C-Am-F-G (gentle, cottagecore)
+  var chords = [
+    [261.6, 329.6, 392],   // C major
+    [220, 261.6, 329.6],   // A minor
+    [174.6, 220, 261.6],   // F major
+    [196, 246.9, 293.7],   // G major
+  ];
+  var chordIdx = 0;
+  var oscs = [];
+
+  function playChord() {
+    // Stop old oscillators
+    oscs.forEach(function(o) { try { o.stop(); } catch(e) {} });
+    oscs = [];
+    var now = ctx.currentTime;
+    var chord = chords[chordIdx % chords.length];
+    chord.forEach(function(freq, i) {
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.type = "sine";
+      // Slight detune for warmth
+      o.frequency.value = freq + (Math.random() - 0.5) * 2;
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(0.8, now + 1.5);
+      g.gain.linearRampToValueAtTime(0.5, now + 6);
+      g.gain.linearRampToValueAtTime(0, now + 8);
+      o.connect(g).connect(filter);
+      o.start(now);
+      o.stop(now + 8.5);
+      oscs.push(o);
+    });
+    chordIdx++;
+  }
+
+  playChord();
+  _musicInterval = setInterval(playChord, 8000);
+  _musicNodes = { masterGain: masterGain, filter: filter, oscs: oscs };
+}
+
+function stopAmbientMusic() {
+  if (_musicInterval) { clearInterval(_musicInterval); _musicInterval = null; }
+  if (_musicNodes) {
+    _musicNodes.oscs.forEach(function(o) { try { o.stop(); } catch(e) {} });
+    try { _musicNodes.masterGain.disconnect(); } catch(e) {}
+    _musicNodes = null;
+  }
+  stopRainAmbient();
+}
+
+function updateMusicForWeather() {
+  if (!_musicNodes) return;
+  var filter = _musicNodes.filter;
+  var ctx = getAudioCtx();
+  if (!ctx) return;
+  var now = ctx.currentTime;
+  // Adjust filter based on weather
+  if (G.weather === "rainy") {
+    filter.frequency.linearRampToValueAtTime(400, now + 1);
+    startRainAmbient();
+  } else if (G.weather === "snowy") {
+    filter.frequency.linearRampToValueAtTime(350, now + 1);
+    stopRainAmbient();
+  } else if (G.weather === "sunny") {
+    filter.frequency.linearRampToValueAtTime(800, now + 1);
+    stopRainAmbient();
+  } else {
+    filter.frequency.linearRampToValueAtTime(500, now + 1);
+    stopRainAmbient();
+  }
+}
+
+function startRainAmbient() {
+  if (_rainAmbient) return;
+  var ctx = getAudioCtx();
+  if (!ctx) return;
+  // Filtered white noise for rain ambience
+  var bufSz = ctx.sampleRate * 2;
+  var buf = ctx.createBuffer(1, bufSz, ctx.sampleRate);
+  var d = buf.getChannelData(0);
+  for (var i = 0; i < bufSz; i++) d[i] = Math.random() * 2 - 1;
+  var src = ctx.createBufferSource();
+  src.buffer = buf;
+  src.loop = true;
+  var bp = ctx.createBiquadFilter();
+  bp.type = "bandpass"; bp.frequency.value = 800; bp.Q.value = 0.5;
+  var g = ctx.createGain();
+  g.gain.value = 0.015;
+  src.connect(bp).connect(g).connect(ctx.destination);
+  src.start();
+  _rainAmbient = { src: src, gain: g };
+}
+
+function stopRainAmbient() {
+  if (!_rainAmbient) return;
+  try { _rainAmbient.src.stop(); } catch(e) {}
+  try { _rainAmbient.gain.disconnect(); } catch(e) {}
+  _rainAmbient = null;
 }
 
 // ══════════════════════════════════════════════════════════
@@ -5506,12 +6339,14 @@ function openCustomizeModal() {
 // TUTORIAL SYSTEM
 // ══════════════════════════════════════════════════════════
 var TUTORIAL_STEPS = [
-  { icon: "\ud83c\udf3a", title: "Welcome to Yurie's Flower Shop!", desc: "Grow beautiful flowers and sell them to visiting customers. Let's learn the basics!" },
-  { icon: "\ud83d\udca7", title: "Water Your Plants", desc: "Water fills automatically over time. Tap the \ud83c\udf0a whirlpool button for a burst, or catch drifting clouds for bonus water!" },
-  { icon: "\ud83d\udc64", title: "NPC Customers", desc: "Customers arrive asking for specific flowers. Tap them to fulfill orders and earn coins \u2014 they pay more than base price!" },
-  { icon: "\u2600\ufe0f", title: "Weather Changes", desc: "Weather shifts between Sunny, Rainy, and Drought. Rain gives free water, drought needs more watering. Plan ahead!" },
-  { icon: "\ud83e\uddec", title: "Hybridize Flowers", desc: "When two bloomed flowers are in adjacent pots, you can hybridize them for a chance at rare new seeds!" },
-  { icon: "\ud83c\udfc6", title: "Achievements & Style", desc: "Earn 40 achievements for coins. Complete your Journal to unlock pot styles and backgrounds in the Style menu!" },
+  { icon: "\ud83c\udf3a", title: "Welcome to Yurie's Flower Shop!", desc: "Grow flowers, serve customers, and build your dream garden. Let's learn how!" },
+  { icon: "\ud83d\udca7", title: "Getting Water", desc: "Water trickles in over time. Tap the bucket button to swipe and fill it fast! Catch drifting clouds for bonus drops." },
+  { icon: "\ud83c\udf31", title: "Growing Flowers", desc: "Open packets for seeds, plant them in pots, then water to grow. Each flower takes 3 stages to bloom." },
+  { icon: "\ud83d\udc64", title: "Serving Customers", desc: "NPCs visit your shop asking for specific flowers. Store bloomed flowers in the Garden House, then tap a customer to sell! VIP customers pay 5x!" },
+  { icon: "\ud83e\uddec", title: "Hybridization", desc: "Leave two bloomed flowers in adjacent pots, then tap one to hybridize! Check the Breeding Guide for recipe combos. 5% chance of a unique color mutation!" },
+  { icon: "\u2600\ufe0f", title: "Weather & More", desc: "Weather changes between Sunny (faster growth!), Rainy (free water!), Drought (needs more water), and Snowy (frost nips flowers!). Come back daily for streak rewards!" },
+  { icon: "\ud83c\udfc6", title: "Achievements & Customization", desc: "Earn 40 achievements for coins. Complete your flower Journal to unlock pot styles, backgrounds, and garden decorations in Style!" },
+  { icon: "\ud83d\uded2", title: "The Shop", desc: "Buy seed packets, new pots (up to 12!), and water upgrades. Expand your garden and grow rarer flowers for bigger profits!" },
 ];
 var _tutStep = 0;
 
@@ -5613,6 +6448,43 @@ function multiSparkle() {
       );
     }, i * 90);
 }
+// ══════════════════════════════════════════════════════════
+// BLOOM PARTICLES — petal-colored burst when flower blooms
+// ══════════════════════════════════════════════════════════
+function spawnBloomParticles(plotEl, petalColor) {
+  if (!plotEl) return;
+  var rect = plotEl.getBoundingClientRect();
+  var cx = rect.left + rect.width / 2;
+  var cy = rect.top + rect.height * 0.3;
+  // 8 petal particles + 4 sparkles
+  for (var i = 0; i < 8; i++) {
+    var el = document.createElement("div");
+    el.className = "bloom-particle";
+    var sz = 5 + Math.random() * 6;
+    var angle = (Math.PI * 2 * i) / 8 + (Math.random() - 0.5) * 0.5;
+    var dist = 25 + Math.random() * 35;
+    var dx = Math.cos(angle) * dist;
+    var dy = Math.sin(angle) * dist - 20; // bias upward
+    var dur = 1.2 + Math.random() * 0.8;
+    el.style.cssText = "left:" + cx + "px;top:" + cy + "px;width:" + sz + "px;height:" + sz + "px;background:" + petalColor + ";position:fixed;--bp-dx:" + dx + "px;--bp-dy:" + dy + "px;--bp-dur:" + dur + "s;animation-delay:" + (Math.random() * 0.15) + "s;";
+    document.body.appendChild(el);
+    el.addEventListener("animationend", function() { this.remove(); });
+  }
+  for (var j = 0; j < 4; j++) {
+    var sp = document.createElement("div");
+    sp.className = "bloom-sparkle";
+    var angle2 = (Math.PI * 2 * j) / 4 + (Math.random() - 0.5) * 0.8;
+    var dist2 = 15 + Math.random() * 25;
+    var dx2 = Math.cos(angle2) * dist2;
+    var dy2 = Math.sin(angle2) * dist2 - 15;
+    var dur2 = 1 + Math.random() * 0.6;
+    sp.textContent = ["✦", "✧", "·", "★"][j % 4];
+    sp.style.cssText = "left:" + cx + "px;top:" + cy + "px;color:" + petalColor + ";position:fixed;--bp-dx:" + dx2 + "px;--bp-dy:" + dy2 + "px;--bp-dur:" + dur2 + "s;animation-delay:" + (0.1 + Math.random() * 0.2) + "s;";
+    document.body.appendChild(sp);
+    sp.addEventListener("animationend", function() { this.remove(); });
+  }
+}
+
 function confettiBurst() {
   const colors = [
     "#f48fb1",

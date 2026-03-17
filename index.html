@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>🌸 Yurie's Flower Garden</title>
+  <title>🌸 Yurie's Flower Shop</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
   <div class="title-content">
     <div class="title-flower">&#x1F338;</div>
     <h1 class="title-name">Yurie's<br>Flower Shop</h1>
-    <p class="title-sub">Grow &middot; Bloom &middot; Sell</p>
+    <p class="title-sub">Grow &middot; Bloom &middot; Hybridize &middot; Sell</p>
     <button class="title-enter" id="titleEnter">Enter Garden</button>
   </div>
 </div>
@@ -31,12 +31,12 @@
       <div class="stat-pill">&#x1F33C; <span id="invDisp">0</span></div>
     </div>
     <div class="top-row-btns">
-      <button class="tbtn tbtn-open"    id="btnOpenPkt"><span class="tbtn-ico">&#x1F381;</span>Packets</button>
-      <button class="tbtn tbtn-shop"    id="btnShop"><span class="tbtn-ico">&#x1F6D2;</span>Shop</button>
-      <button class="tbtn tbtn-journal" id="btnJournal"><span class="tbtn-ico">&#x1F4D6;</span>Journal</button>
-      <button class="tbtn tbtn-inv"     id="btnInv"><span class="tbtn-ico">&#x1F3E1;</span>House</button>
-      <button class="tbtn tbtn-achieve" id="btnAchieve"><span class="tbtn-ico">&#x1F3C6;</span>Awards</button>
-      <button class="tbtn tbtn-custom"  id="btnCustom"><span class="tbtn-ico">&#x1F3A8;</span>Style</button>
+      <button class="tbtn tbtn-open"    id="btnOpenPkt"><span class="tbtn-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M8 8c0-2 1-4 4-4s4 2 4 4"/></svg></span>Packets</button>
+      <button class="tbtn tbtn-shop"    id="btnShop"><span class="tbtn-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg></span>Shop</button>
+      <button class="tbtn tbtn-journal" id="btnJournal"><span class="tbtn-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span>Journal</button>
+      <button class="tbtn tbtn-inv"     id="btnInv"><span class="tbtn-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>House</button>
+      <button class="tbtn tbtn-achieve" id="btnAchieve"><span class="tbtn-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>Awards</button>
+      <button class="tbtn tbtn-custom"  id="btnCustom"><span class="tbtn-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="12" r="2.5"/><circle cx="13.5" cy="17.5" r="2.5"/><circle cx="12" cy="12" r="9"/></svg></span>Style</button>
     </div>
   </div>
   <div class="garden-header">
@@ -91,13 +91,14 @@
       </div>
     </div>
   </div>
+  <div class="weather-fx" id="weatherFx"></div>
   <div class="cloud-zone" id="cloudZone"></div>
   <div class="garden-decor-wrap" id="gardenWrap">
     <div class="garden-grid" id="gardenGrid"></div>
   </div>
   <div class="seed-tray">
     <div class="tray-handle"></div>
-    <div class="tray-title">🌱 Your Seeds — tap a pot to plant</div>
+    <div class="tray-title">&#x1F331; Seeds — tap a pot to plant</div>
     <div class="tray-scroll" id="trayItems"></div>
   </div>
 </div>
@@ -142,17 +143,19 @@
 <!-- BLOOM MODAL -->
 <div class="overlay" id="bloomOverlay">
   <div class="bloom-scene">
+    <button class="sh-close" style="position:absolute;top:16px;right:16px;z-index:2;" onclick="closeModal('bloomOverlay')">✕</button>
     <div class="bloom-glow" id="bloomGlow"></div>
     <div class="bloom-fl" id="bloomFlEl"></div>
     <div class="bloom-info">
       <div class="bloom-title" id="bloomTitle"></div>
       <div class="bloom-badge" id="bloomBadge"></div>
       <div class="bloom-sub"   id="bloomSub"></div>
-      <div class="bloom-reward">🎁 +1 Seed Packet for blooming!</div>
+      <div class="bloom-reward">🎁 +1 Packet! Leave in pot to hybridize with neighbors!</div>
     </div>
     <div class="bloom-actions">
-      <button class="btn-sell"  id="btnSell">💰 Sell</button>
+      <button class="btn-sell"  id="btnSell">🧬 Hybridize</button>
       <button class="btn-store" id="btnStore">🏡 Store in Garden House</button>
+      <button class="btn-leave" id="btnLeave">🌸 Leave in Pot</button>
     </div>
   </div>
 </div>
@@ -179,7 +182,7 @@
         <span class="shop-icon">📦</span>
         <div>
           <div class="shop-name">Common Packet</div>
-          <div class="shop-detail">Tulips, daisies, violets, lilies &amp; more — tiny legendary chance</div>
+          <div class="shop-detail">Tulips, daisies, violets &amp; more — great for starting out</div>
         </div>
       </div>
       <button class="btn-buy" onclick="buyPacket('common')"><span class="ic">C</span> 8</button>
@@ -189,7 +192,7 @@
         <span class="shop-icon">🌹</span>
         <div>
           <div class="shop-name">Uncommon Packet</div>
-          <div class="shop-detail">Roses, poppies, cherries, irises &amp; more — no rarities below uncommon</div>
+          <div class="shop-detail">Roses, poppies, cherries &amp; more — better flowers, better NPC prices</div>
         </div>
       </div>
       <button class="btn-buy" onclick="buyPacket('uncommon')"><span class="ic">C</span> 25</button>
@@ -199,7 +202,7 @@
         <span class="shop-icon">💎</span>
         <div>
           <div class="shop-name">Rare Packet</div>
-          <div class="shop-detail">Tiger lilies, orchids, golden iris &amp; more — chance at legendary ✦</div>
+          <div class="shop-detail">Orchids, golden iris &amp; more — NPCs pay top coin for these</div>
         </div>
       </div>
       <button class="btn-buy" onclick="buyPacket('rare')"><span class="ic">C</span> 60</button>
@@ -209,7 +212,7 @@
         <span class="shop-icon">✨</span>
         <div>
           <div class="shop-name">Legendary Packet</div>
-          <div class="shop-detail">Blue Rose, Blue Tulip, White Peony, Pink Orchid, Black Rose &amp; more ✦</div>
+          <div class="shop-detail">Blue Rose, Golden Rose &amp; more — the rarest blooms for VIP customers ✦</div>
         </div>
       </div>
       <button class="btn-buy" onclick="buyPacket('legendary')"><span class="ic">C</span> 120</button>
@@ -279,6 +282,17 @@
     <div class="sh-handle"></div>
     <div class="sh-title">🧬 Hybridize</div>
     <div id="hybridContent"></div>
+  </div>
+</div>
+
+<!-- BREEDING GUIDE MODAL -->
+<div class="overlay" id="breedOverlay">
+  <div class="sheet">
+    <button class="sh-close" onclick="closeModal('breedOverlay')">&#x2715;</button>
+    <div class="sh-handle"></div>
+    <div class="sh-title">&#x1F9EC; Breeding Guide</div>
+    <div class="breed-prog" id="breedProg"></div>
+    <div class="breed-grid" id="breedGrid"></div>
   </div>
 </div>
 
