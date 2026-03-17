@@ -6417,7 +6417,7 @@ function startAmbientMusic() {
     else scale = PENTA_MID;
     var freq = scale[degree % scale.length];
 
-    var swing = (Math.random() - 0.5) * 0.05;
+    var swing = Math.random() * 0.04; // always positive, 0-40ms ahead
     var noteLen = (songM.melLen || 0.35) + Math.random() * 0.1;
 
     // Rest based on song's rest percentage
@@ -6444,14 +6444,22 @@ function startAmbientMusic() {
     o.stop(now + swing + noteLen + 0.1);
 
     state.melodyNoteIdx++;
-    // Switch pattern and octave periodically
+    // When pattern ends, apply variation to avoid exact repetition
     if (state.melodyNoteIdx >= pattern.length) {
       state.melodyNoteIdx = 0;
       var moodNow = getSong();
-      if (Math.random() < 0.5) {
+      // 40% chance: switch to different pattern
+      // 30% chance: reverse current pattern
+      // 30% chance: keep but shift octave
+      var variation = Math.random();
+      if (variation < 0.4) {
         state.melodyPatIdx = Math.floor(Math.random() * moodNow.melodies.length);
+      } else if (variation < 0.7) {
+        // Reverse the pattern in-place for this cycle
+        var reversed = pattern.slice().reverse();
+        moodNow.melodies[state.melodyPatIdx % moodNow.melodies.length] = reversed;
       }
-      state.useHighOctave = Math.random() < 0.25;
+      state.useHighOctave = Math.random() < 0.3;
     }
   }
 
@@ -6490,64 +6498,82 @@ function startAmbientMusic() {
     state.beat++;
   }
 
-  // ── Sequencer tick — exact same synthesis as music maker ──
+  // Sequencer state
   var _seqStep = 0;
-  function seqTick() {
+
+  // ── Look-ahead scheduler (precise Web Audio timing) ──
+  // Instead of setInterval firing each note, we use a fast scheduler
+  // that checks AudioContext.currentTime and schedules notes ahead
+  var _scheduleAhead = 0.1;  // schedule 100ms ahead
+  var _schedulerInterval = 25; // check every 25ms
+  var _nextBeatTime = 0;
+  var _beatCounter = 0;
+  var _schedulerTimer = null;
+
+  function scheduler() {
     var song = getSong();
-    if (!song.sequencer) return;
+    var beatSec = song.beatMs / 1000;
+    // Schedule all beats that fall within the lookahead window
+    while (_nextBeatTime < ctx.currentTime + _scheduleAhead) {
+      if (song.sequencer) {
+        scheduleSeqBeat(_nextBeatTime);
+      } else {
+        scheduleProceduralBeat(_nextBeatTime);
+      }
+      _nextBeatTime += beatSec;
+      _beatCounter++;
+    }
+  }
+
+  function scheduleSeqBeat(time) {
+    var song = getSong();
     var events = song.seq[_seqStep % song.seqSteps];
-    var now = ctx.currentTime;
     events.forEach(function(evt) {
       if (evt.t === "pad") {
-        // Identical to music maker: sine + triangle detuned, through filter
         evt.f.forEach(function(freq) {
           for (var d = 0; d < 2; d++) {
             var o = ctx.createOscillator();
             var g = ctx.createGain();
             o.type = d === 0 ? "sine" : "triangle";
             o.frequency.value = freq + (d === 0 ? -1.5 : 1.5);
-            g.gain.setValueAtTime(0, now);
-            g.gain.linearRampToValueAtTime(d === 0 ? 0.25 : 0.06, now + 0.08);
-            g.gain.linearRampToValueAtTime(0, now + 0.5);
-            o.connect(g).connect(warmFilter); // through filter like music maker
-            o.start(now); o.stop(now + 0.55);
+            g.gain.setValueAtTime(0, time);
+            g.gain.linearRampToValueAtTime(d === 0 ? 0.25 : 0.06, time + 0.08);
+            g.gain.linearRampToValueAtTime(0, time + 0.5);
+            o.connect(g).connect(warmFilter);
+            o.start(time); o.stop(time + 0.55);
           }
         });
       } else if (evt.t === "mel") {
-        // Identical to music maker: random sine/triangle 60/40, through filter
         var o = ctx.createOscillator();
         var g = ctx.createGain();
         o.type = Math.random() < 0.6 ? "sine" : "triangle";
         o.frequency.value = evt.f + (Math.random() - 0.5) * 2;
-        g.gain.setValueAtTime(0, now);
-        g.gain.linearRampToValueAtTime(0.35, now + 0.03);
-        g.gain.linearRampToValueAtTime(0, now + 0.35);
-        o.connect(g).connect(warmFilter); // through filter like music maker
-        o.start(now); o.stop(now + 0.4);
+        g.gain.setValueAtTime(0, time);
+        g.gain.linearRampToValueAtTime(0.35, time + 0.03);
+        g.gain.linearRampToValueAtTime(0, time + 0.35);
+        o.connect(g).connect(warmFilter);
+        o.start(time); o.stop(time + 0.4);
       } else if (evt.t === "bass") {
-        // Identical to music maker: sine, through filter
         var o = ctx.createOscillator();
         var g = ctx.createGain();
         o.type = "sine";
         o.frequency.value = evt.f;
-        g.gain.setValueAtTime(0, now);
-        g.gain.linearRampToValueAtTime(0.45, now + 0.04);
-        g.gain.linearRampToValueAtTime(0, now + 0.4);
-        o.connect(g).connect(warmFilter); // through filter like music maker
-        o.start(now); o.stop(now + 0.45);
+        g.gain.setValueAtTime(0, time);
+        g.gain.linearRampToValueAtTime(0.45, time + 0.04);
+        g.gain.linearRampToValueAtTime(0, time + 0.4);
+        o.connect(g).connect(warmFilter);
+        o.start(time); o.stop(time + 0.45);
       } else if (evt.t === "kick") {
-        // Identical to music maker: bypasses filter, goes to masterGain
         var o = ctx.createOscillator();
         var g = ctx.createGain();
         o.type = "sine";
-        o.frequency.setValueAtTime(160, now);
-        o.frequency.exponentialRampToValueAtTime(40, now + 0.12);
-        g.gain.setValueAtTime(0.5, now);
-        g.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-        o.connect(g).connect(masterGain); // bypass filter like music maker
-        o.start(now); o.stop(now + 0.25);
+        o.frequency.setValueAtTime(160, time);
+        o.frequency.exponentialRampToValueAtTime(40, time + 0.12);
+        g.gain.setValueAtTime(0.5, time);
+        g.gain.exponentialRampToValueAtTime(0.001, time + 0.25);
+        o.connect(g).connect(masterGain);
+        o.start(time); o.stop(time + 0.25);
       } else if (evt.t === "hat") {
-        // Identical to music maker: noise buffer 0.05s, highpass 7000, bypasses filter
         var bufSz = ctx.sampleRate * 0.05;
         var buf = ctx.createBuffer(1, bufSz, ctx.sampleRate);
         var dd = buf.getChannelData(0);
@@ -6557,47 +6583,58 @@ function startAmbientMusic() {
         var hp = ctx.createBiquadFilter();
         hp.type = "highpass"; hp.frequency.value = 7000;
         var g = ctx.createGain();
-        g.gain.setValueAtTime(0.25, now);
-        g.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
-        src.connect(hp).connect(g).connect(masterGain); // bypass filter
-        src.start(now); src.stop(now + 0.06);
+        g.gain.setValueAtTime(0.25, time);
+        g.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
+        src.connect(hp).connect(g).connect(masterGain);
+        src.start(time); src.stop(time + 0.06);
       } else if (evt.t === "snap") {
-        // Identical to music maker: square 1800Hz, bypasses filter
         var o = ctx.createOscillator();
         var g = ctx.createGain();
         o.type = "square";
         o.frequency.value = 1800;
-        g.gain.setValueAtTime(0.15, now);
-        g.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-        o.connect(g).connect(masterGain); // bypass filter
-        o.start(now); o.stop(now + 0.05);
+        g.gain.setValueAtTime(0.15, time);
+        g.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+        o.connect(g).connect(masterGain);
+        o.start(time); o.stop(time + 0.05);
       }
     });
     _seqStep = (_seqStep + 1) % song.seqSteps;
   }
 
-  // ── Timing — uses current mood's BPM ──
-  function startTimers() {
+  function scheduleProceduralBeat(time) {
     var song = getSong();
-    var bms = song.beatMs;
-    if (song.sequencer) {
-      // Step sequencer mode — exact same as music maker
-      _seqStep = 0;
-      warmFilter.frequency.value = 1200;
-      warmFilter.Q.value = 0.6;
-      _musicInterval = setInterval(seqTick, bms);
-    } else {
-      // Procedural mode — pad/melody/bass voices
-      warmFilter.frequency.value = song.filterHz || 700;
+    var localBeat = _beatCounter;
+    // Pad: every 4 beats
+    if (localBeat % 4 === 0) {
       playPad();
+    }
+    // Melody: every beat
+    playMelody();
+    // Bass: every 2 beats
+    if (localBeat % 2 === 0) {
       playBass();
-      _musicInterval = setInterval(function() { playPad(); playBass(); }, bms * 4);
-      _melodyInterval = setInterval(function() { playMelody(); }, bms);
-      _bassInterval = setInterval(function() { playBass(); }, bms * 2);
     }
   }
 
+  function startTimers() {
+    var song = getSong();
+    if (song.sequencer) {
+      _seqStep = 0;
+      warmFilter.frequency.value = 1200;
+      warmFilter.Q.value = 0.6;
+    } else {
+      warmFilter.frequency.value = song.filterHz || 700;
+      warmFilter.Q.value = 0.7;
+      playPad();
+      playBass();
+    }
+    _nextBeatTime = ctx.currentTime + 0.05; // start slightly ahead
+    _beatCounter = 0;
+    _schedulerTimer = setInterval(scheduler, _schedulerInterval);
+  }
+
   function clearTimers() {
+    if (_schedulerTimer) { clearInterval(_schedulerTimer); _schedulerTimer = null; }
     if (_musicInterval) { clearInterval(_musicInterval); _musicInterval = null; }
     if (_melodyInterval) { clearInterval(_melodyInterval); _melodyInterval = null; }
     if (_bassInterval) { clearInterval(_bassInterval); _bassInterval = null; }
@@ -6642,9 +6679,6 @@ function stopAmbientMusic() {
     try { _musicNodes.masterGain.disconnect(); } catch(e) {}
     _musicNodes = null;
   }
-  if (_musicInterval) { clearInterval(_musicInterval); _musicInterval = null; }
-  if (_melodyInterval) { clearInterval(_melodyInterval); _melodyInterval = null; }
-  if (_bassInterval) { clearInterval(_bassInterval); _bassInterval = null; }
   stopRainAmbient();
 }
 
