@@ -1755,7 +1755,6 @@ let G = {
   bgStyle: "default",
   lastLoginDate: null,
   loginStreak: 0,
-  showcase: [null, null, null],
   gardenDecor: [],
   soundEnabled: true,
   musicEnabled: true, // on by default
@@ -1798,7 +1797,6 @@ function saveG() {
     tutorialDone: G.tutorialDone,
     lastLoginDate: G.lastLoginDate,
     loginStreak: G.loginStreak,
-    showcase: G.showcase,
     gardenDecor: G.gardenDecor,
     soundEnabled: G.soundEnabled,
     musicEnabled: G.musicEnabled,
@@ -1849,7 +1847,6 @@ function loadG() {
       tutorialDone: s.tutorialDone ?? false,
       lastLoginDate: s.lastLoginDate ?? null,
       loginStreak: s.loginStreak ?? 0,
-      showcase: s.showcase ?? [null, null, null],
       gardenDecor: s.gardenDecor ?? [],
       soundEnabled: s.soundEnabled !== false,
       musicEnabled: s.musicEnabled === true,
@@ -2912,7 +2909,6 @@ function initGame() {
     initParticles();
     initFireflies();
     updateParticleVisibility();
-    renderShowcase();
     applyGardenDecor();
     console.log("[Garden] deferred init — wiring buttons");
     _soundEnabled = G.soundEnabled;
@@ -3679,32 +3675,13 @@ function openInventoryModal() {
           : f.rarity.charAt(0).toUpperCase() + f.rarity.slice(1);
     var appVal = getAppreciatedValue(item);
     var appreciated = appVal > f.sell;
-    // Check if flower can be added to showcase
-    var emptySlot = G.showcase ? G.showcase.indexOf(null) : -1;
     card.innerHTML =
       `<div class="inv-fl">${flowerSVG(item.key, MAX_STAGE)}</div>` +
       `<div class="inv-name">${f.name}</div>` +
       `<div class="inv-badge ${f.rarity}">${rarLabel}</div>` +
       `<div class="inv-sell-val"><span class="ic">C</span>${appVal}` +
       (appreciated ? ` <span class="inv-appreciate">\u2191</span>` : "") +
-      `</div>` +
-      (emptySlot >= 0 ? `<button class="btn-inv-sell" data-showcase="${emptySlot}" data-key="${item.key}">\u2b50 Showcase</button>` : "");
-    // Wire showcase button
-    var scBtn = card.querySelector("[data-showcase]");
-    if (scBtn) {
-      (function(slotIdx, flowerKey) {
-        scBtn.onclick = function(e) {
-          e.stopPropagation();
-          if (!G.showcase) G.showcase = [null, null, null];
-          G.showcase[slotIdx] = flowerKey;
-          saveG();
-          renderShowcase();
-          playSound("click");
-          toast(f.name + " added to showcase!", 1200);
-          openInventoryModal(); // refresh
-        };
-      })(emptySlot, item.key);
-    }
+      `</div>`;
     grid.appendChild(card);
   });
   openModal("invOverlay");
@@ -4315,7 +4292,7 @@ function weightedRandom(type = "common") {
 // ── Valve wheel ─────────────────────────────────────────────────────────────
 // ── New Water System: Whirlpool Button + Cloud Tap + Passive Trickle ──────
 (function setupWater() {
-  var WHIRL_COOLDOWN = 10000; // 10s
+  var WHIRL_COOLDOWN = 0; // no cooldown
   var WHIRL_AMOUNT = 3;
   var TRICKLE_INTERVAL = 45000; // 45s
   var CLOUD_INTERVAL_MIN = 40000; // 40s
@@ -4342,14 +4319,14 @@ function weightedRandom(type = "common") {
   }
 
   // Bucket fill mechanic
-  var SWIPES_TO_FILL = 8; // left-right swipes needed
+  var SWIPES_TO_FILL = 8; // up-down swipes needed
   var bucketOverlay = document.getElementById("bucketOverlay");
   var bucketWater = document.getElementById("bucketWater");
   var bucketPct = document.getElementById("bucketPct");
   var bucketHint = document.getElementById("bucketHint");
   var bucketFillLevel = 0;
-  var _bucketSwipeStartX = 0;
-  var _bucketSwipeDir = 0; // 0=none, 1=right, -1=left
+  var _bucketSwipeStartY = 0;
+  var _bucketSwipeDir = 0; // 0=none, 1=down, -1=up
   var _bucketLastDir = 0;
   var _bucketActive = false;
 
@@ -4364,7 +4341,7 @@ function weightedRandom(type = "common") {
     bucketFillLevel = 0;
     _bucketLastDir = 0;
     updateBucketVisual();
-    bucketHint.textContent = "Swipe left \u0026 right to fill!";
+    bucketHint.textContent = "Swipe up \u0026 down to fill!";
     bucketOverlay.classList.add("on");
     playSound("click");
   }
@@ -4413,19 +4390,19 @@ function weightedRandom(type = "common") {
     }, 1200);
   }
 
-  // Touch handling for swipe detection
+  // Touch handling for swipe detection (up-down)
   bucketOverlay.addEventListener("touchstart", function(e) {
     if (!_bucketActive) return;
-    _bucketSwipeStartX = e.touches[0].clientX;
+    _bucketSwipeStartY = e.touches[0].clientY;
     _bucketSwipeDir = 0;
   }, { passive: true });
 
   bucketOverlay.addEventListener("touchmove", function(e) {
     if (!_bucketActive) return;
     e.preventDefault();
-    var dx = e.touches[0].clientX - _bucketSwipeStartX;
-    if (Math.abs(dx) > 30) {
-      var dir = dx > 0 ? 1 : -1;
+    var dy = e.touches[0].clientY - _bucketSwipeStartY;
+    if (Math.abs(dy) > 30) {
+      var dir = dy > 0 ? 1 : -1;
       // Only count if direction changed from last swipe (alternating)
       if (dir !== _bucketLastDir) {
         _bucketLastDir = dir;
@@ -4433,7 +4410,7 @@ function weightedRandom(type = "common") {
         updateBucketVisual();
         playSound("water");
         haptic(20);
-        _bucketSwipeStartX = e.touches[0].clientX; // reset for next swipe
+        _bucketSwipeStartY = e.touches[0].clientY; // reset for next swipe
 
         if (bucketFillLevel >= SWIPES_TO_FILL) {
           completeBucket();
@@ -4447,20 +4424,20 @@ function weightedRandom(type = "common") {
   bucketOverlay.addEventListener("mousedown", function(e) {
     if (!_bucketActive) return;
     _mouseDown = true;
-    _bucketSwipeStartX = e.clientX;
+    _bucketSwipeStartY = e.clientY;
     _bucketSwipeDir = 0;
   });
   bucketOverlay.addEventListener("mousemove", function(e) {
     if (!_bucketActive || !_mouseDown) return;
-    var dx = e.clientX - _bucketSwipeStartX;
-    if (Math.abs(dx) > 30) {
-      var dir = dx > 0 ? 1 : -1;
+    var dy = e.clientY - _bucketSwipeStartY;
+    if (Math.abs(dy) > 30) {
+      var dir = dy > 0 ? 1 : -1;
       if (dir !== _bucketLastDir) {
         _bucketLastDir = dir;
         bucketFillLevel++;
         updateBucketVisual();
         playSound("water");
-        _bucketSwipeStartX = e.clientX;
+        _bucketSwipeStartY = e.clientY;
         if (bucketFillLevel >= SWIPES_TO_FILL) {
           _mouseDown = false;
           completeBucket();
@@ -6911,98 +6888,6 @@ function showLoginGiftModal(streak, pktType, coins, today) {
   overlay.appendChild(content);
 }
 
-// ══════════════════════════════════════════════════════════
-// SHOWCASE — 3-slot flower display
-// ══════════════════════════════════════════════════════════
-function renderShowcase() {
-  var existing = document.querySelector(".showcase-wrap");
-  if (existing) existing.remove();
-
-  if (!G.showcase) G.showcase = [null, null, null];
-
-  var wrap = document.createElement("div");
-  wrap.className = "showcase-wrap";
-  var title = document.createElement("div");
-  title.className = "showcase-title";
-  title.textContent = "\ud83c\udf3a Flower Showcase";
-  wrap.appendChild(title);
-
-  var slots = document.createElement("div");
-  slots.className = "showcase-slots";
-  for (var i = 0; i < 3; i++) {
-    var slot = document.createElement("div");
-    var key = G.showcase ? G.showcase[i] : null;
-    slot.className = "showcase-slot" + (key ? " filled" : "");
-    if (key && FLOWERS[key]) {
-      slot.innerHTML = '<div class="showcase-flower">' + flowerSVG(key, MAX_STAGE) + '</div><div class="showcase-slot-name">' + FLOWERS[key].name + '</div>';
-      (function(idx) {
-        slot.onclick = function() {
-          G.showcase[idx] = null;
-          saveG();
-          renderShowcase();
-          toast("Removed from showcase", 1200);
-        };
-      })(i);
-    } else {
-      var empty = document.createElement("div");
-      empty.className = "showcase-slot-empty";
-      empty.textContent = "+";
-      slot.appendChild(empty);
-      (function(idx) {
-        slot.onclick = function() { openShowcasePicker(idx); };
-      })(i);
-    }
-    slots.appendChild(slot);
-  }
-  wrap.appendChild(slots);
-
-  // Insert before garden grid
-  var grid = document.getElementById("gardenGrid");
-  if (grid && grid.parentNode) {
-    grid.parentNode.insertBefore(wrap, grid);
-  }
-}
-
-function openShowcasePicker(slotIdx) {
-  if (!G.inventory.length && !G.discovered.length) {
-    toast("Discover flowers first!", 1500);
-    return;
-  }
-  // Use the NPC sell modal as a generic picker
-  var titleEl = document.getElementById("npcSellTitle");
-  titleEl.textContent = "Pick a flower for showcase";
-  var list = document.getElementById("npcSellList");
-  list.textContent = "";
-  // Show discovered flowers
-  G.discovered.forEach(function(key) {
-    var f = FLOWERS[key];
-    if (!f) return;
-    var row = document.createElement("button");
-    row.className = "plant-row " + f.rarity;
-    var svg = document.createElement("div");
-    svg.className = "pr-svg";
-    svg.innerHTML = flowerSVG(key, MAX_STAGE);
-    row.appendChild(svg);
-    var info = document.createElement("div");
-    info.className = "pr-info";
-    var nm = document.createElement("div");
-    nm.className = "pr-name";
-    nm.textContent = f.name;
-    info.appendChild(nm);
-    row.appendChild(info);
-    row.onclick = function() {
-      if (!G.showcase) G.showcase = [null, null, null];
-      G.showcase[slotIdx] = key;
-      saveG();
-      closeModal("npcSellOverlay");
-      renderShowcase();
-      playSound("click");
-      toast(f.name + " added to showcase!", 1500);
-    };
-    list.appendChild(row);
-  });
-  openModal("npcSellOverlay");
-}
 
 // ══════════════════════════════════════════════════════════
 // GARDEN COSMETICS
