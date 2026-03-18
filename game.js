@@ -4401,7 +4401,7 @@ function weightedRandom(type = "common") {
     if (!_bucketActive) return;
     e.preventDefault();
     var dy = e.touches[0].clientY - _bucketSwipeStartY;
-    if (Math.abs(dy) > 30) {
+    if (Math.abs(dy) > 15) {
       var dir = dy > 0 ? 1 : -1;
       // Only count if direction changed from last swipe (alternating)
       if (dir !== _bucketLastDir) {
@@ -4430,7 +4430,7 @@ function weightedRandom(type = "common") {
   bucketOverlay.addEventListener("mousemove", function(e) {
     if (!_bucketActive || !_mouseDown) return;
     var dy = e.clientY - _bucketSwipeStartY;
-    if (Math.abs(dy) > 30) {
+    if (Math.abs(dy) > 15) {
       var dir = dy > 0 ? 1 : -1;
       if (dir !== _bucketLastDir) {
         _bucketLastDir = dir;
