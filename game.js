@@ -4359,7 +4359,7 @@ function weightedRandom(type = "common") {
   function completeBucket() {
     _bucketActive = false;
     whirlLastUsed = Date.now();
-    whirlBtn.disabled = true;
+    whirlBtn.disabled = WHIRL_COOLDOWN > 0;
     // Full water!
     var amount = G.maxWater - G.water;
     G.water = G.maxWater;
