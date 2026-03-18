@@ -4548,8 +4548,8 @@ function weightedRandom(type = "common") {
 // ══════════════════════════════════════════════════════════
 // NPC FLOWER SHOP SYSTEM
 // ══════════════════════════════════════════════════════════
-var NPC_FEMALE_NAMES = ["Hana","Lily","Rose","Daisy","Iris","Violet","Jasmine","Flora","Ivy","Poppy","Sakura","Azalea","Primrose","Meadow"];
-var NPC_MALE_NAMES = ["Oliver","James","Finn","Leo","Hugo","Felix","Theo","Max","Kai","Ren","Sage","Briar","Lark","Robin"];
+var NPC_FEMALE_NAMES = ["Tutu","Yurie","Ana"];
+var NPC_MALE_NAMES = ["Ian","Guilherme","Brasil","Vitor","Klebio"];
 var NPC_FEMALE_AVATARS = ["\ud83d\udc69","\ud83d\udc69\u200d\ud83e\uddb0","\ud83d\udc75","\ud83d\udc67","\ud83d\udc71\u200d\u2640\ufe0f"];
 var NPC_MALE_AVATARS = ["\ud83d\udc68","\ud83d\udc68\u200d\ud83e\uddb0","\ud83d\udc74","\ud83d\udc66","\ud83d\udc71"];
 const NPC_MAX = 3;
