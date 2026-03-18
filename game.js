@@ -5068,6 +5068,84 @@ function openHybridModal(plotIdx) {
   openModal("hybridOverlay");
 }
 
+// ── Fusion animation overlay ──────────────────────────────────────────────
+function showFusionAnimation(key1, key2, resultInfo, onDone) {
+  // resultInfo: { key, name, badge, badgeClass, sound }
+  var overlay = document.createElement("div");
+  overlay.className = "fusion-overlay";
+
+  // Left flower
+  var left = document.createElement("div");
+  left.className = "fusion-flower left";
+  left.innerHTML = flowerSVG(key1, MAX_STAGE);
+  overlay.appendChild(left);
+
+  // Right flower
+  var right = document.createElement("div");
+  right.className = "fusion-flower right";
+  right.innerHTML = flowerSVG(key2, MAX_STAGE);
+  overlay.appendChild(right);
+
+  // Burst effect
+  var burst = document.createElement("div");
+  burst.className = "fusion-burst";
+  overlay.appendChild(burst);
+
+  // Result (shown after merge animation)
+  var result = document.createElement("div");
+  result.className = "fusion-result";
+  if (resultInfo.key && FLOWERS[resultInfo.key]) {
+    result.innerHTML =
+      '<div class="fusion-result-svg">' + flowerSVG(resultInfo.key, MAX_STAGE) + '</div>' +
+      '<div class="fusion-result-name">' + resultInfo.name + '</div>' +
+      '<div class="fusion-result-badge ' + (resultInfo.badgeClass || "") + '">' + resultInfo.badge + '</div>';
+  } else {
+    result.innerHTML =
+      '<div class="fusion-result-name">' + resultInfo.name + '</div>' +
+      '<div class="fusion-result-badge ' + (resultInfo.badgeClass || "") + '">' + resultInfo.badge + '</div>';
+  }
+  overlay.appendChild(result);
+
+  // Sparkles
+  var sparkles = ["\u2728", "\u2b50", "\u2728", "\ud83c\udf1f"];
+  for (var i = 0; i < sparkles.length; i++) {
+    var sp = document.createElement("div");
+    sp.className = "fusion-sparkle";
+    sp.textContent = sparkles[i];
+    var angle = (i / sparkles.length) * Math.PI * 2;
+    sp.style.cssText = "transform-origin:center;left:calc(50% + " + Math.round(Math.cos(angle) * 50) + "px);top:calc(50% + " + Math.round(Math.sin(angle) * 50) + "px);animation-delay:" + (0.7 + i * 0.1) + "s;";
+    overlay.appendChild(sp);
+  }
+
+  document.body.appendChild(overlay);
+  requestAnimationFrame(function() { overlay.classList.add("on"); });
+
+  // Play sound after merge
+  setTimeout(function() {
+    if (resultInfo.sound) playSound(resultInfo.sound);
+    haptic(60);
+  }, 700);
+
+  // Dismiss on tap after result shown
+  setTimeout(function() {
+    overlay.onclick = function() {
+      overlay.classList.remove("on");
+      setTimeout(function() { overlay.remove(); }, 300);
+      if (onDone) onDone();
+    };
+  }, 1200);
+
+  // Auto-dismiss after 3.5s
+  setTimeout(function() {
+    if (overlay.parentNode) {
+      overlay.classList.remove("on");
+      setTimeout(function() { if (overlay.parentNode) overlay.remove(); }, 300);
+      if (onDone) onDone();
+      onDone = null; // prevent double call
+    }
+  }, 3500);
+}
+
 function doHybridize(idx1, idx2) {
   var key1 = G.plots[idx1].key, key2 = G.plots[idx2].key;
   var f1 = FLOWERS[key1], f2 = FLOWERS[key2];
@@ -5082,8 +5160,7 @@ function doHybridize(idx1, idx2) {
   // Clear both plots
   clearPlot(idx1);
   clearPlot(idx2);
-  playSound("hybrid");
-  haptic(60);
+  closeModal("hybridOverlay");
 
   var kind1 = f1.kind, kind2 = f2.kind;
 
@@ -5100,8 +5177,10 @@ function doHybridize(idx1, idx2) {
   var mutationRoll = Math.random();
   var isMutation = mutationRoll < 0.05; // 5% mutation chance
 
+  // Compute result first, then show animation
+  var resultInfo = { key: null, name: "", badge: "", badgeClass: "", sound: "hybrid" };
+
   if (recipe && roll < 0.45) {
-    // Recipe match — weighted random from recipe outcomes
     var totalW = 0;
     recipe.forEach(function(r) { totalW += r.w; });
     var rr = Math.random() * totalW, racc = 0;
@@ -5110,12 +5189,10 @@ function doHybridize(idx1, idx2) {
       racc += recipe[ri].w;
       if (rr < racc) { resultKey = recipe[ri].key; break; }
     }
-    // Track breed discovery
     var recipeKey = [kind1, kind2].sort().join("+");
     if (!G.breedDiscovered.includes(recipeKey)) G.breedDiscovered.push(recipeKey);
 
     if (isMutation && FLOWERS[resultKey]) {
-      // Mutation! Shift hue and create variant
       var baseF = FLOWERS[resultKey];
       var hueShift = 15 + Math.random() * 30;
       if (Math.random() < 0.5) hueShift = -hueShift;
@@ -5133,28 +5210,22 @@ function doHybridize(idx1, idx2) {
       G.hybridCount++;
       G.mutations.push(mutKey);
       if (!G.discovered.includes(mutKey)) G.discovered.push(mutKey);
-      playSound("mutation");
-      toast("\u2728 MUTATION: " + mutName + "! A unique color variant!", 3500);
+      resultInfo = { key: mutKey, name: mutName, badge: "\u2728 Mutation!", badgeClass: "mutation", sound: "mutation" };
     } else {
       G.seeds.push({ id: G.seedId++, key: resultKey });
       G.hybridCount++;
       if (!G.discovered.includes(resultKey)) G.discovered.push(resultKey);
-      playSound("reveal_legendary");
-      toast("\u2728 RECIPE HYBRID: " + FLOWERS[resultKey].name + "! \u2728", 3000);
+      resultInfo = { key: resultKey, name: FLOWERS[resultKey].name, badge: "\u2728 Recipe Hybrid!", badgeClass: "", sound: "reveal_legendary" };
     }
   } else if (goldenMatch.length > 0 && roll < 0.25) {
-    // Golden pre-defined hybrid
     var hk = goldenMatch[Math.floor(Math.random() * goldenMatch.length)];
     G.seeds.push({ id: G.seedId++, key: hk });
     G.hybridCount++;
-    playSound("reveal_legendary");
-    toast("\u2728 RARE HYBRID: " + FLOWERS[hk].name + "! \u2728", 3000);
+    resultInfo = { key: hk, name: FLOWERS[hk].name, badge: "\u2728 Rare Hybrid!", badgeClass: "", sound: "reveal_legendary" };
   } else if (roll < 0.85) {
-    // Dynamic hybrid — unique name from parents
     var dynKey = getOrCreateDynamicHybrid(key1, key2);
 
     if (isMutation && FLOWERS[dynKey]) {
-      // Mutation on dynamic hybrid
       var dBase = FLOWERS[dynKey];
       var dShift = 15 + Math.random() * 30;
       if (Math.random() < 0.5) dShift = -dShift;
@@ -5171,32 +5242,33 @@ function doHybridize(idx1, idx2) {
       G.hybridCount++;
       G.mutations.push(dMutKey);
       if (!G.discovered.includes(dMutKey)) G.discovered.push(dMutKey);
-      playSound("mutation");
-      toast("\u2728 MUTATION: " + FLOWERS[dMutKey].name + "! Unique color!", 3500);
+      resultInfo = { key: dMutKey, name: FLOWERS[dMutKey].name, badge: "\u2728 Mutation!", badgeClass: "mutation", sound: "mutation" };
     } else {
       G.seeds.push({ id: G.seedId++, key: dynKey });
       G.hybridCount++;
       if (!G.discovered.includes(dynKey)) G.discovered.push(dynKey);
-      playSound("reveal_hybrid");
-      toast("\ud83e\uddec " + FLOWERS[dynKey].name + " created! A new species!", 3000);
+      resultInfo = { key: dynKey, name: FLOWERS[dynKey].name, badge: "\ud83e\uddec New Species!", badgeClass: "", sound: "reveal_hybrid" };
     }
   } else if (roll < 0.95) {
-    // Seed of one parent
     var parentKey = Math.random() < 0.5 ? key1 : key2;
     G.seeds.push({ id: G.seedId++, key: parentKey });
     G.hybridCount++;
-    toast("Got a " + FLOWERS[parentKey].name + " seed \ud83e\uddec", 2500);
+    resultInfo = { key: parentKey, name: FLOWERS[parentKey].name, badge: "\ud83e\uddec Parent Seed", badgeClass: "", sound: "hybrid" };
   } else {
     // Fail — refund coins
     G.coins += cost;
-    toast("Fusion failed\u2026 coins refunded \ud83d\ude1e", 2500);
+    resultInfo = { key: null, name: "Fusion Failed", badge: "Coins refunded \ud83d\ude1e", badgeClass: "fail", sound: "click" };
   }
+
   updateHUD();
   renderTray();
   renderGarden();
   saveG();
-  closeModal("hybridOverlay");
-  checkAchievements();
+
+  // Show the fusion animation
+  showFusionAnimation(key1, key2, resultInfo, function() {
+    checkAchievements();
+  });
 }
 
 // ══════════════════════════════════════════════════════════

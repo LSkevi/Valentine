@@ -503,8 +503,8 @@ body {
   animation: swipeHint 1.2s ease-in-out infinite;
 }
 @keyframes swipeHint {
-  0%, 100% { transform: translateX(0); opacity: 0.4; }
-  50% { transform: translateX(15px); opacity: 0.8; }
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50% { transform: translateY(-12px); opacity: 0.8; }
 }
 .bucket-overlay .bucket-full {
   animation: bucketBurst 0.6s ease;
@@ -526,6 +526,98 @@ body {
   0% { opacity: 1; transform: scale(0.5) translateY(0); }
   50% { opacity: 1; transform: scale(1.3) translateY(-40px); }
   100% { opacity: 0; transform: scale(0.8) translateY(-80px); }
+}
+
+/* ── Fusion animation overlay ────────────────────────── */
+.fusion-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.fusion-overlay.on { opacity: 1; pointer-events: auto; }
+.fusion-flower {
+  position: absolute;
+  width: 80px;
+  height: 100px;
+}
+.fusion-flower svg { width: 100%; height: 100%; display: block; }
+.fusion-flower.left {
+  animation: fusionSlideLeft 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.fusion-flower.right {
+  animation: fusionSlideRight 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes fusionSlideLeft {
+  0% { transform: translate(-120px, 0) scale(1); opacity: 1; }
+  80% { transform: translate(0, 0) scale(1.05); opacity: 1; }
+  100% { transform: translate(0, 0) scale(0); opacity: 0; }
+}
+@keyframes fusionSlideRight {
+  0% { transform: translate(120px, 0) scale(1); opacity: 1; }
+  80% { transform: translate(0, 0) scale(1.05); opacity: 1; }
+  100% { transform: translate(0, 0) scale(0); opacity: 0; }
+}
+.fusion-burst {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,215,0,0.7), rgba(102,187,106,0.4), transparent 70%);
+  opacity: 0;
+  animation: fusionBurst 0.5s 0.6s ease-out forwards;
+}
+@keyframes fusionBurst {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.5); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+.fusion-result {
+  position: absolute;
+  text-align: center;
+  opacity: 0;
+  animation: fusionReveal 0.6s 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.fusion-result-svg { width: 96px; height: 120px; margin: 0 auto; }
+.fusion-result-svg svg { width: 100%; height: 100%; display: block; }
+.fusion-result-name {
+  margin-top: 8px;
+  font-size: 0.85em;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+}
+.fusion-result-badge {
+  margin-top: 4px;
+  font-size: 0.72em;
+  font-weight: 600;
+  color: #66bb6a;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+.fusion-result-badge.mutation { color: #ce93d8; }
+.fusion-result-badge.fail { color: #ef5350; }
+@keyframes fusionReveal {
+  0% { transform: scale(0.3); opacity: 0; }
+  60% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.fusion-sparkle {
+  position: absolute;
+  font-size: 1.2em;
+  pointer-events: none;
+  animation: fusionSparkle 0.8s 0.7s ease-out forwards;
+  opacity: 0;
+}
+@keyframes fusionSparkle {
+  0% { transform: scale(0) translateY(0); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: scale(1) translateY(-40px); opacity: 0; }
 }
 
 /* ── Drifting cloud ───────────────────────────────────── */
@@ -1748,6 +1840,10 @@ body {
   max-width: 480px;
   margin: 0 auto;
   width: 100%;
+  height: 120px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex-shrink: 0;
 }
 .npc-card {
   display: flex;
