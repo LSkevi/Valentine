@@ -3349,10 +3349,10 @@ function waterPlot(i) {
       updatePlotCard(i);
       saveG();
       toast(`${STAGE_NAMES[G.plots[i].stage]} — keep watering! 🌿`, 1500);
-      // Apply watered animation to the new tile
+      // Apply stage-up growth animation to the new tile
       if (grid.children[i]) {
-        grid.children[i].classList.add("watered");
-        setTimeout(() => { if (grid.children[i]) grid.children[i].classList.remove("watered"); }, 380);
+        grid.children[i].classList.add("stage-up");
+        setTimeout(() => { if (grid.children[i]) grid.children[i].classList.remove("stage-up"); }, 600);
       }
     }
   } else {
@@ -3632,6 +3632,12 @@ function openBloomModal(i) {
     toast("Left in pot \u2014 fuse when a neighbor blooms! \ud83c\udf38", 2000);
   };
   openModal("bloomOverlay");
+  // Delay action buttons to prevent accidental taps from spam-tapping the pot
+  var actions = document.querySelector(".bloom-actions");
+  if (actions) {
+    actions.classList.remove("active");
+    setTimeout(function() { actions.classList.add("active"); }, 1500);
+  }
 }
 function storeFlower() {
   if (G.bloomPlot === null) return;
