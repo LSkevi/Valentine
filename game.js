@@ -2953,7 +2953,7 @@ function initGame() {
         volLbl.textContent = "Vol";
         row2.appendChild(volLbl);
         var slider = document.createElement("input");
-        slider.type = "range"; slider.min = "0"; slider.max = "100";
+        slider.type = "range"; slider.min = "0"; slider.max = "150";
         slider.value = String(Math.round((G.sfxVolume || 1.0) * 100));
         slider.style.cssText = "flex:1;accent-color:var(--primary,#527a5f);";
         slider.oninput = function(ev) {
@@ -3019,7 +3019,7 @@ function initGame() {
         row2.appendChild(volLbl);
         var slider = document.createElement("input");
         slider.type = "range";
-        slider.min = "0"; slider.max = "100";
+        slider.min = "0"; slider.max = "150";
         slider.value = String(Math.round((G.musicVolume || 0.045) * 1000));
         slider.style.cssText = "flex:1;accent-color:var(--primary,#527a5f);";
         slider.oninput = function(ev) {
