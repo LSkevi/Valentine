@@ -4096,13 +4096,7 @@ function _backdropDismiss(o, e) {
   if (e.target !== o) return;
   if (Date.now() - _modalOpenTime < 300) return;
   e.preventDefault();
-  if (o.id === "pktOverlay" && G.opening && !G.openedKey) {
-    G.pkt[G.pendingPktType] += (G.pendingPktQty || 1);
-    G.opening = false;
-    updateHUD();
-    saveG();
-  }
-  o.classList.remove("on");
+  closeModal(o.id);
 }
 document.querySelectorAll(".overlay").forEach((o) => {
   o.addEventListener("click", (e) => _backdropDismiss(o, e));
@@ -5609,35 +5603,43 @@ var BG_PETAL_POOLS = {
   "autumn":    ["\ud83c\udf42", "\ud83c\udf41", "\ud83c\udf44", "\ud83c\udf30", "\ud83e\udda5", "\ud83c\udf43"],
   "night":     ["\u2b50", "\u2728", "\u2734\ufe0f", "\ud83c\udf1f", "\u00b7", "\u2726"],
 };
+var BG_PETAL_POOLS_NIGHT = {
+  "default":   ["\u2b50", "\u2728", "\u2727", "\ud83c\udf1f", "\u00b7"],
+  "garden":    ["\ud83e\udeb2", "\u2b50", "\u2727", "\ud83c\udf1f", "\ud83e\udd97"],
+  "enchanted": ["\u2728", "\ud83d\udd2e", "\ud83c\udf1f", "\u2b50", "\ud83e\udeb7", "\u2727"],
+  "sunset":    ["\ud83c\udf19", "\u2b50", "\u2727", "\ud83c\udf1f", "\u2728"],
+  "ocean":     ["\ud83c\udf19", "\u2b50", "\ud83e\uddac", "\u2727", "\ud83c\udf1f"],
+  "autumn":    ["\ud83c\udf19", "\u2b50", "\ud83e\udd89", "\u2727", "\ud83c\udf1f"],
+  "night":     ["\u2b50", "\u2728", "\u2734\ufe0f", "\ud83c\udf1f", "\u00b7", "\u2726"],
+};
+
+// Day and night gradients for each background style
+var BG_GRADIENTS = {
+  "default":   { day: "",
+                 night: "linear-gradient(155deg, #1a1e2e 0%, #232840 40%, #1e2444 100%)" },
+  "garden":    { day: "linear-gradient(155deg, #e8f5e9 0%, #c8e6c9 40%, #a5d6a7 100%)",
+                 night: "linear-gradient(155deg, #0d2818 0%, #1a3a28 40%, #0f3020 100%)" },
+  "enchanted": { day: "linear-gradient(155deg, #ede7f6 0%, #d1c4e9 30%, #b39ddb 60%, #e8eaf6 100%)",
+                 night: "linear-gradient(155deg, #1a1030 0%, #2a1848 30%, #3a2060 60%, #1a1030 100%)" },
+  "sunset":    { day: "linear-gradient(155deg, #fff3e0 0%, #ffcc80 30%, #ff8a65 60%, #ef5350 100%)",
+                 night: "linear-gradient(155deg, #1a1018 0%, #2e1520 30%, #4a1828 60%, #1a0a12 100%)" },
+  "ocean":     { day: "linear-gradient(155deg, #e0f7fa 0%, #80deea 30%, #4dd0e1 60%, #b2ebf2 100%)",
+                 night: "linear-gradient(155deg, #0a1628 0%, #0d2040 30%, #103050 60%, #0a1830 100%)" },
+  "autumn":    { day: "linear-gradient(155deg, #fff8e1 0%, #ffcc80 30%, #d4a056 60%, #8d6e63 100%)",
+                 night: "linear-gradient(155deg, #1a1408 0%, #2a2010 30%, #3a2818 60%, #1a1208 100%)" },
+  "night":     { day: "linear-gradient(155deg, #0d1117 0%, #161b22 30%, #1a1e3a 60%, #0d1117 100%)",
+                 night: "linear-gradient(155deg, #0d1117 0%, #161b22 30%, #1a1e3a 60%, #0d1117 100%)" },
+};
 
 function applyBgStyle() {
   var canvas = document.querySelector(".bg-canvas");
   if (!canvas) return;
-  // Remove night class
   document.body.classList.remove("bg-night");
-  switch (G.bgStyle) {
-    case "garden":
-      canvas.style.background = "linear-gradient(155deg, #e8f5e9 0%, #c8e6c9 40%, #a5d6a7 100%)";
-      break;
-    case "enchanted":
-      canvas.style.background = "linear-gradient(155deg, #ede7f6 0%, #d1c4e9 30%, #b39ddb 60%, #e8eaf6 100%)";
-      break;
-    case "sunset":
-      canvas.style.background = "linear-gradient(155deg, #fff3e0 0%, #ffcc80 30%, #ff8a65 60%, #ef5350 100%)";
-      break;
-    case "ocean":
-      canvas.style.background = "linear-gradient(155deg, #e0f7fa 0%, #80deea 30%, #4dd0e1 60%, #b2ebf2 100%)";
-      break;
-    case "autumn":
-      canvas.style.background = "linear-gradient(155deg, #fff8e1 0%, #ffcc80 30%, #d4a056 60%, #8d6e63 100%)";
-      break;
-    case "night":
-      canvas.style.background = "linear-gradient(155deg, #0d1117 0%, #161b22 30%, #1a1e3a 60%, #0d1117 100%)";
-      document.body.classList.add("bg-night");
-      break;
-    default:
-      canvas.style.background = "";
-  }
+  var isNight = document.body.classList.contains("night-mode");
+  var gradients = BG_GRADIENTS[G.bgStyle] || BG_GRADIENTS["default"];
+  var useDark = isNight || G.bgStyle === "night";
+  canvas.style.background = useDark ? gradients.night : gradients.day;
+  if (useDark) document.body.classList.add("bg-night");
   // Refresh floating art to match theme
   refreshPetals();
 }
@@ -5648,18 +5650,20 @@ function refreshPetals() {
   // Remove old petals
   document.querySelectorAll(".petal").forEach(function(el) { el.remove(); });
   // Create new ones with theme-appropriate pool
-  var pool = BG_PETAL_POOLS[G.bgStyle] || BG_PETAL_POOLS["default"];
-  var count = G.bgStyle === "night" ? 20 : 14;
+  var isNight = document.body.classList.contains("night-mode") || G.bgStyle === "night";
+  var pools = isNight ? BG_PETAL_POOLS_NIGHT : BG_PETAL_POOLS;
+  var pool = pools[G.bgStyle] || pools["default"];
+  var count = isNight ? 20 : 14;
   for (var i = 0; i < count; i++) {
     var el = document.createElement("div");
     el.className = "petal";
     el.textContent = pool[Math.floor(Math.random() * pool.length)];
     var left = 5 + Math.random() * 90;
-    var dur = G.bgStyle === "night" ? (4 + Math.random() * 6) : (13 + Math.random() * 18);
+    var dur = isNight ? (4 + Math.random() * 6) : (13 + Math.random() * 18);
     var delay = Math.random() * 20;
-    var size = G.bgStyle === "night" ? (0.3 + Math.random() * 0.5) : (0.7 + Math.random() * 0.8);
+    var size = isNight ? (0.3 + Math.random() * 0.5) : (0.7 + Math.random() * 0.8);
     el.style.cssText = "left:" + left + "%;font-size:" + size + "em;animation-duration:" + dur + "s;animation-delay:-" + delay + "s;";
-    if (G.bgStyle === "night") {
+    if (isNight) {
       el.style.animationName = "twinkle";
     }
     document.body.appendChild(el);
@@ -6826,6 +6830,7 @@ function stopRainAmbient() {
 function checkNightMode() {
   var hour = new Date().getHours();
   var isNight = hour >= 20 || hour < 6;
+  var wasNight = document.body.classList.contains("night-mode");
   document.body.classList.toggle("night-mode", isNight);
   // Override weather bar to show Moonlight at night
   var bar = document.getElementById("weatherBar");
@@ -6833,13 +6838,13 @@ function checkNightMode() {
     if (isNight) {
       bar.textContent = "\ud83c\udf19 Moonlight";
       bar.className = "weather-bar weather-moonlight";
-    } else if (!bar.classList.contains("weather-moonlight")) {
-      // Day mode — leave weather as-is
-    } else {
+    } else if (wasNight) {
       // Transitioning from night to day — restore weather
       renderWeather();
     }
   }
+  // Re-apply background gradient for day/night transition
+  if (isNight !== wasNight) applyBgStyle();
   return isNight;
 }
 
