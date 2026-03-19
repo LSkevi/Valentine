@@ -101,6 +101,10 @@ body {
   z-index: -1;
   opacity: 0;
   animation: petalDrift linear infinite;
+  line-height: 0;
+}
+.petal svg {
+  display: block;
 }
 @keyframes petalDrift {
   0% {

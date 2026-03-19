@@ -5594,23 +5594,50 @@ function renderMilestoneSection() {
 }
 
 // Petal pools per background theme
+// SVG particle shapes for each theme (day + night variants)
+function _svg(w, h, inner, fill) {
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' + inner + '</svg>';
+}
+var _petalShapes = {
+  // Petal (teardrop)
+  petal: function(c) { return _svg(12, 16, '<ellipse cx="6" cy="9" rx="5" ry="7" fill="' + c + '" opacity=".6"/>', c); },
+  // Small flower (5 petals)
+  flower: function(c) { return _svg(14, 14, '<circle cx="7" cy="7" r="2.5" fill="#fff5" /><circle cx="7" cy="2.5" r="2.5" fill="' + c + '" opacity=".5"/><circle cx="11" cy="5.5" r="2.5" fill="' + c + '" opacity=".45"/><circle cx="9.8" cy="10.5" r="2.5" fill="' + c + '" opacity=".4"/><circle cx="4.2" cy="10.5" r="2.5" fill="' + c + '" opacity=".4"/><circle cx="3" cy="5.5" r="2.5" fill="' + c + '" opacity=".45"/>', c); },
+  // Leaf
+  leaf: function(c) { return _svg(14, 10, '<path d="M1 5Q7 -2 13 5Q7 12 1 5Z" fill="' + c + '" opacity=".5"/><line x1="1" y1="5" x2="13" y2="5" stroke="' + c + '" stroke-width=".5" opacity=".3"/>', c); },
+  // Star (4-point)
+  star4: function(c) { return _svg(12, 12, '<path d="M6 0L7.5 4.5L12 6L7.5 7.5L6 12L4.5 7.5L0 6L4.5 4.5Z" fill="' + c + '" opacity=".7"/>', c); },
+  // Diamond sparkle
+  sparkle: function(c) { return _svg(10, 10, '<path d="M5 0L6 4L10 5L6 6L5 10L4 6L0 5L4 4Z" fill="' + c + '" opacity=".6"/>', c); },
+  // Circle dot
+  dot: function(c) { return _svg(8, 8, '<circle cx="4" cy="4" r="3" fill="' + c + '" opacity=".5"/>', c); },
+  // Wave
+  wave: function(c) { return _svg(16, 8, '<path d="M0 4Q4 0 8 4Q12 8 16 4" fill="none" stroke="' + c + '" stroke-width="1.5" opacity=".4"/>', c); },
+  // Maple leaf
+  maple: function(c) { return _svg(14, 14, '<path d="M7 0L8.5 4L13 3L10 7L14 10L9 9L7 14L5 9L0 10L4 7L1 3L5.5 4Z" fill="' + c + '" opacity=".5"/>', c); },
+  // Crescent moon
+  moon: function(c) { return _svg(12, 12, '<path d="M8 1a5 5 0 1 0 0 10 4 4 0 0 1 0-10Z" fill="' + c + '" opacity=".6"/>', c); },
+  // Snowflake-like
+  crystal: function(c) { return _svg(12, 12, '<path d="M6 0v12M0 6h12M1.8 1.8l8.4 8.4M10.2 1.8l-8.4 8.4" stroke="' + c + '" stroke-width=".7" opacity=".5" fill="none"/>', c); },
+};
+
 var BG_PETAL_POOLS = {
-  "default":   ["\ud83c\udf38", "\ud83c\udf37", "\u273f", "\u2740", "\ud83d\udcae", "\ud83c\udf3a"],
-  "garden":    ["\ud83c\udf3f", "\ud83c\udf40", "\ud83c\udf3e", "\ud83c\udf31", "\u2618\ufe0f", "\ud83c\udf3b"],
-  "enchanted": ["\u2728", "\u2b50", "\ud83d\udd2e", "\u2727", "\ud83e\udeb7", "\ud83c\udf1f"],
-  "sunset":    ["\ud83c\udf05", "\ud83c\udf1e", "\u2601\ufe0f", "\ud83e\udda9", "\ud83c\udf3b", "\ud83e\udd8b"],
-  "ocean":     ["\ud83c\udf0a", "\ud83d\udc1a", "\u2693", "\ud83e\uddea", "\ud83c\udf2c\ufe0f", "\ud83d\udc20"],
-  "autumn":    ["\ud83c\udf42", "\ud83c\udf41", "\ud83c\udf44", "\ud83c\udf30", "\ud83e\udda5", "\ud83c\udf43"],
-  "night":     ["\u2b50", "\u2728", "\u2734\ufe0f", "\ud83c\udf1f", "\u00b7", "\u2726"],
+  "default":   [_petalShapes.petal("#f48fb1"), _petalShapes.petal("#ce93d8"), _petalShapes.flower("#f06292"), _petalShapes.petal("#ef9a9a"), _petalShapes.flower("#e57373"), _petalShapes.petal("#f8bbd0")],
+  "garden":    [_petalShapes.leaf("#66bb6a"), _petalShapes.leaf("#81c784"), _petalShapes.leaf("#4caf50"), _petalShapes.dot("#a5d6a7"), _petalShapes.leaf("#388e3c"), _petalShapes.flower("#aed581")],
+  "enchanted": [_petalShapes.sparkle("#ce93d8"), _petalShapes.star4("#b39ddb"), _petalShapes.sparkle("#e1bee7"), _petalShapes.crystal("#9575cd"), _petalShapes.star4("#7e57c2"), _petalShapes.sparkle("#ba68c8")],
+  "sunset":    [_petalShapes.petal("#ffab91"), _petalShapes.dot("#ff8a65"), _petalShapes.petal("#ffcc80"), _petalShapes.flower("#ef5350"), _petalShapes.petal("#ff7043"), _petalShapes.dot("#ffa726")],
+  "ocean":     [_petalShapes.wave("#4dd0e1"), _petalShapes.dot("#80deea"), _petalShapes.wave("#26c6da"), _petalShapes.dot("#00bcd4"), _petalShapes.wave("#b2ebf2"), _petalShapes.dot("#4db6ac")],
+  "autumn":    [_petalShapes.maple("#ff8a65"), _petalShapes.maple("#d4a056"), _petalShapes.maple("#8d6e63"), _petalShapes.leaf("#bf360c"), _petalShapes.maple("#e65100"), _petalShapes.maple("#ffb74d")],
+  "night":     [_petalShapes.star4("#e8eaf6"), _petalShapes.sparkle("#c5cae9"), _petalShapes.dot("#9fa8da"), _petalShapes.star4("#7986cb"), _petalShapes.sparkle("#e8eaf6"), _petalShapes.dot("#b0bec5")],
 };
 var BG_PETAL_POOLS_NIGHT = {
-  "default":   ["\u2b50", "\u2728", "\u2727", "\ud83c\udf1f", "\u00b7"],
-  "garden":    ["\ud83e\udeb2", "\u2b50", "\u2727", "\ud83c\udf1f", "\ud83e\udd97"],
-  "enchanted": ["\u2728", "\ud83d\udd2e", "\ud83c\udf1f", "\u2b50", "\ud83e\udeb7", "\u2727"],
-  "sunset":    ["\ud83c\udf19", "\u2b50", "\u2727", "\ud83c\udf1f", "\u2728"],
-  "ocean":     ["\ud83c\udf19", "\u2b50", "\ud83e\uddac", "\u2727", "\ud83c\udf1f"],
-  "autumn":    ["\ud83c\udf19", "\u2b50", "\ud83e\udd89", "\u2727", "\ud83c\udf1f"],
-  "night":     ["\u2b50", "\u2728", "\u2734\ufe0f", "\ud83c\udf1f", "\u00b7", "\u2726"],
+  "default":   [_petalShapes.star4("#c5cae9"), _petalShapes.sparkle("#9fa8da"), _petalShapes.dot("#7986cb"), _petalShapes.star4("#e8eaf6"), _petalShapes.dot("#b0bec5")],
+  "garden":    [_petalShapes.star4("#a5d6a7"), _petalShapes.sparkle("#81c784"), _petalShapes.dot("#66bb6a"), _petalShapes.star4("#c8e6c9"), _petalShapes.dot("#4caf50")],
+  "enchanted": [_petalShapes.sparkle("#ce93d8"), _petalShapes.star4("#e1bee7"), _petalShapes.crystal("#b39ddb"), _petalShapes.sparkle("#ba68c8"), _petalShapes.star4("#9575cd")],
+  "sunset":    [_petalShapes.moon("#ffcc80"), _petalShapes.star4("#ff8a65"), _petalShapes.sparkle("#ef9a9a"), _petalShapes.dot("#ffab91"), _petalShapes.star4("#ffa726")],
+  "ocean":     [_petalShapes.moon("#80deea"), _petalShapes.star4("#4dd0e1"), _petalShapes.dot("#26c6da"), _petalShapes.sparkle("#b2ebf2"), _petalShapes.star4("#80cbc4")],
+  "autumn":    [_petalShapes.moon("#ffcc80"), _petalShapes.star4("#d4a056"), _petalShapes.sparkle("#8d6e63"), _petalShapes.dot("#bf360c"), _petalShapes.star4("#ff8a65")],
+  "night":     [_petalShapes.star4("#e8eaf6"), _petalShapes.sparkle("#c5cae9"), _petalShapes.dot("#9fa8da"), _petalShapes.star4("#7986cb"), _petalShapes.sparkle("#e8eaf6"), _petalShapes.dot("#b0bec5")],
 };
 
 // Day and night gradients for each background style
@@ -5657,12 +5684,12 @@ function refreshPetals() {
   for (var i = 0; i < count; i++) {
     var el = document.createElement("div");
     el.className = "petal";
-    el.textContent = pool[Math.floor(Math.random() * pool.length)];
+    el.innerHTML = pool[Math.floor(Math.random() * pool.length)];
     var left = 5 + Math.random() * 90;
     var dur = isNight ? (4 + Math.random() * 6) : (13 + Math.random() * 18);
     var delay = Math.random() * 20;
-    var size = isNight ? (0.3 + Math.random() * 0.5) : (0.7 + Math.random() * 0.8);
-    el.style.cssText = "left:" + left + "%;font-size:" + size + "em;animation-duration:" + dur + "s;animation-delay:-" + delay + "s;";
+    var scale = isNight ? (0.6 + Math.random() * 0.8) : (1 + Math.random() * 1.2);
+    el.style.cssText = "left:" + left + "%;transform:scale(" + scale.toFixed(2) + ");animation-duration:" + dur + "s;animation-delay:-" + delay + "s;";
     if (isNight) {
       el.style.animationName = "twinkle";
     }
