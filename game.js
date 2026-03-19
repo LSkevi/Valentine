@@ -4565,7 +4565,7 @@ var NPC_FRIENDS = [
   { name: "Ana",       avatar: "\ud83d\udc69" },
   { name: "Kinano",    avatar: "\ud83d\udc69" },
   { name: "Tutu",      avatar: "\ud83d\udc69" },
-  { name: "Vito",      avatar: "\ud83d\udc68\u200d\ud83e\uddb1" },
+  { name: "Vitor",     avatar: "\ud83d\udc68\ud83c\udfff" },
   { name: "Ian",       avatar: "\ud83d\udc68" },
   { name: "Guilherme", avatar: "\ud83d\udc71" },
   { name: "Klebio",    avatar: "\ud83d\udc71" },
