@@ -4548,10 +4548,17 @@ function weightedRandom(type = "common") {
 // ══════════════════════════════════════════════════════════
 // NPC FLOWER SHOP SYSTEM
 // ══════════════════════════════════════════════════════════
-var NPC_FEMALE_NAMES = ["Tutu","Yurie","Ana"];
-var NPC_MALE_NAMES = ["Ian","Guilherme","Brasil","Vitor","Klebio"];
-var NPC_FEMALE_AVATARS = ["\ud83d\udc69","\ud83d\udc69\u200d\ud83e\uddb0","\ud83d\udc75","\ud83d\udc67","\ud83d\udc71\u200d\u2640\ufe0f"];
-var NPC_MALE_AVATARS = ["\ud83d\udc68","\ud83d\udc68\u200d\ud83e\uddb0","\ud83d\udc74","\ud83d\udc66","\ud83d\udc71"];
+var NPC_FRIENDS = [
+  { name: "Yurie",     avatar: "\ud83d\udc69" },
+  { name: "Ana",       avatar: "\ud83d\udc69" },
+  { name: "Kinano",    avatar: "\ud83d\udc69" },
+  { name: "Tutu",      avatar: "\ud83d\udc69" },
+  { name: "Vito",      avatar: "\ud83d\udc68\u200d\ud83e\uddb1" },
+  { name: "Ian",       avatar: "\ud83d\udc68" },
+  { name: "Guilherme", avatar: "\ud83d\udc71" },
+  { name: "Klebio",    avatar: "\ud83d\udc71" },
+  { name: "Brasil",    avatar: "\ud83d\udc71" },
+];
 const NPC_MAX = 3;
 const NPC_SPAWN_MIN = 35000; // 35s minimum between spawns
 const NPC_SPAWN_MAX = 90000; // 90s max
@@ -4621,7 +4628,7 @@ function createNPC() {
   if (isVip) reward = Math.round(f.sell * 8 * (0.9 + Math.random() * 0.3));
   if (isWildcard) reward = Math.round(reward * 0.8); // slightly less for flexibility
 
-  var _npcGender = Math.random() < 0.5 ? "f" : "m";
+  var _npcFriend = NPC_FRIENDS[Math.floor(Math.random() * NPC_FRIENDS.length)];
   var dialogue;
   if (isWildcard) {
     var rLabel = RARITY_LABEL[requestRarity] || requestRarity;
@@ -4638,8 +4645,8 @@ function createNPC() {
 
   var npc = {
     id: G.npcIdCounter++,
-    name: _npcGender === "f" ? NPC_FEMALE_NAMES[Math.floor(Math.random() * NPC_FEMALE_NAMES.length)] : NPC_MALE_NAMES[Math.floor(Math.random() * NPC_MALE_NAMES.length)],
-    avatar: _npcGender === "f" ? NPC_FEMALE_AVATARS[Math.floor(Math.random() * NPC_FEMALE_AVATARS.length)] : NPC_MALE_AVATARS[Math.floor(Math.random() * NPC_MALE_AVATARS.length)],
+    name: _npcFriend.name,
+    avatar: _npcFriend.avatar,
     requestKey: requestKey,
     requestRarity: requestRarity,
     reward: reward,
