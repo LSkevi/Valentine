@@ -1,4 +1,4 @@
-var CACHE_NAME = "yurie-v6";
+var CACHE_NAME = "yurie-v7";
 var ASSETS = ["/", "/index.html", "/style.css", "/game.js", "/manifest.json"];
 
 self.addEventListener("install", function (e) {

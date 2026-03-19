@@ -3399,6 +3399,7 @@ function openPktModal() {
   }
   G.openedKey = null;
   G.opening = false;
+  _ensurePktResultTemplate();
   // render selector cards
   const types = ["common", "uncommon", "rare", "legendary"];
   document.getElementById("pktSelector").innerHTML = types
@@ -3428,6 +3429,7 @@ function selectPktType(type, qty) {
   qty = qty || 1;
   if (G.pkt[type] < qty || G.opening) return;
   G.pendingPktType = type;
+  G.pendingPktQty = qty;
   G.opening = true;
   G.pkt[type] -= qty;
   updateHUD();
@@ -3445,8 +3447,10 @@ function selectPktType(type, qty) {
     document.getElementById("pktHint").style.display = "";
     playSound("packet_" + type);
     setTimeout(function() {
+      if (!G.opening) return; // modal was dismissed
       card.classList.add("shaking");
       setTimeout(function() {
+        if (!G.opening) return; // modal was dismissed
         G.openedKey = weightedRandom(type);
         saveG();
         var f = FLOWERS[G.openedKey];
@@ -3516,6 +3520,20 @@ function selectPktType(type, qty) {
     renderTray();
     if (bestRarity === "unique") confettiBurst();
     else if (bestRarity === "legendary" || bestRarity === "rare") multiSparkle();
+  }
+}
+
+// Restore the single-packet result template if it was destroyed by multi-pack innerHTML
+function _ensurePktResultTemplate() {
+  var el = document.getElementById("pktResult");
+  if (!document.getElementById("resFlower")) {
+    el.innerHTML =
+      '<div class="res-flower" id="resFlower"></div>' +
+      '<div class="res-name" id="resName"></div>' +
+      '<div class="res-rarity" id="resRarity"></div>' +
+      '<div class="res-msg" id="resMsg"></div>' +
+      '<button class="btn-collect" onclick="collectSeed()">Add to Seeds \ud83c\udf31</button>';
+    el.classList.remove("show");
   }
 }
 
@@ -4041,7 +4059,7 @@ function openModal(id) {
   document.querySelectorAll(".overlay.on").forEach((o) => {
     if (o.id !== id) {
       if (o.id === "pktOverlay" && G.opening && !G.openedKey) {
-        G.pkt[G.pendingPktType]++;
+        G.pkt[G.pendingPktType] += (G.pendingPktQty || 1);
         G.opening = false;
         updateHUD();
         saveG();
@@ -4056,7 +4074,7 @@ function openModal(id) {
 function closeModal(id) {
   // Refund packet if closed mid-animation before seed was revealed
   if (id === "pktOverlay" && G.opening && !G.openedKey) {
-    G.pkt[G.pendingPktType]++;
+    G.pkt[G.pendingPktType] += (G.pendingPktQty || 1);
     G.opening = false;
     updateHUD();
     saveG();
@@ -4079,7 +4097,7 @@ function _backdropDismiss(o, e) {
   if (Date.now() - _modalOpenTime < 300) return;
   e.preventDefault();
   if (o.id === "pktOverlay" && G.opening && !G.openedKey) {
-    G.pkt[G.pendingPktType]++;
+    G.pkt[G.pendingPktType] += (G.pendingPktQty || 1);
     G.opening = false;
     updateHUD();
     saveG();
@@ -6809,10 +6827,18 @@ function checkNightMode() {
   var hour = new Date().getHours();
   var isNight = hour >= 20 || hour < 6;
   document.body.classList.toggle("night-mode", isNight);
-  // Update weather bar emoji for night
+  // Override weather bar to show Moonlight at night
   var bar = document.getElementById("weatherBar");
-  if (bar && isNight && !bar.textContent.includes("\ud83c\udf19")) {
-    // Keep weather text but add moon indicator
+  if (bar) {
+    if (isNight) {
+      bar.textContent = "\ud83c\udf19 Moonlight";
+      bar.className = "weather-bar weather-moonlight";
+    } else if (!bar.classList.contains("weather-moonlight")) {
+      // Day mode — leave weather as-is
+    } else {
+      // Transitioning from night to day — restore weather
+      renderWeather();
+    }
   }
   return isNight;
 }
