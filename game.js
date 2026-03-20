@@ -3690,7 +3690,7 @@ function selectPktType(type, qty) {
     document.getElementById("pktHint").style.display = "none";
     var results = [];
     for (var i = 0; i < qty; i++) {
-      var key = weightedRandom(type);
+      var key = weightedRandom(type, results);
       results.push(key);
       if (!G.discovered.includes(key)) G.discovered.push(key);
       G.seeds.push({ id: G.seedId++, key: key });
@@ -4176,9 +4176,24 @@ function openJournalModal() {
   ];
   const grid = document.getElementById("jnlGrid");
   grid.innerHTML = "";
-  const unlocked = order.filter((k) => G.discovered.includes(k)).length;
+  // Collect discovered dynamic hybrids and mutations (not in the static order list)
+  var dynamicKeys = G.discovered.filter(function(k) {
+    return (k.indexOf("dyn_") === 0 || k.indexOf("mut_") === 0) && FLOWERS[k];
+  });
+  // Sort: mutations first, then dynamic hybrids, alphabetically within each
+  dynamicKeys.sort(function(a, b) {
+    var aMut = a.indexOf("mut_") === 0 ? 0 : 1;
+    var bMut = b.indexOf("mut_") === 0 ? 0 : 1;
+    if (aMut !== bMut) return aMut - bMut;
+    return (FLOWERS[a].name || a).localeCompare(FLOWERS[b].name || b);
+  });
+  var fullOrder = order.concat(dynamicKeys);
+  var staticCount = order.length;
+  const unlocked = fullOrder.filter((k) => G.discovered.includes(k)).length;
+  var staticUnlocked = order.filter((k) => G.discovered.includes(k)).length;
+  var dynCount = dynamicKeys.length;
   document.getElementById("jnlProg").textContent =
-    `${unlocked} / ${order.length} flowers discovered`;
+    staticUnlocked + " / " + staticCount + " flowers" + (dynCount > 0 ? " + " + dynCount + " fusion" + (dynCount > 1 ? "s" : "") : "");
   // Fusion Guide button in journal
   var existingFusionBtn = grid.parentElement.querySelector(".jnl-fusion-btn");
   if (existingFusionBtn) existingFusionBtn.remove();
@@ -4187,23 +4202,47 @@ function openJournalModal() {
   fusionBtn.textContent = "\ud83e\uddec Fusion Guide";
   fusionBtn.onclick = function() { closeModal("journalOverlay"); setTimeout(openBreedGuide, 200); };
   grid.parentElement.insertBefore(fusionBtn, grid);
-  order.forEach((key) => {
-    const f = FLOWERS[key];
-    const known = G.discovered.includes(key);
-    const card = document.createElement("div");
+  // Render static flowers
+  order.forEach(function(key) {
+    var f = FLOWERS[key];
+    var known = G.discovered.includes(key);
+    var card = document.createElement("div");
     card.className = "jnl-card" + (known ? "" : " jlocked");
-    // Tint background for white/light flowers so they're visible
     var isLight = isLightColor(f.petal);
     if (known && isLight) card.style.background = "#e8e4dc";
-    const svgHtml = flowerSVG(key, 3);
-    card.innerHTML = `
-      <div class="jnl-svg${known ? "" : " jsilhouette"}">${svgHtml}</div>
-      <div class="jnl-name${known ? "" : " jlocked"}">${known ? f.name : getFlowerHint(f)}</div>
-      <span class="jnl-badge ${f.rarity}">${RARITY_LABEL[f.rarity]}</span>
-      <div class="jnl-sell${known ? "" : " jhide"}"><span class="ic" style="width:13px;height:13px;font-size:.6em">C</span>${f.sell}</div>
-    `;
+    var svgHtml = flowerSVG(key, 3);
+    card.insertAdjacentHTML("beforeend",
+      '<div class="jnl-svg' + (known ? "" : " jsilhouette") + '">' + svgHtml + '</div>' +
+      '<div class="jnl-name' + (known ? "" : " jlocked") + '">' + (known ? f.name : getFlowerHint(f)) + '</div>' +
+      '<span class="jnl-badge ' + f.rarity + '">' + RARITY_LABEL[f.rarity] + '</span>' +
+      '<div class="jnl-sell' + (known ? "" : " jhide") + '"><span class="ic" style="width:13px;height:13px;font-size:.6em">C</span>' + f.sell + '</div>'
+    );
     grid.appendChild(card);
   });
+  // Render dynamic fusions section
+  if (dynamicKeys.length > 0) {
+    var divider = document.createElement("div");
+    divider.style.cssText = "grid-column:1/-1;text-align:center;padding:12px 0 4px;font-size:.8em;font-weight:700;color:var(--primary,#527a5f);border-top:1px solid var(--border,rgba(60,50,40,0.1));margin-top:8px;";
+    divider.textContent = "\ud83e\uddec Your Fusions (" + dynamicKeys.length + ")";
+    grid.appendChild(divider);
+    dynamicKeys.forEach(function(key) {
+      var f = FLOWERS[key];
+      if (!f) return;
+      var card = document.createElement("div");
+      card.className = "jnl-card";
+      var isLight = isLightColor(f.petal);
+      if (isLight) card.style.background = "#e8e4dc";
+      var isMut = key.indexOf("mut_") === 0;
+      var svgHtml = flowerSVG(key, 3);
+      card.insertAdjacentHTML("beforeend",
+        '<div class="jnl-svg">' + svgHtml + '</div>' +
+        '<div class="jnl-name">' + f.name + '</div>' +
+        '<span class="jnl-badge hybrid">' + (isMut ? "\u2728 Mutation" : "\ud83e\uddec Fusion") + '</span>' +
+        '<div class="jnl-sell"><span class="ic" style="width:13px;height:13px;font-size:.6em">C</span>' + f.sell + '</div>'
+      );
+      grid.appendChild(card);
+    });
+  }
   openModal("journalOverlay");
 }
 function openShopModal() {
@@ -4555,16 +4594,44 @@ const PKT_POOLS = {
     whiteLily: 3,
   },
 };
-function weightedRandom(type = "common") {
-  const pool = PKT_POOLS[type] || PKT_POOLS.common;
-  const keys = Object.keys(pool);
-  const total = keys.reduce((s, k) => s + pool[k], 0);
-  let r = Math.random() * total;
-  for (const k of keys) {
-    r -= pool[k];
-    if (r <= 0) return k;
+// Smart pack: duplicate protection + undiscovered boost
+// exclude: array of keys to exclude from this batch (multi-pack dedup)
+function weightedRandom(type, exclude) {
+  type = type || "common";
+  exclude = exclude || [];
+  var pool = PKT_POOLS[type] || PKT_POOLS.common;
+  var keys = Object.keys(pool);
+  // Count how many of each flower the player currently owns (seeds + inventory + plots)
+  var ownedCount = {};
+  G.seeds.forEach(function(s) { ownedCount[s.key] = (ownedCount[s.key] || 0) + 1; });
+  G.inventory.forEach(function(i) { ownedCount[i.key] = (ownedCount[i.key] || 0) + 1; });
+  G.plots.forEach(function(p) { if (p.key) ownedCount[p.key] = (ownedCount[p.key] || 0) + 1; });
+  // Also count batch exclusions
+  exclude.forEach(function(k) { ownedCount[k] = (ownedCount[k] || 0) + 1; });
+  // Build adjusted weights
+  var adjusted = {};
+  var total = 0;
+  keys.forEach(function(k) {
+    var w = pool[k];
+    var owned = ownedCount[k] || 0;
+    // Reduce weight for duplicates
+    if (owned >= 3) w *= 0.1;
+    else if (owned >= 2) w *= 0.25;
+    else if (owned >= 1) w *= 0.5;
+    // Boost undiscovered flowers (especially for legendary)
+    if (!G.discovered.includes(k)) {
+      w *= (type === "legendary" ? 2.0 : 1.5);
+    }
+    adjusted[k] = w;
+    total += w;
+  });
+  // Roll
+  var r = Math.random() * total;
+  for (var i = 0; i < keys.length; i++) {
+    r -= adjusted[keys[i]];
+    if (r <= 0) return keys[i];
   }
-  return keys.at(-1);
+  return keys[keys.length - 1];
 }
 
 // ── Valve wheel ─────────────────────────────────────────────────────────────
