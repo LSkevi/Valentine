@@ -1646,10 +1646,9 @@ const BREED_RECIPES = {
   "orchid+rose":    [{ key: "crimsonOrchid", w: 60 }],
   "daisy+sunflower":[{ key: "goldenDaisy", w: 65 }],
   "cherry+lily":    [{ key: "frostedCherry", w: 55 }],
-  "iris+tulip":     [{ key: "shadowIris", w: 60 }],
+  "iris+tulip":     [{ key: "shadowIris", w: 45 }, { key: "emeraldTulip", w: 40 }],
   "peony+poppy":    [{ key: "coralPeony", w: 60 }],
   "lavender+violet":[{ key: "stardustLavender", w: 55 }],
-  "iris+tulip":     [{ key: "emeraldTulip", w: 50 }, { key: "shadowIris", w: 35 }],
   "rose+sunflower": [{ key: "phoenixSunflower", w: 60 }],
   "daisy+violet":   [{ key: "crystalViolet", w: 55 }],
   "iris+poppy":     [{ key: "midnightPoppy", w: 60 }],
@@ -1805,6 +1804,7 @@ function saveG() {
     breedDiscovered: G.breedDiscovered,
     mutations: G.mutations,
     contextTips: G.contextTips,
+    _bugfix_pkt_v1: G._bugfix_pkt_v1,
   };
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify(s));
@@ -1855,6 +1855,7 @@ function loadG() {
       breedDiscovered: s.breedDiscovered ?? [],
       mutations: s.mutations ?? [],
       contextTips: s.contextTips ?? {},
+      _bugfix_pkt_v1: s._bugfix_pkt_v1 ?? false,
     });
     // Rebuild dynamic hybrid FLOWERS entries from save data
     // Check seeds, inventory, plots, discovered for dyn_ keys
@@ -1879,6 +1880,23 @@ function loadG() {
         }
       }
     });
+    // One-time compensation for packet bug (seeds lost due to _svg collision)
+    if (!s._bugfix_pkt_v1) {
+      var uncommonKeys = Object.keys(FLOWERS).filter(function(k) {
+        return FLOWERS[k].rarity === "uncommon" && FLOWERS[k].w > 0;
+      });
+      for (var ci = 0; ci < 10; ci++) {
+        var compKey = uncommonKeys[Math.floor(Math.random() * uncommonKeys.length)];
+        G.seeds.push({ id: G.seedId++, key: compKey });
+        if (!G.discovered.includes(compKey)) G.discovered.push(compKey);
+      }
+      G._bugfix_pkt_v1 = true;
+      // Save the flag immediately so it only happens once
+      try { var tmp = JSON.parse(localStorage.getItem(SAVE_KEY)); tmp._bugfix_pkt_v1 = true; localStorage.setItem(SAVE_KEY, JSON.stringify(tmp)); } catch(e2) {}
+      setTimeout(function() {
+        toast("\ud83c\udf81 Bug fix gift: 10 uncommon seeds added! Sorry for lost packets!", 4000);
+      }, 2000);
+    }
     return true;
   } catch (e) {
     return false;
@@ -3450,6 +3468,7 @@ function selectPktType(type, qty) {
       if (!G.opening) return; // modal was dismissed
       card.classList.add("shaking");
       setTimeout(function() {
+        try {
         if (!G.opening) return; // modal was dismissed
         G.openedKey = weightedRandom(type);
         saveG();
@@ -3457,8 +3476,13 @@ function selectPktType(type, qty) {
         playSound("reveal_" + f.rarity);
         haptic(f.rarity === "legendary" || f.rarity === "unique" ? 100 : 40);
         document.getElementById("pktOpenWrap").style.display = "none";
-        document.getElementById("resFlower").innerHTML =
-          '<div style="width:100%;height:100%">' + flowerSVG(G.openedKey, MAX_STAGE) + '</div>';
+        var resFlowerEl = document.getElementById("resFlower");
+        var svgContent = flowerSVG(G.openedKey, MAX_STAGE);
+        var wrapper = document.createElement("div");
+        wrapper.style.cssText = "width:100%;height:100%";
+        wrapper.insertAdjacentHTML("beforeend", svgContent);
+        resFlowerEl.textContent = "";
+        resFlowerEl.appendChild(wrapper);
         document.getElementById("resName").textContent = f.name;
         var rl = document.getElementById("resRarity");
         rl.textContent = RARITY_LABEL[f.rarity];
@@ -3469,6 +3493,20 @@ function selectPktType(type, qty) {
         if (f.rarity === "legendary" || f.rarity === "unique") multiSparkle();
         if (f.rarity === "unique") confettiBurst();
         else spawnSparkle(window.innerWidth / 2, window.innerHeight * 0.4, "\u2728");
+        } catch(err) {
+          console.error("[Garden] Packet reveal error:", err);
+          // Ensure seed is still collected even if rendering fails
+          if (G.openedKey) {
+            if (!G.discovered.includes(G.openedKey)) G.discovered.push(G.openedKey);
+            G.seeds.push({ id: G.seedId++, key: G.openedKey });
+            G.openedKey = null;
+            G.opening = false;
+            renderTray();
+            saveG();
+            closeModal("pktOverlay");
+            toast("Seed collected! (display error) \ud83c\udf31", 2000);
+          }
+        }
       }, 540);
     }, 100);
   } else {
@@ -5595,30 +5633,30 @@ function renderMilestoneSection() {
 
 // Petal pools per background theme
 // SVG particle shapes for each theme (day + night variants)
-function _svg(w, h, inner, fill) {
+function _particleSvg(w, h, inner, fill) {
   return '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' + inner + '</svg>';
 }
 var _petalShapes = {
   // Petal (teardrop)
-  petal: function(c) { return _svg(12, 16, '<ellipse cx="6" cy="9" rx="5" ry="7" fill="' + c + '" opacity=".6"/>', c); },
+  petal: function(c) { return _particleSvg(12, 16, '<ellipse cx="6" cy="9" rx="5" ry="7" fill="' + c + '" opacity=".6"/>', c); },
   // Small flower (5 petals)
-  flower: function(c) { return _svg(14, 14, '<circle cx="7" cy="7" r="2.5" fill="#fff5" /><circle cx="7" cy="2.5" r="2.5" fill="' + c + '" opacity=".5"/><circle cx="11" cy="5.5" r="2.5" fill="' + c + '" opacity=".45"/><circle cx="9.8" cy="10.5" r="2.5" fill="' + c + '" opacity=".4"/><circle cx="4.2" cy="10.5" r="2.5" fill="' + c + '" opacity=".4"/><circle cx="3" cy="5.5" r="2.5" fill="' + c + '" opacity=".45"/>', c); },
+  flower: function(c) { return _particleSvg(14, 14, '<circle cx="7" cy="7" r="2.5" fill="#fff5" /><circle cx="7" cy="2.5" r="2.5" fill="' + c + '" opacity=".5"/><circle cx="11" cy="5.5" r="2.5" fill="' + c + '" opacity=".45"/><circle cx="9.8" cy="10.5" r="2.5" fill="' + c + '" opacity=".4"/><circle cx="4.2" cy="10.5" r="2.5" fill="' + c + '" opacity=".4"/><circle cx="3" cy="5.5" r="2.5" fill="' + c + '" opacity=".45"/>', c); },
   // Leaf
-  leaf: function(c) { return _svg(14, 10, '<path d="M1 5Q7 -2 13 5Q7 12 1 5Z" fill="' + c + '" opacity=".5"/><line x1="1" y1="5" x2="13" y2="5" stroke="' + c + '" stroke-width=".5" opacity=".3"/>', c); },
+  leaf: function(c) { return _particleSvg(14, 10, '<path d="M1 5Q7 -2 13 5Q7 12 1 5Z" fill="' + c + '" opacity=".5"/><line x1="1" y1="5" x2="13" y2="5" stroke="' + c + '" stroke-width=".5" opacity=".3"/>', c); },
   // Star (4-point)
-  star4: function(c) { return _svg(12, 12, '<path d="M6 0L7.5 4.5L12 6L7.5 7.5L6 12L4.5 7.5L0 6L4.5 4.5Z" fill="' + c + '" opacity=".7"/>', c); },
+  star4: function(c) { return _particleSvg(12, 12, '<path d="M6 0L7.5 4.5L12 6L7.5 7.5L6 12L4.5 7.5L0 6L4.5 4.5Z" fill="' + c + '" opacity=".7"/>', c); },
   // Diamond sparkle
-  sparkle: function(c) { return _svg(10, 10, '<path d="M5 0L6 4L10 5L6 6L5 10L4 6L0 5L4 4Z" fill="' + c + '" opacity=".6"/>', c); },
+  sparkle: function(c) { return _particleSvg(10, 10, '<path d="M5 0L6 4L10 5L6 6L5 10L4 6L0 5L4 4Z" fill="' + c + '" opacity=".6"/>', c); },
   // Circle dot
-  dot: function(c) { return _svg(8, 8, '<circle cx="4" cy="4" r="3" fill="' + c + '" opacity=".5"/>', c); },
+  dot: function(c) { return _particleSvg(8, 8, '<circle cx="4" cy="4" r="3" fill="' + c + '" opacity=".5"/>', c); },
   // Wave
-  wave: function(c) { return _svg(16, 8, '<path d="M0 4Q4 0 8 4Q12 8 16 4" fill="none" stroke="' + c + '" stroke-width="1.5" opacity=".4"/>', c); },
+  wave: function(c) { return _particleSvg(16, 8, '<path d="M0 4Q4 0 8 4Q12 8 16 4" fill="none" stroke="' + c + '" stroke-width="1.5" opacity=".4"/>', c); },
   // Maple leaf
-  maple: function(c) { return _svg(14, 14, '<path d="M7 0L8.5 4L13 3L10 7L14 10L9 9L7 14L5 9L0 10L4 7L1 3L5.5 4Z" fill="' + c + '" opacity=".5"/>', c); },
+  maple: function(c) { return _particleSvg(14, 14, '<path d="M7 0L8.5 4L13 3L10 7L14 10L9 9L7 14L5 9L0 10L4 7L1 3L5.5 4Z" fill="' + c + '" opacity=".5"/>', c); },
   // Crescent moon
-  moon: function(c) { return _svg(12, 12, '<path d="M8 1a5 5 0 1 0 0 10 4 4 0 0 1 0-10Z" fill="' + c + '" opacity=".6"/>', c); },
+  moon: function(c) { return _particleSvg(12, 12, '<path d="M8 1a5 5 0 1 0 0 10 4 4 0 0 1 0-10Z" fill="' + c + '" opacity=".6"/>', c); },
   // Snowflake-like
-  crystal: function(c) { return _svg(12, 12, '<path d="M6 0v12M0 6h12M1.8 1.8l8.4 8.4M10.2 1.8l-8.4 8.4" stroke="' + c + '" stroke-width=".7" opacity=".5" fill="none"/>', c); },
+  crystal: function(c) { return _particleSvg(12, 12, '<path d="M6 0v12M0 6h12M1.8 1.8l8.4 8.4M10.2 1.8l-8.4 8.4" stroke="' + c + '" stroke-width=".7" opacity=".5" fill="none"/>', c); },
 };
 
 var BG_PETAL_POOLS = {
