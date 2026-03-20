@@ -1805,7 +1805,7 @@ function saveG() {
     mutations: G.mutations,
     contextTips: G.contextTips,
     _bugfix_pkt_v1: G._bugfix_pkt_v1,
-    _bugfix_pkt_v2: G._bugfix_pkt_v2,
+    _bugfix_pkt_v3: G._bugfix_pkt_v3,
     _lastTickTime: Date.now(),
   };
   try {
@@ -1858,7 +1858,7 @@ function loadG() {
       mutations: s.mutations ?? [],
       contextTips: s.contextTips ?? {},
       _bugfix_pkt_v1: s._bugfix_pkt_v1 ?? false,
-      _bugfix_pkt_v2: s._bugfix_pkt_v2 ?? false,
+      _bugfix_pkt_v3: s._bugfix_pkt_v3 ?? false,
       _lastTickTime: s._lastTickTime ?? 0,
     });
     // Rebuild dynamic hybrid FLOWERS entries from save data
@@ -1893,7 +1893,7 @@ function loadG() {
 // ── One-time bug compensation (shown after entering game) ────────
 function applyBugfixGift() {
   // v2 flag: ensures ALL players see the visible gift (v1 fired silently behind title screen)
-  if (G._bugfix_pkt_v2) return;
+  if (G._bugfix_pkt_v3) return;
   var uncommonKeys = Object.keys(FLOWERS).filter(function(k) {
     return FLOWERS[k].rarity === "uncommon" && FLOWERS[k].w > 0;
   });
@@ -1903,13 +1903,41 @@ function applyBugfixGift() {
     G.seeds.push({ id: G.seedId++, key: compKey });
     if (!G.discovered.includes(compKey)) G.discovered.push(compKey);
   }
-  G._bugfix_pkt_v2 = true;
+  G._bugfix_pkt_v3 = true;
   renderTray();
   updateHUD();
   saveG();
   playSound("achieve");
   haptic(60);
-  toast("\ud83c\udf81 Gift: 10 uncommon seeds added! Sorry for a bug with packets!", 5000);
+  // Show as a modal card so the player definitely sees it
+  var overlay = document.createElement("div");
+  overlay.className = "overlay tutorial-overlay on";
+  overlay.style.zIndex = "99999";
+  document.body.appendChild(overlay);
+  var card = document.createElement("div");
+  card.className = "login-gift-card";
+  var icon = document.createElement("div");
+  icon.style.cssText = "font-size:2.5em;text-align:center;margin-bottom:8px;";
+  icon.textContent = "\ud83c\udf81";
+  card.appendChild(icon);
+  var title = document.createElement("div");
+  title.className = "tutorial-title";
+  title.textContent = "Bug Fix Gift!";
+  card.appendChild(title);
+  var msg = document.createElement("div");
+  msg.className = "login-reward";
+  msg.style.cssText = "font-size:.85em;line-height:1.5;margin:8px 0 16px;";
+  msg.textContent = "We fixed a bug that caused lost seeds when opening packets. As compensation, here are 10 uncommon seeds!";
+  card.appendChild(msg);
+  var btn = document.createElement("button");
+  btn.className = "btn-login-claim";
+  btn.textContent = "Thank you! \ud83c\udf3a";
+  btn.onclick = function() {
+    overlay.remove();
+    playSound("click");
+  };
+  card.appendChild(btn);
+  overlay.appendChild(card);
 }
 
 // ── Offline progress — grant passive water + expire NPCs ────────
