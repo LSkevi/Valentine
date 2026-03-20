@@ -1805,6 +1805,7 @@ function saveG() {
     mutations: G.mutations,
     contextTips: G.contextTips,
     _bugfix_pkt_v1: G._bugfix_pkt_v1,
+    _lastTickTime: Date.now(),
   };
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify(s));
@@ -1856,6 +1857,7 @@ function loadG() {
       mutations: s.mutations ?? [],
       contextTips: s.contextTips ?? {},
       _bugfix_pkt_v1: s._bugfix_pkt_v1 ?? false,
+      _lastTickTime: s._lastTickTime ?? 0,
     });
     // Rebuild dynamic hybrid FLOWERS entries from save data
     // Check seeds, inventory, plots, discovered for dyn_ keys
@@ -1880,26 +1882,71 @@ function loadG() {
         }
       }
     });
-    // One-time compensation for packet bug (seeds lost due to _svg collision)
-    if (!s._bugfix_pkt_v1) {
-      var uncommonKeys = Object.keys(FLOWERS).filter(function(k) {
-        return FLOWERS[k].rarity === "uncommon" && FLOWERS[k].w > 0;
-      });
-      for (var ci = 0; ci < 10; ci++) {
-        var compKey = uncommonKeys[Math.floor(Math.random() * uncommonKeys.length)];
-        G.seeds.push({ id: G.seedId++, key: compKey });
-        if (!G.discovered.includes(compKey)) G.discovered.push(compKey);
-      }
-      G._bugfix_pkt_v1 = true;
-      // Save the flag immediately so it only happens once
-      try { var tmp = JSON.parse(localStorage.getItem(SAVE_KEY)); tmp._bugfix_pkt_v1 = true; localStorage.setItem(SAVE_KEY, JSON.stringify(tmp)); } catch(e2) {}
-      setTimeout(function() {
-        toast("\ud83c\udf81 Bug fix gift: 10 uncommon seeds added! Sorry for lost packets!", 4000);
-      }, 2000);
-    }
     return true;
   } catch (e) {
     return false;
+  }
+}
+
+// ── One-time bug compensation (shown after entering game) ────────
+function applyBugfixGift() {
+  if (G._bugfix_pkt_v1) return;
+  var uncommonKeys = Object.keys(FLOWERS).filter(function(k) {
+    return FLOWERS[k].rarity === "uncommon" && FLOWERS[k].w > 0;
+  });
+  if (!uncommonKeys.length) return;
+  for (var ci = 0; ci < 10; ci++) {
+    var compKey = uncommonKeys[Math.floor(Math.random() * uncommonKeys.length)];
+    G.seeds.push({ id: G.seedId++, key: compKey });
+    if (!G.discovered.includes(compKey)) G.discovered.push(compKey);
+  }
+  G._bugfix_pkt_v1 = true;
+  renderTray();
+  updateHUD();
+  saveG();
+  playSound("achieve");
+  haptic(60);
+  toast("\ud83c\udf81 Gift: 10 uncommon seeds added! Sorry for a bug with packets!", 5000);
+}
+
+// ── Offline progress — grant passive water + expire NPCs ────────
+function applyOfflineProgress() {
+  if (!G._lastTickTime) { G._lastTickTime = Date.now(); saveG(); return; }
+  var elapsed = Date.now() - G._lastTickTime;
+  if (elapsed < 60000) { G._lastTickTime = Date.now(); return; } // less than 1 min away
+  var minutes = Math.floor(elapsed / 60000);
+  var rewards = [];
+  // Passive water accumulation (1 per 45s, capped at max)
+  var waterGained = Math.min(G.maxWater - G.water, Math.floor(elapsed / 45000));
+  if (waterGained > 0) {
+    G.water += waterGained;
+    renderDrops();
+    rewards.push("+" + waterGained + " water");
+  }
+  // Expire old NPCs
+  var expiredCount = 0;
+  G.npcs = G.npcs.filter(function(npc) {
+    if (Date.now() - npc.spawnedAt > npc.patience) { expiredCount++; return false; }
+    return true;
+  });
+  if (expiredCount > 0) {
+    G.npcStreak = 0;
+    rewards.push(expiredCount + " customer" + (expiredCount > 1 ? "s" : "") + " left");
+  }
+  // Coin bonus for time away (1 coin per 10 min, max 30)
+  var bonusCoins = Math.min(30, Math.floor(minutes / 10));
+  if (bonusCoins > 0) {
+    G.coins += bonusCoins;
+    G.totalCoins += bonusCoins;
+    rewards.push("+" + bonusCoins + " coins");
+  }
+  G._lastTickTime = Date.now();
+  renderNPCs();
+  updateHUD();
+  saveG();
+  if (rewards.length > 0) {
+    var timeStr = minutes >= 60 ? Math.floor(minutes / 60) + "h " + (minutes % 60) + "m" : minutes + "m";
+    toast("\ud83c\udf1f Welcome back! (" + timeStr + " away) " + rewards.join(", "), 4500);
   }
 }
 
@@ -3113,6 +3160,9 @@ function initGame() {
         document.getElementById("gameScreen").style.display = "";
         setTimeout(function() {
           titleScreen.style.display = "none";
+          // One-time compensation for packet bug + welcome back
+          applyBugfixGift();
+          applyOfflineProgress();
           // Show tutorial for new players, then daily login
           if (!G.tutorialDone) {
             showTutorial();
@@ -3649,7 +3699,9 @@ function plantSeed(key, plotIdx) {
 function openBloomModal(i) {
   G.bloomPlot = i;
   const f = FLOWERS[G.plots[i].key];
-  document.getElementById("bloomFlEl").innerHTML = flowerSVG(G.plots[i].key, MAX_STAGE);
+  var bloomFlEl = document.getElementById("bloomFlEl");
+  bloomFlEl.textContent = "";
+  bloomFlEl.insertAdjacentHTML("beforeend", flowerSVG(G.plots[i].key, MAX_STAGE));
   document.getElementById("bloomTitle").textContent = `${f.name} is fully bloomed! 🎉`;
 
   // Rarity badge
@@ -3687,6 +3739,51 @@ function openBloomModal(i) {
     closeModal("bloomOverlay");
     toast("Left in pot \u2014 fuse when a neighbor blooms! \ud83c\udf38", 2000);
   };
+  // Direct sell: find a matching NPC wanting this flower
+  var existingDirectBtn = document.getElementById("btnDirectSell");
+  if (existingDirectBtn) existingDirectBtn.remove();
+  var flowerKey = G.plots[i].key;
+  var matchingNpc = G.npcs.find(function(npc) {
+    if (npc.wildcard) return FLOWERS[flowerKey] && FLOWERS[flowerKey].rarity === npc.requestRarity;
+    return npc.requestKey === flowerKey;
+  });
+  if (matchingNpc) {
+    var directBtn = document.createElement("button");
+    directBtn.id = "btnDirectSell";
+    directBtn.className = "btn-store";
+    directBtn.style.cssText = "background:linear-gradient(135deg,#f9a825,#ff8f00);color:#fff;font-weight:700;border:none;";
+    directBtn.textContent = "\ud83d\udcb0 Sell to " + matchingNpc.name + " for " + matchingNpc.reward + " coins!";
+    directBtn.onclick = function() {
+      if (G.bloomPlot === null) return;
+      var key = G.plots[G.bloomPlot].key;
+      var fSold = FLOWERS[key];
+      if (!G.discovered.includes(key)) G.discovered.push(key);
+      // Remove NPC
+      var npcIdx = G.npcs.findIndex(function(n) { return n.id === matchingNpc.id; });
+      if (npcIdx !== -1) {
+        G.coins += matchingNpc.reward;
+        G.totalCoins += matchingNpc.reward;
+        G.totalSold++;
+        G.npcSales++;
+        G.npcStreak++;
+        if (G.npcStreak > G.npcBestStreak) G.npcBestStreak = G.npcStreak;
+        G.npcs.splice(npcIdx, 1);
+      }
+      clearPlot(G.bloomPlot);
+      G.bloomPlot = null;
+      closeModal("bloomOverlay");
+      updateHUD();
+      renderNPCs();
+      saveG();
+      playSound("sale");
+      haptic(50);
+      toast(matchingNpc.name + " loved the " + fSold.name + "! +" + matchingNpc.reward + " coins \ud83d\udcb0", 2500);
+      spawnSparkle(window.innerWidth / 2, window.innerHeight * 0.3, "\u2728");
+      checkAchievements();
+    };
+    var actions = document.querySelector(".bloom-actions");
+    if (actions) actions.insertBefore(directBtn, actions.firstChild);
+  }
   openModal("bloomOverlay");
   // Delay action buttons to prevent accidental taps from spam-tapping the pot
   var actions = document.querySelector(".bloom-actions");
@@ -4609,14 +4706,18 @@ var NPC_FRIENDS = [
   { name: "Klebio",    avatar: "\ud83d\udc71" },
   { name: "Brasil",    avatar: "\ud83d\udc71" },
 ];
-const NPC_MAX = 3;
+function getNpcMax() {
+  if (G.plots.length >= 9) return 5;
+  if (G.plots.length >= 6) return 4;
+  return 3;
+}
 const NPC_SPAWN_MIN = 35000; // 35s minimum between spawns
 const NPC_SPAWN_MAX = 90000; // 90s max
 const NPC_PATIENCE_MIN = 120000; // 2 min
 const NPC_PATIENCE_MAX = 300000; // 5 min
 
 function createNPC() {
-  if (G.npcs.length >= NPC_MAX) return;
+  if (G.npcs.length >= getNpcMax()) return;
   var requestKey = null;
   var requestRarity = null;
   var isMystery = false;
@@ -4909,7 +5010,7 @@ function tickNPCs() {
     return true;
   });
   // Spawn new NPC if timer elapsed
-  if (G.npcs.length < NPC_MAX && now - G.npcTimer > NPC_SPAWN_MIN + Math.random() * (NPC_SPAWN_MAX - NPC_SPAWN_MIN)) {
+  if (G.npcs.length < getNpcMax() && now - G.npcTimer > NPC_SPAWN_MIN + Math.random() * (NPC_SPAWN_MAX - NPC_SPAWN_MIN)) {
     G.npcTimer = now;
     createNPC();
     changed = true;
@@ -5739,7 +5840,11 @@ function refreshPetals() {
 // GAME TICK — runs every 1s
 // ══════════════════════════════════════════════════════════
 var _rainWaterCounter = 0;
+var _tickSaveCounter = 0;
 function gameTick() {
+  // Persist last tick time every 30s for offline progress
+  _tickSaveCounter++;
+  if (_tickSaveCounter >= 30) { _tickSaveCounter = 0; G._lastTickTime = Date.now(); saveG(); }
   tickNPCs();
   tickWeather();
   // Rain auto-water every 60 ticks (60s)
