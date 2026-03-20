@@ -1556,24 +1556,110 @@ var KIND_DISPLAY = {
   hyacinth:"Hyacinth", bluebell:"Bluebell", cosmos:"Cosmos",
 };
 
-// Color name from hex (approximate)
+// Color name from hex (approximate) — expanded palette for hybrid variety
+// Azure, Jade, Teal are mutation-only (returned by colorNameForMutation)
 function colorNameFromHex(hex) {
   var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-  var max = Math.max(r,g,b), min = Math.min(r,g,b);
+  var max = Math.max(r,g,b), min = Math.min(r,g,b), sat = max - min;
   var brightness = (r + g + b) / 3;
-  if (brightness > 220) return "White";
-  if (brightness < 40) return "Dark";
-  if (max - min < 30) return brightness > 140 ? "Silver" : "Shadow";
-  if (r > g + 40 && r > b + 40) return r > 180 ? "Scarlet" : "Crimson";
-  if (r > 180 && g > 100 && b < 80) return "Amber";
-  if (r > 180 && g > 140 && b > 140) return "Blush";
-  if (g > r + 30 && g > b + 30) return g > 160 ? "Jade" : "Forest";
-  if (b > r + 30 && b > g + 30) return b > 160 ? "Azure" : "Cobalt";
-  if (r > 150 && b > 150 && g < 100) return "Violet";
-  if (r > 180 && g > 80 && g < 150) return "Coral";
-  if (r > 200 && g > 180) return "Golden";
-  if (g > 150 && b > 150) return "Teal";
+  // Achromatic
+  if (brightness > 230) return "Snow";
+  if (brightness > 200 && sat < 30) return "Ivory";
+  if (brightness < 35) return "Midnight";
+  if (brightness < 60 && sat < 40) return "Shadow";
+  if (sat < 25) return brightness > 160 ? "Silver" : brightness > 100 ? "Ash" : "Dusk";
+  // Compute hue (0-360)
+  var h = 0;
+  if (sat > 0) {
+    if (max === r) h = ((g - b) / sat + (g < b ? 6 : 0)) * 60;
+    else if (max === g) h = ((b - r) / sat + 2) * 60;
+    else h = ((r - g) / sat + 4) * 60;
+  }
+  // Reds (0-15, 345-360)
+  if (h >= 345 || h < 15) {
+    if (brightness > 190) return "Blush";
+    if (brightness > 140) return "Rose";
+    if (brightness > 100) return "Scarlet";
+    return "Crimson";
+  }
+  // Red-Orange (15-30)
+  if (h >= 15 && h < 30) {
+    if (brightness > 160) return "Peach";
+    return "Rust";
+  }
+  // Orange (30-45)
+  if (h >= 30 && h < 45) {
+    if (brightness > 170) return "Apricot";
+    return "Amber";
+  }
+  // Gold-Yellow (45-65)
+  if (h >= 45 && h < 65) {
+    if (brightness > 180) return "Golden";
+    return "Honey";
+  }
+  // Yellow-Green (65-90)
+  if (h >= 65 && h < 90) {
+    if (brightness > 160) return "Lemon";
+    return "Olive";
+  }
+  // Green (90-150) — rare from mixing, reserved names for mutations
+  if (h >= 90 && h < 150) {
+    if (brightness > 160) return "Spring";
+    if (brightness > 100) return "Fern";
+    return "Forest";
+  }
+  // Cyan-Teal (150-190) — rare from mixing
+  if (h >= 150 && h < 190) {
+    if (brightness > 150) return "Seafoam";
+    return "Pine";
+  }
+  // Blue (190-250)
+  if (h >= 190 && h < 250) {
+    if (brightness > 170) return "Sky";
+    if (brightness > 120) return "Sapphire";
+    return "Cobalt";
+  }
+  // Blue-Purple (250-280)
+  if (h >= 250 && h < 280) {
+    if (brightness > 150) return "Lavender";
+    if (brightness > 100) return "Violet";
+    return "Indigo";
+  }
+  // Purple-Magenta (280-320)
+  if (h >= 280 && h < 320) {
+    if (brightness > 160) return "Orchid";
+    if (brightness > 100) return "Plum";
+    return "Royal";
+  }
+  // Magenta-Pink (320-345)
+  if (h >= 320 && h < 345) {
+    if (brightness > 170) return "Coral";
+    if (brightness > 120) return "Magenta";
+    return "Berry";
+  }
   return "Mystic";
+}
+
+// Mutation-only color names — rarer, more exotic
+function colorNameForMutation(hex) {
+  var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  var max = Math.max(r,g,b), sat = max - Math.min(r,g,b);
+  var brightness = (r + g + b) / 3;
+  if (sat < 20) return brightness > 150 ? "Ghostly" : "Obsidian";
+  var h = 0;
+  if (sat > 0) {
+    if (max === r) h = ((g - b) / sat + (g < b ? 6 : 0)) * 60;
+    else if (max === g) h = ((b - r) / sat + 2) * 60;
+    else h = ((r - g) / sat + 4) * 60;
+  }
+  if (h >= 90 && h < 160) return brightness > 140 ? "Jade" : "Emerald";
+  if (h >= 160 && h < 200) return brightness > 140 ? "Teal" : "Abyssal";
+  if (h >= 200 && h < 260) return brightness > 150 ? "Azure" : "Celestial";
+  if (h >= 260 && h < 310) return "Ethereal";
+  if (h >= 310 || h < 20) return brightness > 160 ? "Flamingo" : "Garnet";
+  if (h >= 20 && h < 50) return "Solar";
+  if (h >= 50 && h < 90) return "Aurora";
+  return "Phantom";
 }
 
 // Shift hex color hue by degrees (for mutations)
@@ -1663,7 +1749,7 @@ const BREED_RECIPES = {
   "iris+lily":      [{ key: "shadowIris", w: 40 }, { key: "moonlightLily", w: 35 }],
 };
 // Mutation name prefixes
-var MUTATION_PREFIXES = ["Vivid", "Pale", "Deep", "Bright", "Dusky", "Frosty", "Warm", "Wild"];
+var MUTATION_PREFIXES = ["Vivid", "Pale", "Deep", "Bright", "Dusky", "Frosty", "Warm", "Wild", "Radiant", "Twilight", "Misty", "Ember", "Silken", "Starlit", "Ancient", "Neon"];
 
 const STAGE_NAMES = ["🌰 Seed", "🌱 Sprout", "🌿 Growing", "🌸 Bloomed!"];
 const STAGE_WATERS = 3,
@@ -5389,11 +5475,13 @@ function doHybridize(idx1, idx2) {
 
     if (isMutation && FLOWERS[resultKey]) {
       var baseF = FLOWERS[resultKey];
-      var hueShift = 15 + Math.random() * 30;
+      var hueShift = 20 + Math.random() * 40;
       if (Math.random() < 0.5) hueShift = -hueShift;
       var mutPetal = shiftHue(baseF.petal, hueShift);
-      var mutPrefix = MUTATION_PREFIXES[Math.floor(Math.random() * MUTATION_PREFIXES.length)];
-      var mutName = mutPrefix + " " + baseF.name;
+      // Use exotic mutation color name, falling back to prefix + base name
+      var mutColorName = colorNameForMutation(mutPetal);
+      var speciesName = KIND_DISPLAY[baseF.kind] || baseF.kind.charAt(0).toUpperCase() + baseF.kind.slice(1);
+      var mutName = mutColorName + " " + speciesName;
       var mutKey = "mut_" + resultKey + "_" + Date.now();
       FLOWERS[mutKey] = {
         name: mutName, kind: baseF.kind, appearance: baseF.appearance,
@@ -5422,13 +5510,14 @@ function doHybridize(idx1, idx2) {
 
     if (isMutation && FLOWERS[dynKey]) {
       var dBase = FLOWERS[dynKey];
-      var dShift = 15 + Math.random() * 30;
+      var dShift = 20 + Math.random() * 40;
       if (Math.random() < 0.5) dShift = -dShift;
       var dPetal = shiftHue(dBase.petal, dShift);
-      var dPrefix = MUTATION_PREFIXES[Math.floor(Math.random() * MUTATION_PREFIXES.length)];
+      var dMutColor = colorNameForMutation(dPetal);
+      var dSpecies = KIND_DISPLAY[dBase.kind] || dBase.kind.charAt(0).toUpperCase() + dBase.kind.slice(1);
       var dMutKey = "mut_" + dynKey + "_" + Date.now();
       FLOWERS[dMutKey] = {
-        name: dPrefix + " " + dBase.name, kind: dBase.kind, appearance: dBase.appearance,
+        name: dMutColor + " " + dSpecies, kind: dBase.kind, appearance: dBase.appearance,
         rarity: "hybrid", w: 0, petal: dPetal, stem: dBase.stem,
         sell: Math.round(dBase.sell * 1.2), dynamic: true, mutation: true,
         parent1: key1, parent2: key2,
