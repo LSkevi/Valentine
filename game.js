@@ -4209,11 +4209,18 @@ function openJournalModal() {
     var card = document.createElement("div");
     card.className = "jnl-card" + (known ? "" : " jlocked");
     var isLight = isLightColor(f.petal);
-    if (known && isLight) card.style.background = "#e8e4dc";
+    var isNight = document.body.classList.contains("night-mode") || G.bgStyle === "night";
+    if (known && isLight && !isNight) {
+      card.style.background = "#e8e4dc";
+      card.style.color = "#3a3530";
+    }
     var svgHtml = flowerSVG(key, 3);
+    var needsDarkText = known && isLight && !isNight;
+    var nameColor = needsDarkText ? "color:#3a3530;" : "";
+    var sellColor = needsDarkText ? "color:#5a5348;" : "";
     card.insertAdjacentHTML("beforeend",
       '<div class="jnl-svg' + (known ? "" : " jsilhouette") + '">' + svgHtml + '</div>' +
-      '<div class="jnl-name' + (known ? "" : " jlocked") + '">' + (known ? f.name : getFlowerHint(f)) + '</div>' +
+      '<div class="jnl-name' + (known ? "" : " jlocked") + '" style="' + nameColor + '">' + (known ? f.name : getFlowerHint(f)) + '</div>' +
       '<span class="jnl-badge ' + f.rarity + '">' + RARITY_LABEL[f.rarity] + '</span>' +
       '<div class="jnl-sell' + (known ? "" : " jhide") + '"><span class="ic" style="width:13px;height:13px;font-size:.6em">C</span>' + f.sell + '</div>'
     );
@@ -4231,14 +4238,21 @@ function openJournalModal() {
       var card = document.createElement("div");
       card.className = "jnl-card";
       var isLight = isLightColor(f.petal);
-      if (isLight) card.style.background = "#e8e4dc";
+      var isNightF = document.body.classList.contains("night-mode") || G.bgStyle === "night";
+      if (isLight && !isNightF) {
+        card.style.background = "#e8e4dc";
+        card.style.color = "#3a3530";
+      }
       var isMut = key.indexOf("mut_") === 0;
       var svgHtml = flowerSVG(key, 3);
+      var needsDark = isLight && !isNightF;
+      var nameColor = needsDark ? "color:#3a3530;" : "";
+      var sellColor = needsDark ? "color:#5a5348;" : "";
       card.insertAdjacentHTML("beforeend",
         '<div class="jnl-svg">' + svgHtml + '</div>' +
-        '<div class="jnl-name">' + f.name + '</div>' +
+        '<div class="jnl-name" style="' + nameColor + '">' + f.name + '</div>' +
         '<span class="jnl-badge hybrid">' + (isMut ? "\u2728 Mutation" : "\ud83e\uddec Fusion") + '</span>' +
-        '<div class="jnl-sell"><span class="ic" style="width:13px;height:13px;font-size:.6em">C</span>' + f.sell + '</div>'
+        '<div class="jnl-sell" style="' + sellColor + '"><span class="ic" style="width:13px;height:13px;font-size:.6em">C</span>' + f.sell + '</div>'
       );
       grid.appendChild(card);
     });
