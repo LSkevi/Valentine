@@ -1700,18 +1700,26 @@ function getOrCreateDynamicHybrid(key1, key2) {
   if (FLOWERS[hybKey]) return hybKey;
   var f1 = FLOWERS[key1], f2 = FLOWERS[key2];
   if (!f1 || !f2) return key1; // fallback
-  // Use parent1's appearance (shape) with mixed colors
+  // Use parent1's appearance (shape) with mixed colors + random jitter
   var mixedPetal = mixColors(f1.petal, f2.petal);
   var mixedStem = mixColors(f1.stem, f2.stem);
-  // Name = color adjective from mixed petal + species from the shape (kind)
+  // Add slight random hue jitter so similar parents don't produce identical colors
+  var jitter = (Math.random() - 0.5) * 20; // +/-10 degrees
+  mixedPetal = shiftHue(mixedPetal, jitter);
+  // Randomly pick which parent's shape to use (not always parent1)
+  var shapeParent = Math.random() < 0.5 ? f1 : f2;
+  // Name = color adjective from mixed petal + species from the shape
   var colorAdj = colorNameFromHex(mixedPetal);
-  var speciesName = KIND_DISPLAY[f1.kind] || f1.kind.charAt(0).toUpperCase() + f1.kind.slice(1);
+  var speciesName = KIND_DISPLAY[shapeParent.kind] || shapeParent.kind.charAt(0).toUpperCase() + shapeParent.kind.slice(1);
   var hybridName = colorAdj + " " + speciesName;
-  var avgSell = Math.round((f1.sell + f2.sell) * 0.8);
+  // Sell value: average scaled by parent rarity
+  var rarityBonus = { common: 1, uncommon: 1.2, rare: 1.5, legendary: 2, unique: 2.5, hybrid: 1.3 };
+  var bonus = Math.max(rarityBonus[f1.rarity] || 1, rarityBonus[f2.rarity] || 1);
+  var avgSell = Math.round((f1.sell + f2.sell) * 0.8 * bonus);
   FLOWERS[hybKey] = {
     name: hybridName,
-    kind: f1.kind,
-    appearance: f1.appearance,
+    kind: shapeParent.kind,
+    appearance: shapeParent.appearance,
     rarity: "hybrid",
     w: 0,
     petal: mixedPetal,
@@ -5455,13 +5463,24 @@ function doHybridize(idx1, idx2) {
   });
 
   var roll = Math.random();
-  var mutationRoll = Math.random();
-  var isMutation = mutationRoll < 0.05; // 5% mutation chance
+  // Mutation chance: base 12%, +15% if this exact pair was already discovered, +5% per rare parent
+  var mutChance = 0.12;
+  var dynTestKey = generateHybridKey(key1, key2);
+  if (G.discovered.includes(dynTestKey)) mutChance += 0.15; // repeat pair bonus
+  var rarityMutBonus = { rare: 0.05, legendary: 0.08, unique: 0.10 };
+  mutChance += (rarityMutBonus[f1.rarity] || 0) + (rarityMutBonus[f2.rarity] || 0);
+  mutChance = Math.min(mutChance, 0.50); // cap at 50%
+  var isMutation = Math.random() < mutChance;
+
+  // Rarity affects recipe chance: rarer parents = slightly lower recipe chance (more unique outcomes)
+  var recipeChance = 0.40;
+  if (f1.rarity === "rare" || f2.rarity === "rare") recipeChance = 0.30;
+  if (f1.rarity === "legendary" || f2.rarity === "legendary") recipeChance = 0.25;
 
   // Compute result first, then show animation
   var resultInfo = { key: null, name: "", badge: "", badgeClass: "", sound: "hybrid" };
 
-  if (recipe && roll < 0.45) {
+  if (recipe && roll < recipeChance) {
     var totalW = 0;
     recipe.forEach(function(r) { totalW += r.w; });
     var rr = Math.random() * totalW, racc = 0;
@@ -5500,12 +5519,13 @@ function doHybridize(idx1, idx2) {
       if (!G.discovered.includes(resultKey)) G.discovered.push(resultKey);
       resultInfo = { key: resultKey, name: FLOWERS[resultKey].name, badge: "\u2728 Recipe Hybrid!", badgeClass: "", sound: "reveal_legendary" };
     }
-  } else if (goldenMatch.length > 0 && roll < 0.25) {
+  } else if (goldenMatch.length > 0 && roll < recipeChance + 0.15) {
     var hk = goldenMatch[Math.floor(Math.random() * goldenMatch.length)];
     G.seeds.push({ id: G.seedId++, key: hk });
     G.hybridCount++;
+    if (!G.discovered.includes(hk)) G.discovered.push(hk);
     resultInfo = { key: hk, name: FLOWERS[hk].name, badge: "\u2728 Rare Hybrid!", badgeClass: "", sound: "reveal_legendary" };
-  } else if (roll < 0.85) {
+  } else if (roll < 0.90) {
     var dynKey = getOrCreateDynamicHybrid(key1, key2);
 
     if (isMutation && FLOWERS[dynKey]) {
@@ -5533,7 +5553,7 @@ function doHybridize(idx1, idx2) {
       if (!G.discovered.includes(dynKey)) G.discovered.push(dynKey);
       resultInfo = { key: dynKey, name: FLOWERS[dynKey].name, badge: "\ud83e\uddec New Species!", badgeClass: "", sound: "reveal_hybrid" };
     }
-  } else if (roll < 0.95) {
+  } else if (roll < 0.96) {
     var parentKey = Math.random() < 0.5 ? key1 : key2;
     G.seeds.push({ id: G.seedId++, key: parentKey });
     G.hybridCount++;

@@ -1,5 +1,5 @@
-var CACHE_NAME = "yurie-v12";
-var ASSETS = ["/", "/index.html", "/style.css?v=12", "/game.js?v=12", "/manifest.json"];
+var CACHE_NAME = "yurie-v13";
+var ASSETS = ["/", "/index.html", "/style.css?v=13", "/game.js?v=13", "/manifest.json"];
 
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(CACHE_NAME).then(function (c) { return c.addAll(ASSETS); }));
