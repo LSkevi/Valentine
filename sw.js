@@ -1,5 +1,5 @@
-var CACHE_NAME = "yurie-v10";
-var ASSETS = ["/", "/index.html", "/style.css", "/game.js", "/manifest.json"];
+var CACHE_NAME = "yurie-v11";
+var ASSETS = ["/", "/index.html", "/style.css?v=11", "/game.js?v=11", "/manifest.json"];
 
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(CACHE_NAME).then(function (c) { return c.addAll(ASSETS); }));
@@ -17,15 +17,14 @@ self.addEventListener("activate", function (e) {
 
 self.addEventListener("fetch", function (e) {
   e.respondWith(
-    caches.match(e.request).then(function (cached) {
-      var fetched = fetch(e.request).then(function (resp) {
-        if (resp && resp.status === 200) {
-          var clone = resp.clone();
-          caches.open(CACHE_NAME).then(function (c) { c.put(e.request, clone); });
-        }
-        return resp;
-      }).catch(function () { return cached; });
-      return cached || fetched;
+    fetch(e.request).then(function (resp) {
+      if (resp && resp.status === 200) {
+        var clone = resp.clone();
+        caches.open(CACHE_NAME).then(function (c) { c.put(e.request, clone); });
+      }
+      return resp;
+    }).catch(function () {
+      return caches.match(e.request);
     })
   );
 });
