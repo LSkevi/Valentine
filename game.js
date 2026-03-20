@@ -1805,6 +1805,7 @@ function saveG() {
     mutations: G.mutations,
     contextTips: G.contextTips,
     _bugfix_pkt_v1: G._bugfix_pkt_v1,
+    _bugfix_pkt_v2: G._bugfix_pkt_v2,
     _lastTickTime: Date.now(),
   };
   try {
@@ -1857,6 +1858,7 @@ function loadG() {
       mutations: s.mutations ?? [],
       contextTips: s.contextTips ?? {},
       _bugfix_pkt_v1: s._bugfix_pkt_v1 ?? false,
+      _bugfix_pkt_v2: s._bugfix_pkt_v2 ?? false,
       _lastTickTime: s._lastTickTime ?? 0,
     });
     // Rebuild dynamic hybrid FLOWERS entries from save data
@@ -1890,7 +1892,8 @@ function loadG() {
 
 // ── One-time bug compensation (shown after entering game) ────────
 function applyBugfixGift() {
-  if (G._bugfix_pkt_v1) return;
+  // v2 flag: ensures ALL players see the visible gift (v1 fired silently behind title screen)
+  if (G._bugfix_pkt_v2) return;
   var uncommonKeys = Object.keys(FLOWERS).filter(function(k) {
     return FLOWERS[k].rarity === "uncommon" && FLOWERS[k].w > 0;
   });
@@ -1900,7 +1903,7 @@ function applyBugfixGift() {
     G.seeds.push({ id: G.seedId++, key: compKey });
     if (!G.discovered.includes(compKey)) G.discovered.push(compKey);
   }
-  G._bugfix_pkt_v1 = true;
+  G._bugfix_pkt_v2 = true;
   renderTray();
   updateHUD();
   saveG();
