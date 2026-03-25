@@ -156,6 +156,10 @@ body {
   grid-template-columns: repeat(3, 1fr);
   gap: 4px;
   padding-bottom: 2px;
+  position: relative;
+  z-index: 21;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 /* ── Stat pills ───────────────────────────────────────── */
@@ -634,7 +638,7 @@ body {
 }
 .drift-cloud {
   position: fixed;
-  top: 90px;
+  top: 200px;
   font-size: 2.4em;
   cursor: pointer;
   pointer-events: auto;

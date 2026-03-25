@@ -3113,7 +3113,7 @@ function initGame() {
         if (existing) { existing.remove(); return; }
         var popup = document.createElement("div");
         popup.id = "sfxVolPopup";
-        popup.style.cssText = "position:fixed;top:44px;right:10px;background:var(--surface,#fffcf7);border:1.5px solid var(--border,rgba(60,50,40,0.08));border-radius:14px;padding:10px 14px;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:200;display:flex;flex-direction:column;gap:6px;min-width:160px;";
+        popup.style.cssText = "position:fixed;top:calc(44px + env(safe-area-inset-top));right:10px;background:var(--surface,#fffcf7);border:1.5px solid var(--border,rgba(60,50,40,0.08));border-radius:14px;padding:10px 14px;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:200;display:flex;flex-direction:column;gap:6px;min-width:160px;";
         var row1 = document.createElement("div");
         row1.style.cssText = "display:flex;align-items:center;justify-content:space-between;";
         var lbl = document.createElement("span");
@@ -3175,7 +3175,7 @@ function initGame() {
         if (existing) { existing.remove(); return; }
         var popup = document.createElement("div");
         popup.id = "musicVolPopup";
-        popup.style.cssText = "position:fixed;top:44px;right:60px;background:var(--surface,#fffcf7);border:1.5px solid var(--border,rgba(60,50,40,0.08));border-radius:14px;padding:10px 14px;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:200;display:flex;flex-direction:column;gap:6px;min-width:160px;";
+        popup.style.cssText = "position:fixed;top:calc(44px + env(safe-area-inset-top));right:60px;background:var(--surface,#fffcf7);border:1.5px solid var(--border,rgba(60,50,40,0.08));border-radius:14px;padding:10px 14px;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:200;display:flex;flex-direction:column;gap:6px;min-width:160px;";
         // On/Off toggle
         var row1 = document.createElement("div");
         row1.style.cssText = "display:flex;align-items:center;justify-content:space-between;";
