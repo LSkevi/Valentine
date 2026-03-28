@@ -3466,6 +3466,11 @@ function buildPlotCard(p, i) {
         ? " has-plant"
         : "");
   div.onclick = () => clickPlot(i);
+  div.addEventListener("touchstart", function(e) {
+    e.preventDefault();
+    getAudioCtx();
+    clickPlot(i);
+  }, { passive: false });
   const lbl =
     p.state === "empty"
       ? ""
