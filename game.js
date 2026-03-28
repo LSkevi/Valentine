@@ -1500,6 +1500,7 @@ const FLOWERS = {
   crystalViolet: { name: "Crystal Violet", kind: "violet", appearance: "violet", rarity: "hybrid", w: 0, petal: "#80deea", stem: "#66bb6a", sell: 45, parents: ["violet", "daisy"] },
   midnightPoppy: { name: "Midnight Poppy", kind: "poppy", appearance: "poppy", rarity: "hybrid", w: 0, petal: "#1a237e", stem: "#33691e", sell: 50, parents: ["poppy", "iris"] },
 };
+const STATIC_FLOWER_COUNT = Object.keys(FLOWERS).length;
 const RARITY_LABEL = {
   common: "Common",
   uncommon: "Uncommon",
@@ -1901,6 +1902,18 @@ function saveG() {
     _bugfix_pkt_v1: G._bugfix_pkt_v1,
     _bugfix_pkt_v3: G._bugfix_pkt_v3,
     _lastTickTime: Date.now(),
+    // Persist dynamic flower definitions (mutations + dynamic hybrids)
+    dynamicFlowers: (function() {
+      var df = {};
+      var allKeys = [].concat(G.mutations || [], G.discovered || []);
+      allKeys.forEach(function(k) {
+        if (k && (k.indexOf("mut_") === 0 || k.indexOf("dyn_") === 0) && FLOWERS[k]) {
+          var f = FLOWERS[k];
+          df[k] = { name: f.name, kind: f.kind, appearance: f.appearance, rarity: f.rarity, w: 0, petal: f.petal, stem: f.stem, sell: f.sell, dynamic: true, mutation: !!f.mutation, parent1: f.parent1, parent2: f.parent2 };
+        }
+      });
+      return df;
+    })(),
   };
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify(s));
@@ -1955,8 +1968,13 @@ function loadG() {
       _bugfix_pkt_v3: s._bugfix_pkt_v3 ?? false,
       _lastTickTime: s._lastTickTime ?? 0,
     });
-    // Rebuild dynamic hybrid FLOWERS entries from save data
-    // Check seeds, inventory, plots, discovered for dyn_ keys
+    // Rebuild dynamic flower definitions (mutations + dynamic hybrids) from save
+    if (s.dynamicFlowers) {
+      Object.keys(s.dynamicFlowers).forEach(function(k) {
+        if (!FLOWERS[k]) FLOWERS[k] = s.dynamicFlowers[k];
+      });
+    }
+    // Fallback: rebuild any dyn_ keys not covered by dynamicFlowers (older saves)
     var allKeys = [].concat(
       G.seeds.map(function(s) { return s.key; }),
       G.inventory.map(function(i) { return i.key; }),
@@ -1965,9 +1983,7 @@ function loadG() {
     );
     allKeys.forEach(function(k) {
       if (k && k.indexOf("dyn_") === 0 && !FLOWERS[k]) {
-        // Parse parent keys from dyn_key1_key2
         var parts = k.slice(4).split("_");
-        // Find the split point — keys can contain underscores so try all splits
         for (var si = 1; si < parts.length; si++) {
           var p1 = parts.slice(0, si).join("_");
           var p2 = parts.slice(si).join("_");
@@ -3341,10 +3357,15 @@ function updatePlotCard(i) {
   if (grid.children[i]) {
     grid.replaceChild(buildPlotCard(G.plots[i], i), grid.children[i]);
   }
-  // Refresh adjacent pots so hybridize badges update
-  var adj = getAdjacentBloomed(i);
-  [i - 1, i + 1, i - 3, i + 3].forEach(function(n) {
-    if (n >= 0 && n < G.plots.length && grid.children[n]) {
+  // Refresh adjacent pots so hybridize badges update (use proper adjacency check)
+  var col = i % 3, row = Math.floor(i / 3);
+  var neighbors = [];
+  if (col > 0) neighbors.push(i - 1);
+  if (col < 2) neighbors.push(i + 1);
+  if (row > 0) neighbors.push(i - 3);
+  if (i + 3 < G.plots.length) neighbors.push(i + 3);
+  neighbors.forEach(function(n) {
+    if (grid.children[n]) {
       grid.replaceChild(buildPlotCard(G.plots[n], n), grid.children[n]);
     }
   });
@@ -3978,12 +3999,16 @@ function openInventoryModal() {
 function sellFromInventory(uid) {
   const idx = G.inventory.findIndex((x) => x.uid === uid);
   if (idx === -1) return;
-  const f = FLOWERS[G.inventory[idx].key];
-  G.coins += f.sell;
+  const item = G.inventory[idx];
+  const f = FLOWERS[item.key];
+  var value = getAppreciatedValue(item);
+  G.coins += value;
+  G.totalCoins += value;
+  G.totalSold++;
   G.inventory.splice(idx, 1);
   updateHUD();
   saveG();
-  toast(`Sold ${f.name} for ${f.sell} coins! 💰`, 2000);
+  toast(`Sold ${f.name} for ${value} coins! 💰`, 2000);
   openInventoryModal();
 }
 function clearPlot(i) {
@@ -5116,6 +5141,23 @@ function renderNPCs() {
   });
 }
 
+function updateNPCTimers() {
+  var section = document.getElementById("npcSection");
+  if (!section) return;
+  var cards = section.querySelectorAll(".npc-card");
+  G.npcs.forEach(function(npc, idx) {
+    if (!cards[idx]) return;
+    var elapsed = Date.now() - npc.spawnedAt;
+    var pct = Math.max(0, 100 - (elapsed / npc.patience) * 100);
+    var fill = cards[idx].querySelector(".npc-timer-fill");
+    if (fill) {
+      fill.style.width = pct.toFixed(1) + "%";
+      if (pct < 25) fill.classList.add("urgent");
+      else fill.classList.remove("urgent");
+    }
+  });
+}
+
 function openNPCSellModal(npcId) {
   var npc = G.npcs.find(function(n) { return n.id === npcId; });
   if (!npc) return;
@@ -5230,7 +5272,7 @@ function tickNPCs() {
     saveG();
     renderNPCs();
   } else {
-    renderNPCs(); // update timer bars
+    updateNPCTimers(); // lightweight timer bar update only
   }
 }
 
@@ -5894,7 +5936,9 @@ var MILESTONES = [
 ];
 
 function getJournalPercent() {
-  return Math.round((G.discovered.length / Object.keys(FLOWERS).length) * 100);
+  // Use static count to avoid inflating denominator with dynamic hybrids/mutations
+  var staticDiscovered = G.discovered.filter(function(k) { return k.indexOf("dyn_") !== 0 && k.indexOf("mut_") !== 0; }).length;
+  return Math.min(100, Math.round((staticDiscovered / STATIC_FLOWER_COUNT) * 100));
 }
 
 function checkMilestones() {
