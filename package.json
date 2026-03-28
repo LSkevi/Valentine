@@ -1,0 +1,19 @@
+{
+  "name": "valentine",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LSkevi/Valentine.git"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.3"
+  }
+}

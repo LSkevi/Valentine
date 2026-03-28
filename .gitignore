@@ -1,1 +1,5 @@
+node_modules/
+dist/
+.vite/
+*.stackdump
 Postman (x64).exe
