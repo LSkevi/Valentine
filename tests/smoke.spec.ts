@@ -169,12 +169,11 @@ test.describe('Yurie Flower Shop — Smoke Tests', () => {
     await firstPlot.click();
     await page.waitForTimeout(500);
     // Either a planting/bloom modal opens or a "no seeds" toast appears
-    const plantOverlay = page.locator('#plantOverlay');
-    const bloomOverlay = page.locator('#bloomOverlay');
-    const toast = page.locator('#toast');
-    const plantOpen = await plantOverlay.getAttribute('class').then(c => c?.includes('on')).catch(() => false);
-    const bloomOpen = await bloomOverlay.getAttribute('class').then(c => c?.includes('on')).catch(() => false);
-    const toastShown = await toast.getAttribute('class').then(c => c?.includes('show')).catch(() => false);
+    const [plantOpen, bloomOpen, toastShown] = await Promise.all([
+      page.locator('#plantOverlay').getAttribute('class').then(c => c?.includes('on')).catch(() => false),
+      page.locator('#bloomOverlay').getAttribute('class').then(c => c?.includes('on')).catch(() => false),
+      page.locator('#toast').getAttribute('class').then(c => c?.includes('show')).catch(() => false),
+    ]);
     expect(plantOpen || bloomOpen || toastShown).toBeTruthy();
   });
 
