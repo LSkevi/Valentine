@@ -347,6 +347,6 @@
 </div>
 
 <script type="module" src="/src/main.ts"></script>
-<script>if("serviceWorker"in navigator){navigator.serviceWorker.register("/sw.js").catch(function(e){console.warn("SW registration failed:",e);});}</script>
+<script>if("serviceWorker"in navigator){navigator.serviceWorker.register("/sw.js").then(function(reg){reg.onupdatefound=function(){var w=reg.installing;w.onstatechange=function(){if(w.state==="installed"&&navigator.serviceWorker.controller){location.reload();}};};}).catch(function(e){console.warn("SW registration failed:",e);});}</script>
 </body>
 </html>
