@@ -162,6 +162,22 @@ test.describe('Yurie Flower Shop — Smoke Tests', () => {
     await overlay.locator('.sh-close').click();
   });
 
+  test('tapping a pot opens a modal or shows toast', async ({ page }) => {
+    await enterGame(page);
+    const firstPlot = page.locator('#gardenGrid .plot').first();
+    await expect(firstPlot).toBeVisible();
+    await firstPlot.click();
+    await page.waitForTimeout(500);
+    // Either a planting/bloom modal opens or a "no seeds" toast appears
+    const plantOverlay = page.locator('#plantOverlay');
+    const bloomOverlay = page.locator('#bloomOverlay');
+    const toast = page.locator('#toast');
+    const plantOpen = await plantOverlay.getAttribute('class').then(c => c?.includes('on')).catch(() => false);
+    const bloomOpen = await bloomOverlay.getAttribute('class').then(c => c?.includes('on')).catch(() => false);
+    const toastShown = await toast.getAttribute('class').then(c => c?.includes('show')).catch(() => false);
+    expect(plantOpen || bloomOpen || toastShown).toBeTruthy();
+  });
+
   test('no critical JS errors on load', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', err => errors.push(err.message));
