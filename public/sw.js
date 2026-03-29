@@ -20,7 +20,7 @@ self.addEventListener("activate", function (e) {
 self.addEventListener("fetch", function (e) {
   e.respondWith(
     fetch(e.request).then(function (resp) {
-      if (resp && resp.status === 200) {
+      if (resp && resp.status === 200 && e.request.method === "GET") {
         var clone = resp.clone();
         caches.open(CACHE_NAME).then(function (c) { c.put(e.request, clone); });
       }

@@ -273,8 +273,8 @@ export function storeFlower(): void {
   const f = FLOWERS[key];
   if (!f) return;
   if (!G.discovered.includes(key)) G.discovered.push(key);
-  G.seedId++;
-  G.inventory.push({ key, uid: G.seedId, storedAt: Date.now() });
+  const uid = G.seedId++;
+  G.inventory.push({ key, uid, storedAt: Date.now() });
   clearPlot(G.bloomPlot);
   G.bloomPlot = null;
   closeModal('bloomOverlay');

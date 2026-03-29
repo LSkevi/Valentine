@@ -5,8 +5,8 @@ import { G, SAVE_KEY } from './state';
 const FLOWERS: Record<string, FlowerDef> = (window as any).__FLOWERS ?? {};
 
 // TODO: import getOrCreateDynamicHybrid from './flowers'
-const getOrCreateDynamicHybrid: (p1: string, p2: string) => void =
-  (window as any).__getOrCreateDynamicHybrid ?? (() => {});
+const getOrCreateDynamicHybrid: (p1: string, p2: string, flowers: Record<string, FlowerDef>) => string =
+  (window as any).__getOrCreateDynamicHybrid ?? (() => '');
 
 /** Callback invoked when a save or load error occurs. Wire up from main.ts. */
 export let onSaveError: ((msg: string) => void) | null = null;
@@ -179,7 +179,7 @@ export function loadG(): boolean {
           const p1 = parts.slice(0, si).join('_');
           const p2 = parts.slice(si).join('_');
           if ((p1 in FLOWERS) && (p2 in FLOWERS)) {
-            getOrCreateDynamicHybrid(p1, p2);
+            getOrCreateDynamicHybrid(p1, p2, FLOWERS);
             break;
           }
         }

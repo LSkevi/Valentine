@@ -72,7 +72,7 @@ export function gameTick(): void {
         G.plots[frostIdx].waters--;
         playSound("frost_nip");
         toast(
-          "\u2744\uFE0F Frost nipped " + FLOWERS[G.plots[frostIdx].key].name + "! Lost 1 water",
+          "\u2744\uFE0F Frost nipped " + (FLOWERS[G.plots[frostIdx].key]?.name ?? "a flower") + "! Lost 1 water",
           2000,
         );
         updatePlotCard(frostIdx);

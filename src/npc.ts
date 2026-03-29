@@ -354,6 +354,7 @@ export function fulfillNPC(npcId: number, uid: number): void {
   const invIdx = G.inventory.findIndex((x: any) => x.uid === uid);
   if (invIdx === -1) return;
   const f = FLOWERS[G.inventory[invIdx].key];
+  if (!f) return;
   G.inventory.splice(invIdx, 1);
   G.coins += npc.reward;
   G.totalCoins += npc.reward;

@@ -79,7 +79,7 @@ export interface NPC {
   reward: number;
   wildcard: boolean;
   mystery?: boolean;
-  isVip?: boolean;
+  vip?: boolean;
   spawnedAt: number;
   patience: number;
   dialogue?: string;

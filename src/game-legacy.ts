@@ -1844,6 +1844,7 @@ let G = {
   // NPC system
   npcs: [],
   npcTimer: 0,
+  npcNextSpawn: 0,
   npcIdCounter: 0,
   // Weather
   weather: "sunny",
@@ -1897,6 +1898,7 @@ function saveG() {
     discovered: G.discovered,
     npcs: G.npcs,
     npcTimer: G.npcTimer,
+    npcNextSpawn: G.npcNextSpawn,
     npcIdCounter: G.npcIdCounter,
     weather: G.weather,
     weatherTimer: G.weatherTimer,
@@ -1951,6 +1953,7 @@ function loadG() {
       discovered: s.discovered ?? [],
       npcs: s.npcs ?? [],
       npcTimer: s.npcTimer ?? 0,
+      npcNextSpawn: s.npcNextSpawn ?? 0,
       npcIdCounter: s.npcIdCounter ?? 0,
       weather: s.weather ?? "sunny",
       weatherTimer: s.weatherTimer ?? 0,
@@ -2155,7 +2158,7 @@ function _fc(f) {
     pll: lighter(p, 85),
     pd: darker(p),
     SD: darker(S, 25),
-    rare: f.rarity === "rare" || f.rarity === "unique",
+    rare: f.rarity === "rare" || f.rarity === "legendary" || f.rarity === "unique",
   };
 }
 function _aura(cy, r, pll, rare) {
@@ -5275,8 +5278,8 @@ function tickNPCs() {
     return true;
   });
   // Spawn new NPC if timer elapsed
-  if (G.npcs.length < getNpcMax() && now - G.npcTimer > NPC_SPAWN_MIN + Math.random() * (NPC_SPAWN_MAX - NPC_SPAWN_MIN)) {
-    G.npcTimer = now;
+  if (G.npcs.length < getNpcMax() && now > G.npcNextSpawn) {
+    G.npcNextSpawn = now + NPC_SPAWN_MIN + Math.random() * (NPC_SPAWN_MAX - NPC_SPAWN_MIN);
     createNPC();
     changed = true;
   }
@@ -5329,8 +5332,14 @@ function tickWeather() {
 function renderWeather() {
   var bar = document.getElementById("weatherBar");
   if (!bar) return;
-  bar.textContent = WEATHER_LABELS[G.weather] || WEATHER_LABELS.sunny;
-  bar.className = "weather-bar " + (WEATHER_CLASSES[G.weather] || WEATHER_CLASSES.sunny);
+  var isNight = document.body.classList.contains("night-mode");
+  if (isNight) {
+    bar.textContent = "\ud83c\udf19 Moonlight";
+    bar.className = "weather-bar weather-moonlight";
+  } else {
+    bar.textContent = WEATHER_LABELS[G.weather] || WEATHER_LABELS.sunny;
+    bar.className = "weather-bar " + (WEATHER_CLASSES[G.weather] || WEATHER_CLASSES.sunny);
+  }
   // Weather-responsive sway intensity
   var swayMap = { sunny: 1.5, rainy: 2.5, drought: 0.5, snowy: 1.8 };
   document.documentElement.style.setProperty("--sway-intensity", swayMap[G.weather] || 1.5);
@@ -5561,6 +5570,7 @@ function showFusionAnimation(key1, key2, resultInfo, onDone) {
       overlay.classList.remove("on");
       setTimeout(function() { overlay.remove(); }, 300);
       if (onDone) onDone();
+      onDone = null;
     };
   }, 1200);
 
@@ -5570,7 +5580,7 @@ function showFusionAnimation(key1, key2, resultInfo, onDone) {
       overlay.classList.remove("on");
       setTimeout(function() { if (overlay.parentNode) overlay.remove(); }, 300);
       if (onDone) onDone();
-      onDone = null; // prevent double call
+      onDone = null;
     }
   }, 3500);
 }
@@ -5853,10 +5863,10 @@ var ACHIEVEMENTS = [
   { id:"alllegendary", name:"Living Legend", desc:"Discover all legendary flowers", icon:"\ud83c\udf1f", reward:100, check:function(){var ls=Object.keys(FLOWERS).filter(function(k){return FLOWERS[k].rarity==="legendary";});return ls.every(function(k){return G.discovered.includes(k);});} },
   { id:"unique", name:"One of a Kind", desc:"Discover the unique flower", icon:"\ud83d\udc8e", reward:75, check:function(){return Object.keys(FLOWERS).filter(function(k){return FLOWERS[k].rarity==="unique";}).some(function(k){return G.discovered.includes(k);});} },
   { id:"rainbow", name:"Rainbow Garden", desc:"Own 5+ different species in inventory", icon:"\ud83c\udf08", reward:20, check:function(){var kinds=new Set(G.inventory.map(function(i){return FLOWERS[i.key].kind;}));return kinds.size>=5;} },
-  { id:"specialist", name:"Species Specialist", desc:"Discover all colors of one species", icon:"\ud83d\udd2c", reward:30, check:function(){var byKind={};Object.entries(FLOWERS).forEach(function(e){var k=e[0],v=e[1];byKind[v.kind]=byKind[v.kind]||[];byKind[v.kind].push(k);});return Object.values(byKind).some(function(keys){return keys.length>=3&&keys.every(function(k){return G.discovered.includes(k);});});} },
+  { id:"specialist", name:"Species Specialist", desc:"Discover all colors of one species", icon:"\ud83d\udd2c", reward:30, check:function(){var byKind={};Object.entries(FLOWERS).forEach(function(e){var k=e[0],v=e[1];if(k.indexOf("dyn_")===0||k.indexOf("mut_")===0)return;byKind[v.kind]=byKind[v.kind]||[];byKind[v.kind].push(k);});return Object.values(byKind).some(function(keys){return keys.length>=3&&keys.every(function(k){return G.discovered.includes(k);});});} },
   { id:"rare5", name:"Rare Hunter", desc:"Discover 5 rare flowers", icon:"\u2b50", reward:25, check:function(){return G.discovered.filter(function(k){return FLOWERS[k]&&FLOWERS[k].rarity==="rare";}).length>=5;} },
   { id:"allcommon", name:"Common Collector", desc:"Discover all common flowers", icon:"\ud83c\udfe1", reward:40, check:function(){var cs=Object.keys(FLOWERS).filter(function(k){return FLOWERS[k].rarity==="common";});return cs.every(function(k){return G.discovered.includes(k);});} },
-  { id:"fulljournal", name:"Full Journal", desc:"Discover every flower (100%)", icon:"\ud83d\udcd6", reward:200, check:function(){return G.discovered.length>=Object.keys(FLOWERS).length;} },
+  { id:"fulljournal", name:"Full Journal", desc:"Discover every flower (100%)", icon:"\ud83d\udcd6", reward:200, check:function(){return G.discovered.length>=Object.keys(FLOWERS).filter(function(k){return k.indexOf("dyn_")!==0&&k.indexOf("mut_")!==0;}).length;} },
   // Commerce (21-30)
   { id:"sell1", name:"First Sale", desc:"Sell a flower to a customer", icon:"\ud83d\udcb0", reward:10, check:function(){return G.npcSales>=1;} },
   { id:"sell25", name:"Merchant", desc:"Complete 25 customer sales", icon:"\ud83d\udcb5", reward:30, check:function(){return G.npcSales>=25;} },
@@ -5947,8 +5957,12 @@ var MILESTONES = [
   { pct: 100, potStyle: null, bgStyle: "enchanted", label: "100% \u2192 Enchanted Background" },
 ];
 
+function getStaticFlowerCount() {
+  return Object.keys(FLOWERS).filter(function(k){return k.indexOf("dyn_")!==0&&k.indexOf("mut_")!==0;}).length;
+}
+
 function getJournalPercent() {
-  return Math.round((G.discovered.length / Object.keys(FLOWERS).length) * 100);
+  return Math.round((G.discovered.length / getStaticFlowerCount()) * 100);
 }
 
 function checkMilestones() {
@@ -6990,9 +7004,8 @@ function startAmbientMusic() {
       if (variation < 0.4) {
         state.melodyPatIdx = Math.floor(Math.random() * moodNow.melodies.length);
       } else if (variation < 0.7) {
-        // Reverse the pattern in-place for this cycle
-        var reversed = pattern.slice().reverse();
-        moodNow.melodies[state.melodyPatIdx % moodNow.melodies.length] = reversed;
+        // Reverse the pattern for this cycle (use local copy, don't mutate SONGS)
+        pattern = pattern.slice().reverse();
       }
       state.useHighOctave = Math.random() < 0.3;
     }

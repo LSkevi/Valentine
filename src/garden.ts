@@ -112,7 +112,7 @@ export function potCardSVG(p: Plot): string {
   }
 
   // Rare/legendary crown badge
-  const _rar = p.state !== 'empty' ? FLOWERS[p.key!].rarity : '';
+  const _rar = p.state !== 'empty' && FLOWERS[p.key!] ? FLOWERS[p.key!].rarity : '';
   const crownEl =
     _rar === 'unique'
       ? `<rect x="4" y="3" width="22" height="13" rx="3" fill="rgba(233,30,99,.92)"/>
@@ -191,7 +191,7 @@ export function buildPlotCard(p: Plot, i: number): HTMLDivElement {
     p.state === 'empty'
       ? ''
       : p.state === 'bloomed'
-        ? '\u2728 ' + FLOWERS[p.key!].name
+        ? '\u2728 ' + (FLOWERS[p.key!]?.name ?? '???')
         : STAGE_NAMES[p.stage];
   const canFuse = p.state === 'bloomed' && canHybridize(i);
   const hybBadge = canFuse
@@ -273,7 +273,7 @@ export function waterPlot(i: number): void {
         );
         playSound('bloom');
         haptic(80);
-        toast(FLOWERS[G.plots[i].key!].name + ' bloomed! Tap it! \uD83C\uDF38', 2500);
+        toast((FLOWERS[G.plots[i].key!]?.name ?? 'A flower') + ' bloomed! Tap it! \uD83C\uDF38', 2500);
         setTimeout(() => showContextTip('firstBloom'), 3000);
       }, 350);
     } else {
