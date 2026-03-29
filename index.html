@@ -35,6 +35,7 @@
       <div class="stat-pill"><span class="ic">C</span><span id="coinDisp">10</span></div>
       <div class="stat-pill">&#x1F4E6; <span id="pktDisp">3</span></div>
       <div class="stat-pill">&#x1F33C; <span id="invDisp">0</span></div>
+      <div class="stat-pill" id="appVer" style="font-size:10px;opacity:0.5">v?</div>
       <div class="stat-spacer"></div>
       <div class="audio-btn" id="helpBtn" onclick="openHelpGuide()">?</div>
       <div class="audio-btn" id="musicBtn"></div>
@@ -346,9 +347,7 @@
   </div>
 </div>
 
-<div id="appVer" style="position:fixed;bottom:8px;left:8px;font-size:14px;font-weight:bold;color:#e74c3c;background:#fff;padding:2px 8px;border-radius:6px;z-index:9999;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,0.3)">v?</div>
 <script>
-window.onerror=function(m){document.getElementById("appVer").textContent="ERR:"+m.slice(0,80);};
 if("serviceWorker"in navigator){navigator.serviceWorker.ready.then(function(){return caches.keys();}).then(function(k){var v=k.find(function(n){return n.startsWith("yurie-");});if(v)document.getElementById("appVer").textContent=v.replace("yurie-","");});}
 </script>
 <script type="module" src="/src/main.ts"></script>
