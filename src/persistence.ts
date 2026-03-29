@@ -16,11 +16,11 @@ export let onSaveError: ((msg: string) => void) | null = null;
  * Includes dynamic hybrid flower definitions and a save version marker.
  */
 export function saveG(): void {
-  // Collect dynamic hybrid FlowerDef data
-  const dynamicHybrids: Record<string, FlowerDef> = {};
+  // Collect dynamic flower definitions (dyn_ hybrids and mut_ mutations)
+  const dynamicFlowers: Record<string, FlowerDef> = {};
   for (const key of Object.keys(FLOWERS)) {
-    if (key.startsWith('dyn_')) {
-      dynamicHybrids[key] = FLOWERS[key];
+    if (key.startsWith('dyn_') || key.startsWith('mut_')) {
+      dynamicFlowers[key] = FLOWERS[key];
     }
   }
 
@@ -66,7 +66,7 @@ export function saveG(): void {
     _bugfix_pkt_v1: G._bugfix_pkt_v1,
     _bugfix_pkt_v3: G._bugfix_pkt_v3,
     _lastTickTime: Date.now(),
-    dynamicHybrids,
+    dynamicFlowers,
   };
 
   try {
@@ -93,10 +93,18 @@ export function loadG(): boolean {
     // Version check — missing _saveVersion means version 1 (legacy)
     const version: number = s._saveVersion ?? 1;
 
-    // Restore dynamic hybrids into FLOWERS before processing save data keys
+    // Restore dynamic flower definitions (dyn_ and mut_ keys) before processing
+    if (s.dynamicFlowers && typeof s.dynamicFlowers === 'object') {
+      for (const [key, def] of Object.entries(s.dynamicFlowers)) {
+        if (!(key in FLOWERS)) {
+          FLOWERS[key] = def as FlowerDef;
+        }
+      }
+    }
+    // Legacy compatibility: also check old dynamicHybrids field
     if (s.dynamicHybrids && typeof s.dynamicHybrids === 'object') {
       for (const [key, def] of Object.entries(s.dynamicHybrids)) {
-        if (!FLOWERS[key]) {
+        if (!(key in FLOWERS)) {
           FLOWERS[key] = def as FlowerDef;
         }
       }
@@ -163,14 +171,14 @@ export function loadG(): boolean {
     );
 
     for (const k of allKeys) {
-      if (k && k.startsWith('dyn_') && !FLOWERS[k]) {
+      if (k && k.startsWith('dyn_') && !(k in FLOWERS)) {
         // Parse parent keys from dyn_key1_key2
         const parts = k.slice(4).split('_');
         // Find the split point — keys can contain underscores so try all splits
         for (let si = 1; si < parts.length; si++) {
           const p1 = parts.slice(0, si).join('_');
           const p2 = parts.slice(si).join('_');
-          if (FLOWERS[p1] && FLOWERS[p2]) {
+          if ((p1 in FLOWERS) && (p2 in FLOWERS)) {
             getOrCreateDynamicHybrid(p1, p2);
             break;
           }

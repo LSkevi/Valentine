@@ -1877,7 +1877,15 @@ let G = {
 
 const SAVE_KEY = "yurieGarden_v1";
 function saveG() {
+  // Collect dynamic flower definitions (dyn_ and mut_ keys) so they survive reload
+  var dynamicFlowers = {};
+  Object.keys(FLOWERS).forEach(function(k) {
+    if (k.indexOf("dyn_") === 0 || k.indexOf("mut_") === 0) {
+      dynamicFlowers[k] = FLOWERS[k];
+    }
+  });
   const s = {
+    _saveVersion: 2,
     coins: G.coins,
     pkt: G.pkt,
     seeds: G.seeds,
@@ -1918,6 +1926,7 @@ function saveG() {
     _bugfix_pkt_v1: G._bugfix_pkt_v1,
     _bugfix_pkt_v3: G._bugfix_pkt_v3,
     _lastTickTime: Date.now(),
+    dynamicFlowers: dynamicFlowers,
   };
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify(s));
@@ -1972,8 +1981,24 @@ function loadG() {
       _bugfix_pkt_v3: s._bugfix_pkt_v3 ?? false,
       _lastTickTime: s._lastTickTime ?? 0,
     });
-    // Rebuild dynamic hybrid FLOWERS entries from save data
-    // Check seeds, inventory, plots, discovered for dyn_ keys
+    // Restore dynamic flower definitions (dyn_ and mut_ keys) saved in v2+
+    if (s.dynamicFlowers && typeof s.dynamicFlowers === "object") {
+      Object.keys(s.dynamicFlowers).forEach(function(k) {
+        if (!(k in FLOWERS)) {
+          FLOWERS[k] = s.dynamicFlowers[k];
+        }
+      });
+    }
+    // Also check legacy dynamicHybrids field (from persistence.ts format)
+    if (s.dynamicHybrids && typeof s.dynamicHybrids === "object") {
+      Object.keys(s.dynamicHybrids).forEach(function(k) {
+        if (!(k in FLOWERS)) {
+          FLOWERS[k] = s.dynamicHybrids[k];
+        }
+      });
+    }
+    // Fallback: rebuild any dyn_ keys still missing (old saves without definitions)
+    // Note: use "in" operator, not FLOWERS[k], because Proxy returns fallback for missing keys
     var allKeys = [].concat(
       G.seeds.map(function(s) { return s.key; }),
       G.inventory.map(function(i) { return i.key; }),
@@ -1981,14 +2006,14 @@ function loadG() {
       G.discovered
     );
     allKeys.forEach(function(k) {
-      if (k && k.indexOf("dyn_") === 0 && !FLOWERS[k]) {
+      if (k && k.indexOf("dyn_") === 0 && !(k in FLOWERS)) {
         // Parse parent keys from dyn_key1_key2
         var parts = k.slice(4).split("_");
         // Find the split point — keys can contain underscores so try all splits
         for (var si = 1; si < parts.length; si++) {
           var p1 = parts.slice(0, si).join("_");
           var p2 = parts.slice(si).join("_");
-          if (FLOWERS[p1] && FLOWERS[p2]) {
+          if ((p1 in FLOWERS) && (p2 in FLOWERS)) {
             getOrCreateDynamicHybrid(p1, p2);
             break;
           }
