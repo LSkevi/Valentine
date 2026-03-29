@@ -1,4 +1,4 @@
-var CACHE_NAME = "yurie-v20";
+var CACHE_NAME = "yurie-v21";
 // Vite hashes JS/CSS filenames — only cache the shell.
 // Network-first strategy handles hashed assets automatically.
 var ASSETS = ["/", "/index.html", "/manifest.json"];

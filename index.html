@@ -346,7 +346,8 @@
   </div>
 </div>
 
-<div id="appVer" style="position:fixed;bottom:8px;left:8px;font-size:14px;font-weight:bold;color:#e74c3c;background:#fff;padding:2px 8px;border-radius:6px;z-index:9999;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,0.3)">v19</div>
+<div id="appVer" style="position:fixed;bottom:8px;left:8px;font-size:14px;font-weight:bold;color:#e74c3c;background:#fff;padding:2px 8px;border-radius:6px;z-index:9999;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,0.3)">v21</div>
+<script>window.onerror=function(m){document.getElementById("appVer").textContent="ERR:"+m.slice(0,80);}</script>
 <script type="module" src="/src/main.ts"></script>
 <script>if("serviceWorker"in navigator){navigator.serviceWorker.register("/sw.js").then(function(reg){reg.onupdatefound=function(){var w=reg.installing;w.onstatechange=function(){if(w.state==="installed"&&navigator.serviceWorker.controller){location.reload();}};};}).catch(function(e){console.warn("SW registration failed:",e);});}</script>
 </body>
