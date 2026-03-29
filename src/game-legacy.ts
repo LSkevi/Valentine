@@ -1714,9 +1714,9 @@ function findBreedRecipe(kind1, kind2) {
 function getOrCreateDynamicHybrid(key1, key2) {
   var hybKey = generateHybridKey(key1, key2);
   // Already exists?
-  if (FLOWERS[hybKey]) return hybKey;
+  if (hybKey in FLOWERS) return hybKey;
+  if (!(key1 in FLOWERS) || !(key2 in FLOWERS)) return key1; // fallback
   var f1 = FLOWERS[key1], f2 = FLOWERS[key2];
-  if (!f1 || !f2) return key1; // fallback
   // Use parent1's appearance (shape) with mixed colors + random jitter
   var mixedPetal = mixColors(f1.petal, f2.petal);
   var mixedStem = mixColors(f1.stem, f2.stem);
@@ -3585,7 +3585,7 @@ function waterPlot(i) {
         var grid2 = document.getElementById("gardenGrid");
         var plotEl = grid2 ? grid2.children[i] : null;
         var bKey = G.plots[i].key;
-        spawnBloomParticles(plotEl, FLOWERS[bKey] ? FLOWERS[bKey].petal : "#f48fb1");
+        spawnBloomParticles(plotEl, (bKey in FLOWERS) ? FLOWERS[bKey].petal : "#f48fb1");
         playSound("bloom");
         haptic(80);
         toast(FLOWERS[G.plots[i].key].name + " bloomed! Tap it! \ud83c\udf38", 2500);
@@ -3922,7 +3922,7 @@ function openBloomModal(i) {
   if (existingDirectBtn) existingDirectBtn.remove();
   var flowerKey = G.plots[i].key;
   var matchingNpc = G.npcs.find(function(npc) {
-    if (npc.wildcard) return FLOWERS[flowerKey] && FLOWERS[flowerKey].rarity === npc.requestRarity;
+    if (npc.wildcard) return (flowerKey in FLOWERS) && FLOWERS[flowerKey].rarity === npc.requestRarity;
     return npc.requestKey === flowerKey;
   });
   if (matchingNpc) {
@@ -4026,12 +4026,16 @@ function openInventoryModal() {
 function sellFromInventory(uid) {
   const idx = G.inventory.findIndex((x) => x.uid === uid);
   if (idx === -1) return;
-  const f = FLOWERS[G.inventory[idx].key];
-  G.coins += f.sell;
+  const item = G.inventory[idx];
+  const f = FLOWERS[item.key];
+  const sellVal = getAppreciatedValue(item);
+  G.coins += sellVal;
+  G.totalCoins += sellVal;
+  G.totalSold++;
   G.inventory.splice(idx, 1);
   updateHUD();
   saveG();
-  toast(`Sold ${f.name} for ${f.sell} coins! 💰`, 2000);
+  toast(`Sold ${f.name} for ${sellVal} coins! 💰`, 2000);
   openInventoryModal();
 }
 function clearPlot(i) {
@@ -4231,7 +4235,7 @@ function openJournalModal() {
   grid.innerHTML = "";
   // Collect discovered dynamic hybrids and mutations (not in the static order list)
   var dynamicKeys = G.discovered.filter(function(k) {
-    return (k.indexOf("dyn_") === 0 || k.indexOf("mut_") === 0) && FLOWERS[k];
+    return (k.indexOf("dyn_") === 0 || k.indexOf("mut_") === 0) && (k in FLOWERS);
   });
   // Sort: mutations first, then dynamic hybrids, alphabetically within each
   dynamicKeys.sort(function(a, b) {
@@ -5185,7 +5189,7 @@ function openNPCSellModal(npcId) {
   var matches;
   if (npc.wildcard) {
     // Accept any flower of that rarity
-    matches = G.inventory.filter(function(item) { return FLOWERS[item.key] && FLOWERS[item.key].rarity === npc.requestRarity; });
+    matches = G.inventory.filter(function(item) { return (item.key in FLOWERS) && FLOWERS[item.key].rarity === npc.requestRarity; });
   } else {
     matches = G.inventory.filter(function(item) { return item.key === npc.requestKey; });
   }
@@ -5200,7 +5204,7 @@ function openNPCSellModal(npcId) {
     list.appendChild(noMatch);
   } else {
     matches.forEach(function(item) {
-      var itemF = FLOWERS[item.key] || f;
+      var itemF = (item.key in FLOWERS) ? FLOWERS[item.key] : f;
       var row = document.createElement("button");
       row.className = "plant-row " + itemF.rarity;
       var svg = document.createElement("div");
@@ -5519,7 +5523,7 @@ function showFusionAnimation(key1, key2, resultInfo, onDone) {
   // Result (shown after merge animation)
   var result = document.createElement("div");
   result.className = "fusion-result";
-  if (resultInfo.key && FLOWERS[resultInfo.key]) {
+  if (resultInfo.key && (resultInfo.key in FLOWERS)) {
     result.innerHTML =
       '<div class="fusion-result-svg">' + flowerSVG(resultInfo.key, MAX_STAGE) + '</div>' +
       '<div class="fusion-result-name">' + resultInfo.name + '</div>' +
@@ -5628,7 +5632,7 @@ function doHybridize(idx1, idx2) {
     var recipeKey = [kind1, kind2].sort().join("+");
     if (!G.breedDiscovered.includes(recipeKey)) G.breedDiscovered.push(recipeKey);
 
-    if (isMutation && FLOWERS[resultKey]) {
+    if (isMutation && (resultKey in FLOWERS)) {
       var baseF = FLOWERS[resultKey];
       var hueShift = 20 + Math.random() * 40;
       if (Math.random() < 0.5) hueShift = -hueShift;
@@ -5664,7 +5668,7 @@ function doHybridize(idx1, idx2) {
   } else if (roll < 0.90) {
     var dynKey = getOrCreateDynamicHybrid(key1, key2);
 
-    if (isMutation && FLOWERS[dynKey]) {
+    if (isMutation && (dynKey in FLOWERS)) {
       var dBase = FLOWERS[dynKey];
       var dShift = 20 + Math.random() * 40;
       if (Math.random() < 0.5) dShift = -dShift;
@@ -5777,7 +5781,7 @@ function openBreedGuide() {
       outcomes.forEach(function(o) {
         var nm = document.createElement("div");
         nm.className = "breed-result-name";
-        nm.textContent = FLOWERS[o.key] ? FLOWERS[o.key].name : o.key;
+        nm.textContent = (o.key in FLOWERS) ? FLOWERS[o.key].name : o.key;
         result.appendChild(nm);
       });
     } else {
@@ -6156,7 +6160,7 @@ function gameTick() {
     playSound("achieve");
   }
   // Track daily play
-  var today = new Date().toISOString().slice(0, 10);
+  var today = new Date().toLocaleDateString("en-CA");
   if (!G.daysPlayed.includes(today)) {
     G.daysPlayed.push(today);
     saveG();
@@ -7370,7 +7374,7 @@ function getNPCDialogue(flowerName, isVip) {
 // DAILY LOGIN GIFT
 // ══════════════════════════════════════════════════════════
 function checkDailyLogin() {
-  var today = new Date().toISOString().slice(0, 10);
+  var today = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD in local timezone
   if (G.lastLoginDate === today) return; // already claimed today
 
   // Calculate streak
