@@ -346,6 +346,7 @@
   </div>
 </div>
 
+<div id="appVer" style="position:fixed;bottom:2px;right:6px;font-size:9px;opacity:0.25;color:#fff;pointer-events:none;z-index:1">v18</div>
 <script type="module" src="/src/main.ts"></script>
 <script>if("serviceWorker"in navigator){navigator.serviceWorker.register("/sw.js").then(function(reg){reg.onupdatefound=function(){var w=reg.installing;w.onstatechange=function(){if(w.state==="installed"&&navigator.serviceWorker.controller){location.reload();}};};}).catch(function(e){console.warn("SW registration failed:",e);});}</script>
 </body>
