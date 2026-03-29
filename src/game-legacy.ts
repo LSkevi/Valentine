@@ -2020,6 +2020,11 @@ function loadG() {
         }
       }
     });
+    // Clean up any NPCs requesting broken/missing flowers (from old saves)
+    G.npcs = G.npcs.filter(function(npc) {
+      if (npc.wildcard) return true; // wildcard NPCs don't need a valid key
+      return npc.requestKey in FLOWERS;
+    });
     return true;
   } catch (e) {
     return false;
@@ -4988,11 +4993,13 @@ function createNPC() {
 
   if (roll < 0.70) {
     // Ask for a discovered flower (prefer from inventory if available)
-    if (uniqueInvKeys.length > 0 && Math.random() < 0.7) {
-      requestKey = uniqueInvKeys[Math.floor(Math.random() * uniqueInvKeys.length)];
+    // Filter inventory to only real flowers (exclude broken dynamic keys)
+    var validInvKeys = uniqueInvKeys.filter(function(k) { return k in FLOWERS; });
+    if (validInvKeys.length > 0 && Math.random() < 0.7) {
+      requestKey = validInvKeys[Math.floor(Math.random() * validInvKeys.length)];
     } else {
-      // From discovered flowers only
-      var discovered = G.discovered.filter(function(k) { return FLOWERS[k] && FLOWERS[k].rarity !== "hybrid"; });
+      // From discovered flowers only — use "in" to bypass Proxy fallback
+      var discovered = G.discovered.filter(function(k) { return (k in FLOWERS) && FLOWERS[k].rarity !== "hybrid"; });
       if (discovered.length > 0) {
         requestKey = discovered[Math.floor(Math.random() * discovered.length)];
       } else {
@@ -5010,16 +5017,16 @@ function createNPC() {
       requestKey = undiscovered[Math.floor(Math.random() * undiscovered.length)];
       isMystery = true;
     } else {
-      // All discovered — fall back to discovered
-      var disc = G.discovered.filter(function(k) { return FLOWERS[k] && FLOWERS[k].rarity !== "hybrid"; });
+      // All discovered — fall back to discovered (use "in" to bypass Proxy)
+      var disc = G.discovered.filter(function(k) { return (k in FLOWERS) && FLOWERS[k].rarity !== "hybrid"; });
       requestKey = disc.length > 0 ? disc[Math.floor(Math.random() * disc.length)] : "pinkTulip";
     }
   } else {
     // Wildcard customer — "any [rarity] flower!"
     isWildcard = true;
     var rarities = ["common", "uncommon"];
-    if (G.discovered.some(function(k) { return FLOWERS[k] && FLOWERS[k].rarity === "rare"; })) rarities.push("rare");
-    if (G.discovered.some(function(k) { return FLOWERS[k] && FLOWERS[k].rarity === "legendary"; })) rarities.push("legendary");
+    if (G.discovered.some(function(k) { return (k in FLOWERS) && FLOWERS[k].rarity === "rare"; })) rarities.push("rare");
+    if (G.discovered.some(function(k) { return (k in FLOWERS) && FLOWERS[k].rarity === "legendary"; })) rarities.push("legendary");
     requestRarity = rarities[Math.floor(Math.random() * rarities.length)];
     // Pick a placeholder key for reward calculation
     var pool = Object.keys(FLOWERS).filter(function(k) { return FLOWERS[k].rarity === requestRarity && FLOWERS[k].w > 0; });
@@ -5027,7 +5034,7 @@ function createNPC() {
   }
 
   var f = FLOWERS[requestKey];
-  if (!f) { requestKey = "pinkTulip"; f = FLOWERS[requestKey]; }
+  if (!f || !(requestKey in FLOWERS)) { requestKey = "pinkTulip"; f = FLOWERS[requestKey]; }
   var rarityMult = { common: 2.5, uncommon: 3, rare: 4, legendary: 5, unique: 6 };
   var reward = Math.round(f.sell * (rarityMult[f.rarity] || 2.5) * (0.9 + Math.random() * 0.4));
   if (isVip) reward = Math.round(f.sell * 8 * (0.9 + Math.random() * 0.3));
