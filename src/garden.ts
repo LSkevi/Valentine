@@ -31,6 +31,8 @@ const checkAchievements: () => void =
 const showContextTip: (key: string) => void =
   (window as any).__showContextTip ?? (() => {});
 const renderDrops: () => void = (window as any).__renderDrops ?? (() => {});
+const getAudioCtx: () => AudioContext | null =
+  (window as any).__getAudioCtx ?? (() => null);
 const openPlantModal: (idx: number) => void =
   (window as any).__openPlantModal ?? (() => {});
 const openBloomModal: (idx: number) => void =
@@ -179,6 +181,12 @@ export function buildPlotCard(p: Plot, i: number): HTMLDivElement {
         ? ' has-plant'
         : '');
   div.onclick = () => clickPlot(i);
+  div.addEventListener('touchstart', (e: TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    getAudioCtx();
+    clickPlot(i);
+  }, { passive: false });
   const lbl =
     p.state === 'empty'
       ? ''
