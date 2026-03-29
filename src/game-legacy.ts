@@ -4,7 +4,7 @@
 // Once fully extracted, this file will be deleted.
 console.log("[Garden] game.js loading...");
 let toastTimer;
-const FLOWERS = {
+let FLOWERS = {
   // ── Common (59) ─────────────────────────────────────────────
   pinkTulip: {
     name: "Pink Tulip",
@@ -1504,6 +1504,19 @@ const FLOWERS = {
   crystalViolet: { name: "Crystal Violet", kind: "violet", appearance: "violet", rarity: "hybrid", w: 0, petal: "#80deea", stem: "#66bb6a", sell: 45, parents: ["violet", "daisy"] },
   midnightPoppy: { name: "Midnight Poppy", kind: "poppy", appearance: "poppy", rarity: "hybrid", w: 0, petal: "#1a237e", stem: "#33691e", sell: 50, parents: ["poppy", "iris"] },
 };
+// Fallback flower for keys that no longer exist in FLOWERS (e.g. dynamic hybrids
+// saved in localStorage whose recipe was later removed). Without this, any
+// FLOWERS[key].rarity access crashes the game with "undefined is not an object".
+const _FALLBACK_FLOWER = { name: "Mystery Flower", kind: "daisy", appearance: "daisy", rarity: "common", w: 0, petal: "#ccc", stem: "#888", sell: 1 };
+FLOWERS = new Proxy(FLOWERS, {
+  get(target, prop, receiver) {
+    if (typeof prop === "string" && !(prop in target) && prop !== "then") {
+      console.warn("[Garden] Unknown flower key:", prop);
+      return _FALLBACK_FLOWER;
+    }
+    return Reflect.get(target, prop, receiver);
+  }
+});
 const RARITY_LABEL = {
   common: "Common",
   uncommon: "Uncommon",
@@ -3489,7 +3502,6 @@ function buildPlotCard(p, i) {
   return div;
 }
 function clickPlot(i) {
-  toast("plot " + i + " state=" + G.plots[i].state, 1500);
   const p = G.plots[i];
   if (p.state === "empty") {
     if (!G.seeds.length) {
