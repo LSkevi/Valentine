@@ -3489,6 +3489,7 @@ function buildPlotCard(p, i) {
   return div;
 }
 function clickPlot(i) {
+  toast("plot " + i + " state=" + G.plots[i].state, 1500);
   const p = G.plots[i];
   if (p.state === "empty") {
     if (!G.seeds.length) {
